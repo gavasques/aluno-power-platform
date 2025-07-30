@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 import type { Agent } from '@shared/schema';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';

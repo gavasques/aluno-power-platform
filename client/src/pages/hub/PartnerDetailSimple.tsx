@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { usePartners } from '@/contexts/PartnersContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

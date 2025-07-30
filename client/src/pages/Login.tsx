@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 

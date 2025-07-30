@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 
 export type ExportFormat = 'csv' | 'xlsx' | 'json' | 'pdf';
 

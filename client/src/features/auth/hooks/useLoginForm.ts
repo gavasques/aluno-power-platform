@@ -4,7 +4,7 @@
  * Extraído de LoginNew.tsx para modularização
  */
 import { useState, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { LoginFormData, LoginErrors, UseLoginFormReturn } from '../types';

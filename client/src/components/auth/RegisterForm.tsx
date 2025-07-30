@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, Lock, UserPlus } from 'lucide-react';
 import { ButtonLoader } from '@/components/common/LoadingSpinner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 import { useUnifiedFormValidation, commonValidationRules, usePasswordValidation } from '@/hooks/useUnifiedFormValidation';
 
 interface RegisterFormProps {

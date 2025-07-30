@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Coins } from "lucide-react";
 import { useUserCreditBalance } from "@/hooks/useUserCredits";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/UserContext";
 
 export function CreditDisplay() {
   const { user, isAuthenticated } = useAuth();

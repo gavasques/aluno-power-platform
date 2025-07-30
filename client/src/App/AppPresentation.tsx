@@ -13,10 +13,8 @@ import { Router, Route, Switch } from "wouter";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { ToastProvider } from '@/components/ui/toast';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
-import { AuthProvider } from "../contexts/AuthContext";
-import { CombinedProvider } from "../contexts/CombinedProvider";
+// QueryClient agora é fornecido pelo OptimizedProvider
+import { OptimizedProvider } from "../contexts/OptimizedProvider";
 import { HelmetProvider } from 'react-helmet-async';
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import type { AppPresentationProps } from './types';
@@ -67,18 +65,11 @@ export function AppPresentation({
   const { renderWithLayout } = layoutHook;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
+    <Router>
         <ThemeProvider>
-          <ToastProvider 
-            theme="system" 
-            position="top-right" 
-            richColors 
-            closeButton
-          >
+          <ToastProvider>
             <HelmetProvider>
-              <AuthProvider>
-                <CombinedProvider>
+              <OptimizedProvider>
                 <Switch>
                   {/* Render all routes dynamically */}
                   {allRoutes.map((route) => (
@@ -114,12 +105,10 @@ export function AppPresentation({
                   </Route>
                 </Switch>
                   <Toaster />
-                </CombinedProvider>
-              </AuthProvider>
+                </OptimizedProvider>
             </HelmetProvider>
           </ToastProvider>
         </ThemeProvider>
       </Router>
-    </QueryClientProvider>
   );
 }

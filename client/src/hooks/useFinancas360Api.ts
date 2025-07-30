@@ -2,7 +2,7 @@
 // Seguindo princípios SOLID: Single Responsibility e DRY
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import type { ApiResponse } from '@/types/financas360';
 

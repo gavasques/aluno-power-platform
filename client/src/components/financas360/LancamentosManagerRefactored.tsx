@@ -8,7 +8,7 @@ import { Receipt, TrendingUp, TrendingDown } from 'lucide-react';
 import { UnifiedManagerLayout } from '@/components/ui/manager/UnifiedManagerLayout';
 import { useUnifiedFinancas360Manager, useFinancas360Formatters } from '@/hooks/financas360/useUnifiedFinancas360Manager';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 import type { 
   Lancamento, 
   LancamentoFormData, 

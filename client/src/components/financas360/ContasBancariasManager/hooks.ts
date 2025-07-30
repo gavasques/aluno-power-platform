@@ -6,7 +6,7 @@
 import { useReducer, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UserContext';
 
 import { contasBancariasReducer, initialContasBancariasState } from './reducer';
 import type { ContaBancaria, ContaBancariaFormData, Empresa, Banco } from './types';

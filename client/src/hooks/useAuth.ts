@@ -1,4 +1,4 @@
-import { useAuth as useAuthContext } from '@/contexts/AuthContext';
+import { useAuth as useAuthContext } from '@/contexts/UserContext';
 
 /**
  * Enhanced useAuth hook that provides authentication state and helper methods
