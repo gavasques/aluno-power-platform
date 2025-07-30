@@ -601,42 +601,65 @@ Comentário: ${review.review_comment || 'Sem comentário'}
                           {/* Lista de ASINs */}
                           <div className="space-y-3">
                             {extractState.urls.map((url) => (
-                              <div key={url.id} className="flex gap-3">
-                                <div className="flex-1">
-                                  <Input
-                                    placeholder="ASIN (ex: B08N5WRWNW)"
-                                    value={url.asin}
-                                    onChange={(e) => updateExtractUrl(url.id, 'asin', e.target.value.toUpperCase())}
+                              <div key={url.id} className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div className="flex gap-3">
+                                  <div className="flex-1">
+                                    <Input 
+                                      placeholder="ASIN (ex: B08N5WRWNW)"
+                                      value={url.asin}
+                                      onChange={(e) => updateExtractUrl(url.id, 'asin', e.target.value.toUpperCase())}
+                                      disabled={extractState.isExtracting}
+                                      maxLength={10}
+                                    />
+                                  </div>
+                                  <Select
+                                    value={url.country}
+                                    onValueChange={(value) => updateExtractUrl(url.id, 'country', value)}
                                     disabled={extractState.isExtracting}
-                                    maxLength={10}
-                                  />
+                                  >
+                                    <SelectTrigger className="w-[120px]">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="BR">Brasil</SelectItem>
+                                      <SelectItem value="US">EUA</SelectItem>
+                                      <SelectItem value="UK">Reino Unido</SelectItem>
+                                      <SelectItem value="DE">Alemanha</SelectItem>
+                                      <SelectItem value="ES">Espanha</SelectItem>
+                                      <SelectItem value="FR">França</SelectItem>
+                                      <SelectItem value="IT">Itália</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => removeExtractUrl(url.id)}
+                                    disabled={extractState.isExtracting}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 </div>
-                                <Select
-                                  value={url.country}
-                                  onValueChange={(value) => updateExtractUrl(url.id, 'country', value)}
-                                  disabled={extractState.isExtracting}
-                                >
-                                  <SelectTrigger className="w-[120px]">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="BR">Brasil</SelectItem>
-                                    <SelectItem value="US">EUA</SelectItem>
-                                    <SelectItem value="UK">Reino Unido</SelectItem>
-                                    <SelectItem value="DE">Alemanha</SelectItem>
-                                    <SelectItem value="ES">Espanha</SelectItem>
-                                    <SelectItem value="FR">França</SelectItem>
-                                    <SelectItem value="IT">Itália</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => removeExtractUrl(url.id)}
-                                  disabled={extractState.isExtracting}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                                
+                                {/* Configurações do ASIN - Campos em vermelho conforme solicitado */}
+                                {url.asin && (
+                                  <div className="flex gap-2 flex-wrap">
+                                    <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
+                                      ASIN: {url.asin}
+                                    </span>
+                                    <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
+                                      País: {url.country === 'BR' ? '🇧🇷 Brasil' : 
+                                             url.country === 'US' ? '🇺🇸 EUA' :
+                                             url.country === 'UK' ? '🇬🇧 Reino Unido' :
+                                             url.country === 'DE' ? '🇩🇪 Alemanha' :
+                                             url.country === 'ES' ? '🇪🇸 Espanha' :
+                                             url.country === 'FR' ? '🇫🇷 França' :
+                                             url.country === 'IT' ? '🇮🇹 Itália' : url.country}
+                                    </span>
+                                    <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
+                                      Páginas: 1 (primeira página)
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>

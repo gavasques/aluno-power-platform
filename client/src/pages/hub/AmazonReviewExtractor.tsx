@@ -7,7 +7,7 @@ import { AlertCircle, Download, ExternalLink, Trash2, MessageSquare } from 'luci
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/UserContext';
 import { useApiRequest } from '@/hooks/useApiRequest';
-import { CountrySelector } from '@/components/common/CountrySelector';
+import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CreditCostButton } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
@@ -412,12 +412,24 @@ Comentário: ${comment}
               <div className="space-y-2">
                 {state.urls.map((url, index) => {
                   const asin = extractOrValidateASIN(url);
+                  const country = COUNTRIES.find(c => c.code === selectedCountry);
                   return (
                     <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <span className="font-mono text-sm bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
                           ASIN: {asin}
                         </span>
+                        
+                        {/* País selecionado - Campo em vermelho conforme solicitado */}
+                        <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
+                          País: {country?.flag} {country?.name}
+                        </span>
+                        
+                        {/* Máximo de páginas - Campo em vermelho conforme solicitado */}
+                        <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
+                          Máx páginas: {state.totalPages}
+                        </span>
+                        
                         <ExternalLink 
                           className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground"
                           onClick={() => window.open(url, '_blank')}
