@@ -3,7 +3,7 @@
  */
 
 import { Router } from 'express';
-import { eq, count } from 'drizzle-orm';
+import { eq, count, or, ilike } from 'drizzle-orm';
 import { db } from '../../db';
 import { users, userGroups } from '../../../shared/schema';
 import { enhancedAuth } from '../../middleware/enhancedAuth';
@@ -11,10 +11,16 @@ import bcrypt from 'bcryptjs';
 
 const router = Router();
 
-// GET /api/admin/users - List all users (lightweight)
+// GET /api/admin/users - List all users with pagination
 router.get('/users', enhancedAuth, async (req, res) => {
   try {
-    const allUsers = await db
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+    const offset = (page - 1) * limit;
+
+    // Build the query
+    let query = db
       .select({
         id: users.id,
         username: users.username,
@@ -27,7 +33,44 @@ router.get('/users', enhancedAuth, async (req, res) => {
       })
       .from(users);
 
-    res.json(allUsers);
+    // Add search filter if provided
+    if (search) {
+      query = query.where(
+        or(
+          ilike(users.name, `%${search}%`),
+          ilike(users.email, `%${search}%`),
+          ilike(users.username, `%${search}%`)
+        )
+      );
+    }
+
+    // Get total count for pagination
+    const totalCountResult = await db
+      .select({ count: count() })
+      .from(users);
+    const totalUsers = totalCountResult[0].count;
+
+    // Get paginated users
+    const allUsers = await query
+      .limit(limit)
+      .offset(offset)
+      .orderBy(users.createdAt, 'desc');
+
+    // Calculate pagination
+    const totalPages = Math.ceil(totalUsers / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    res.json({
+      users: allUsers,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalUsers,
+        hasNextPage,
+        hasPrevPage
+      }
+    });
   } catch (error) {
     console.error('❌ Admin Users Error:', error);
     res.status(500).json({ error: 'Erro ao carregar usuários' });
