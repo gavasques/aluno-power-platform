@@ -3283,14 +3283,20 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       console.log(`🚀 [AMAZON_LISTING_OPTIMIZER] Iniciando processamento para usuário: ${user.id} (${user.name})`);
       
-      const result = await openaiService.processAmazonListingOptimizer({
+      const result = await openaiService.processAmazonListing({
         agentId,
         userId: user.id.toString(),
         userName: user.name || user.username,
-        ...sanitizedData
+        productName: sanitizedData.productName,
+        productInfo: `Categoria: ${sanitizedData.category}, Keywords: ${sanitizedData.keywords}, Long Tail Keywords: ${sanitizedData.longTailKeywords}, Características: ${sanitizedData.features}, Público Alvo: ${sanitizedData.targetAudience}`,
+        reviewsData: sanitizedData.reviewsData,
+        format: sanitizedData.format
       });
 
-      res.json(result);
+      res.json({
+        success: true,
+        ...result
+      });
     } catch (error: any) {
       console.error('Amazon Listings Optimizer processing error:', error);
       res.status(500).json({ 
