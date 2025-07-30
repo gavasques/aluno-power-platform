@@ -21,8 +21,13 @@ interface ReviewData {
   review_comment: string;
 }
 
+interface ProductInfo {
+  url: string;
+  country: string;
+}
+
 interface ExtractorState {
-  urls: string[];
+  products: ProductInfo[];
   isExtracting: boolean;
   progress: number;
   currentPage: number;
@@ -30,7 +35,6 @@ interface ExtractorState {
   currentProduct: string;
   extractedReviews: ReviewData[];
   errors: string[];
-  countryLocked: boolean;
 }
 
 // Helper functions
@@ -86,15 +90,14 @@ export default function AmazonReviewExtractor() {
   const [urlInput, setUrlInput] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('BR');
   const [state, setState] = useState<ExtractorState>({
-    urls: [],
+    products: [],
     isExtracting: false,
     progress: 0,
     currentPage: 0,
     totalPages: 10,
     currentProduct: '',
     extractedReviews: [],
-    errors: [],
-    countryLocked: false
+    errors: []
   });
 
   const { execute, loading } = useApiRequest();
@@ -110,14 +113,13 @@ export default function AmazonReviewExtractor() {
       return;
     }
 
-    if (state.urls.includes(urlInput)) {
+    if (state.products.some(p => p.url === urlInput)) {
       return;
     }
 
     setState(prev => ({
       ...prev,
-      urls: [...prev.urls, urlInput],
-      countryLocked: prev.urls.length === 0
+      products: [...prev.products, { url: urlInput, country: selectedCountry }]
     }));
     setUrlInput('');
   };
@@ -125,12 +127,11 @@ export default function AmazonReviewExtractor() {
   const removeUrl = (index: number) => {
     setState(prev => ({
       ...prev,
-      urls: prev.urls.filter((_, i) => i !== index),
-      countryLocked: prev.urls.length > 1
+      products: prev.products.filter((_, i) => i !== index)
     }));
   };
 
-  const fetchReviews = async (asin: string, page: number): Promise<ReviewData[]> => {
+  const fetchReviews = async (asin: string, page: number, country: string): Promise<ReviewData[]> => {
     try {
       const data = await execute(
         () => fetch('/api/amazon-reviews/extract', {
@@ -142,7 +143,7 @@ export default function AmazonReviewExtractor() {
           body: JSON.stringify({
             asin,
             page,
-            country: mapCountryCodeForAmazon(selectedCountry),
+            country: mapCountryCodeForAmazon(country),
             sort_by: 'MOST_RECENT'
           })
         })
@@ -179,7 +180,7 @@ export default function AmazonReviewExtractor() {
   };
 
   const extractReviews = async () => {
-    if (state.urls.length === 0) return;
+    if (state.products.length === 0) return;
 
     // Verificar créditos primeiro
     const creditCheck = await checkCredits(FEATURE_CODE);
@@ -200,12 +201,12 @@ export default function AmazonReviewExtractor() {
       const allReviews: ReviewData[] = [];
       const errors: string[] = [];
       let totalPagesProcessed = 0;
-      let totalPagesEstimated = state.urls.length * 3; // Estimativa inicial mais conservadora
+      let totalPagesEstimated = state.products.length * 3; // Estimativa inicial mais conservadora
 
-      for (const url of state.urls) {
-        const asin = extractOrValidateASIN(url);
+      for (const product of state.products) {
+        const asin = extractOrValidateASIN(product.url);
         if (!asin) {
-          errors.push(`URL inválida: ${url}`);
+          errors.push(`URL inválida: ${product.url}`);
           continue;
         }
 
@@ -220,7 +221,7 @@ export default function AmazonReviewExtractor() {
           try {
             setState(prev => ({ ...prev, currentPage: page }));
             
-            const reviews = await fetchReviews(asin, page);
+            const reviews = await fetchReviews(asin, page, product.country);
             
             if (reviews.length === 0) {
               consecutiveEmptyPages++;
@@ -277,7 +278,7 @@ export default function AmazonReviewExtractor() {
         featureCode: FEATURE_CODE,
         provider: 'amazon',
         model: 'review-extractor',
-        prompt: `Extração de reviews de ${state.urls.length} produtos`,
+        prompt: `Extração de reviews de ${state.products.length} produtos`,
         response: `${allReviews.length} reviews extraídos com sucesso`,
         inputTokens: 0,
         outputTokens: 0,
@@ -289,7 +290,7 @@ export default function AmazonReviewExtractor() {
       // Exibir toast de sucesso
       toast({
         title: "Extração concluída!",
-        description: `${allReviews.length} reviews extraídos de ${state.urls.length} produtos`,
+        description: `${allReviews.length} reviews extraídos de ${state.products.length} produtos`,
       });
 
     } catch (error: any) {
@@ -367,7 +368,6 @@ Comentário: ${comment}
             <CountrySelector
               value={selectedCountry}
               onValueChange={setSelectedCountry}
-              className={state.countryLocked ? "opacity-50" : ""}
             />
             <Button onClick={addUrl} disabled={!urlInput.trim()}>
               Adicionar
@@ -397,22 +397,22 @@ Comentário: ${comment}
               <label className="text-sm font-medium">Estimativa de reviews</label>
               <div className="p-3 bg-muted/50 rounded-md">
                 <p className="text-sm">
-                  Até <span className="font-semibold">{state.urls.length * state.totalPages * 10}</span> reviews
+                  Até <span className="font-semibold">{state.products.length * state.totalPages * 10}</span> reviews
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  ({state.urls.length} produtos × {state.totalPages} páginas × ~10 reviews/página)
+                  ({state.products.length} produtos × {state.totalPages} páginas × ~10 reviews/página)
                 </p>
               </div>
             </div>
           </div>
 
-          {state.urls.length > 0 && (
+          {state.products.length > 0 && (
             <div className="space-y-2">
               <h3 className="font-medium">Produtos para extração:</h3>
               <div className="space-y-2">
-                {state.urls.map((url, index) => {
-                  const asin = extractOrValidateASIN(url);
-                  const country = COUNTRIES.find(c => c.code === selectedCountry);
+                {state.products.map((product, index) => {
+                  const asin = extractOrValidateASIN(product.url);
+                  const country = COUNTRIES.find(c => c.code === product.country);
                   return (
                     <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3 flex-wrap">
@@ -432,7 +432,7 @@ Comentário: ${comment}
                         
                         <ExternalLink 
                           className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground"
-                          onClick={() => window.open(url, '_blank')}
+                          onClick={() => window.open(product.url, '_blank')}
                         />
                       </div>
                       <Button
@@ -454,10 +454,10 @@ Comentário: ${comment}
             featureName="tools.amazon_reviews"
             userBalance={userBalance}
             onProcess={extractReviews}
-            disabled={state.urls.length === 0 || state.isExtracting}
+            disabled={state.products.length === 0 || state.isExtracting}
             className="w-full"
           >
-            {state.isExtracting ? 'Extraindo...' : `Extrair Reviews (${state.urls.length} produtos)`}
+            {state.isExtracting ? 'Extraindo...' : `Extrair Reviews (${state.products.length} produtos)`}
           </CreditCostButton>
         </CardContent>
       </Card>
