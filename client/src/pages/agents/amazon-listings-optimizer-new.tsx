@@ -32,6 +32,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import Layout from "@/components/layout/Layout";
 import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
+import { Progress } from '@/components/ui/progress';
+import { ExternalLink, MessageSquare, CheckCircle2, Trash2 } from 'lucide-react';
+import { useAuth } from '@/contexts/UserContext';
+import { useApiRequest } from '@/hooks/useApiRequest';
+import { ButtonLoader } from '@/components/ui/button-loader';
 
 export default function AmazonListingsOptimizerNew() {
   const [location, navigate] = useLocation();
@@ -50,11 +56,29 @@ export default function AmazonListingsOptimizerNew() {
   const [reviewsTab, setReviewsTab] = useState<"upload" | "text" | "extract">("upload");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   
-  // Estado para extração de reviews
+  // Estados para extração da Amazon
+  const [urlInput, setUrlInput] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('BR');
   const [extractState, setExtractState] = useState({
-    urls: [] as Array<{ id: string; asin: string; country: string }>,
+    products: [] as Array<{ url: string; country: string; maxPages: number }>,
     extractedReviews: [] as any[],
     isExtracting: false,
+    progress: 0,
+    currentPage: 1,
+    totalPages: 10,
+    currentProduct: '',
+    errors: [] as string[]
+  });
+  
+  // Estado para extração de reviews
+  const [extractState, setExtractState] = useState({
+    products: [] as Array<{ url: string; country: string; maxPages: number }>,
+    extractedReviews: [] as any[],
+    isExtracting: false,
+    progress: 0,
+    currentPage: 0,
+    totalPages: 10,
+    currentProduct: '',
     errors: [] as string[]
   });
 
@@ -79,129 +103,254 @@ export default function AmazonListingsOptimizerNew() {
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
-  
-  // Funções para extração de reviews
-  const addExtractUrl = () => {
-    setExtractState(prev => ({
-      ...prev,
-      urls: [...prev.urls, { id: crypto.randomUUID(), asin: '', country: 'BR' }]
-    }));
-  };
 
-  const updateExtractUrl = (id: string, field: 'asin' | 'country', value: string) => {
-    setExtractState(prev => ({
-      ...prev,
-      urls: prev.urls.map(url => 
-        url.id === id ? { ...url, [field]: value } : url
-      )
-    }));
-  };
+  const { toast } = useToast();
+  const { user, token } = useAuth();
+  const { execute } = useApiRequest();
+  const { logAIGeneration, checkCredits, showInsufficientCreditsToast } = useCreditSystem();
 
-  const removeExtractUrl = (id: string) => {
-    setExtractState(prev => ({
-      ...prev,
-      urls: prev.urls.filter(url => url.id !== id)
-    }));
+  const FEATURE_CODE = 'agents.amazon_listing';
+
+  // Helper functions para extração Amazon
+  const extractOrValidateASIN = (input: string): string | null => {
+    // ASIN direto (10 caracteres alfanuméricos)
+    if (/^[A-Z0-9]{10}$/.test(input.trim())) {
+      return input.trim();
+    }
+
+    // Extração de URL
+    const asinPatterns = [
+      /\/dp\/([A-Z0-9]{10})/,
+      /\/product\/([A-Z0-9]{10})/,
+      /asin=([A-Z0-9]{10})/,
+      /\/([A-Z0-9]{10})(?:\/|\?|$)/
+    ];
+
+    for (const pattern of asinPatterns) {
+      const match = input.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+    return null;
   };
 
   // Mapeamento de códigos de país para API Amazon
   const mapCountryCodeForAmazon = (countryCode: string): string => {
     const mapping: Record<string, string> = {
       'GB': 'UK', // Reino Unido
-      'AE': 'AE', 'SA': 'SA', 'EG': 'EG', 'TR': 'TR', 'SE': 'SE',
-      'PL': 'PL', 'BE': 'BE', 'CL': 'CL', 'NL': 'NL', 'AU': 'AU',
-      'JP': 'JP', 'SG': 'SG', 'IN': 'IN'
+      'AE': 'AE', // Emirados Árabes
+      'SA': 'SA', // Arábia Saudita
+      'EG': 'EG', // Egito
+      'TR': 'TR', // Turquia
+      'SE': 'SE', // Suécia
+      'PL': 'PL', // Polônia
+      'BE': 'BE', // Bélgica
+      'CL': 'CL', // Chile
+      'NL': 'NL', // Holanda
+      'AU': 'AU', // Austrália
+      'JP': 'JP', // Japão
+      'SG': 'SG', // Singapura
+      'IN': 'IN', // Índia
     };
+    
     return mapping[countryCode] || countryCode;
   };
 
-  const extractReviews = async () => {
-    if (extractState.urls.filter(u => u.asin).length === 0) {
+  // Funções para gerenciamento de produtos na extração
+  const addUrl = () => {
+    if (!urlInput.trim()) return;
+
+    // Limite de 5 produtos
+    if (extractState.products.length >= 5) {
       toast({
-        title: "Erro",
-        description: "Adicione pelo menos um ASIN para extrair reviews",
+        title: "Limite atingido",
+        description: "Máximo de 5 produtos por extração",
         variant: "destructive"
       });
       return;
     }
 
-    setExtractState(prev => ({ ...prev, isExtracting: true, errors: [] }));
-    const allReviews: any[] = [];
+    const asin = extractOrValidateASIN(urlInput);
+    if (!asin) {
+      toast({
+        title: "URL inválida",
+        description: "Por favor, insira uma URL válida da Amazon ou um ASIN válido",
+        variant: "destructive"
+      });
+      return;
+    }
 
+    // Verificar se já existe
+    const existingProduct = extractState.products.find(p => extractOrValidateASIN(p.url) === asin);
+    if (existingProduct) {
+      toast({
+        title: "Produto já adicionado",
+        description: "Este produto já está na lista de extração",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setExtractState(prev => ({
+      ...prev,
+      products: [...prev.products, { 
+        url: urlInput, 
+        country: selectedCountry,
+        maxPages: prev.totalPages
+      }]
+    }));
+
+    setUrlInput('');
+  };
+
+  const removeUrl = (index: number) => {
+    setExtractState(prev => ({
+      ...prev,
+      products: prev.products.filter((_, i) => i !== index)
+    }));
+  };
+
+  const fetchReviews = async (asin: string, page: number, country: string): Promise<any[]> => {
     try {
-      for (let i = 0; i < extractState.urls.length; i++) {
-        const url = extractState.urls[i];
-        if (!url.asin) continue;
+      const data = await execute(
+        () => fetch('/api/amazon-reviews/extract', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            asin,
+            page,
+            country: mapCountryCodeForAmazon(country),
+            sort_by: 'MOST_RECENT'
+          })
+        })
+      );
 
-        // Delay otimizado entre requests: API aceita 10 requests/segundo (120ms = ~8.3 req/s para margem de segurança)
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 120));
-        }
-
-        try {
-          const token = localStorage.getItem('token');
-          const response = await fetch('/api/amazon-reviews/extract', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              asin: url.asin.toUpperCase(),
-              country: mapCountryCodeForAmazon(url.country),
-              page: 1,
-              sort_by: 'MOST_RECENT'
-            })
-          });
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Erro ao extrair reviews');
-          }
-
-          const data = await response.json();
-          if (data.data && data.data.reviews) {
-            allReviews.push(...data.data.reviews.map((review: any) => ({
-              ...review,
-              asin: url.asin,
-              country: url.country
-            })));
-          }
-        } catch (error: any) {
-          setExtractState(prev => ({
-            ...prev,
-            errors: [...prev.errors, `ASIN ${url.asin}: ${error.message}`]
+      // Verificar se a resposta foi bem-sucedida
+      if (data?.status === 'OK' && data?.data?.reviews) {
+        const reviews = data.data.reviews;
+        
+        // Se reviews é um array válido, mapear os dados
+        if (Array.isArray(reviews)) {
+          return reviews.map((review: any) => ({
+            review_title: review.review_title || '',
+            review_star_rating: review.review_star_rating || '',
+            review_comment: review.review_comment || ''
           }));
         }
       }
-
-      if (allReviews.length > 0) {
-        // Converter reviews para formato de texto
-        const reviewsText = allReviews.map((review, index) => {
-          return `=== REVIEW ${index + 1} ===
-Título: ${review.review_title || 'Sem título'}
-Avaliação: ${review.review_star_rating || 'Sem avaliação'} estrelas
-Comentário: ${review.review_comment || 'Sem comentário'}
-`;
-        }).join('\n');
-
-        // Atualizar o campo de reviews com os dados extraídos
-        handleInputChange("reviewsData", reviewsText);
-        
-        setExtractState(prev => ({
-          ...prev,
-          extractedReviews: allReviews,
-          isExtracting: false
-        }));
-
-        toast({
-          title: "Extração concluída!",
-          description: `${allReviews.length} reviews extraídos com sucesso`,
-        });
-
-        // Mudar para aba de texto para mostrar os reviews
-        setReviewsTab("text");
+      
+      // Se chegou aqui, não há reviews disponíveis nesta página
+      return [];
+      
+    } catch (error: any) {
+      // Se o erro indica que não há mais reviews (404, ou fim dos dados), retornar array vazio
+      if (error.message.includes('404') || error.message.includes('Erro 400')) {
+        return [];
       }
+      
+      // Para outros erros, propagar a exceção
+      throw error;
+    }
+  };
+
+  const extractAmazonReviews = async () => {
+    if (extractState.products.length === 0) return;
+
+    setExtractState(prev => ({
+      ...prev,
+      isExtracting: true,
+      progress: 0,
+      extractedReviews: [],
+      errors: []
+    }));
+
+    try {
+      const allReviews: any[] = [];
+      const errors: string[] = [];
+      let totalPagesProcessed = 0;
+      let totalPagesEstimated = extractState.products.length * 3;
+
+      for (const product of extractState.products) {
+        const asin = extractOrValidateASIN(product.url);
+        if (!asin) {
+          errors.push(`URL inválida: ${product.url}`);
+          continue;
+        }
+
+        setExtractState(prev => ({ ...prev, currentProduct: asin }));
+
+        let page = 1;
+        let consecutiveEmptyPages = 0;
+        const MAX_CONSECUTIVE_EMPTY = 2;
+        const MAX_PAGES_PER_PRODUCT = product.maxPages;
+
+        while (page <= MAX_PAGES_PER_PRODUCT && consecutiveEmptyPages < MAX_CONSECUTIVE_EMPTY) {
+          try {
+            setExtractState(prev => ({ ...prev, currentPage: page }));
+            
+            const reviews = await fetchReviews(asin, page, product.country);
+            
+            if (reviews.length === 0) {
+              consecutiveEmptyPages++;
+            } else {
+              consecutiveEmptyPages = 0;
+              allReviews.push(...reviews);
+            }
+            
+            // Delay otimizado: 120ms = ~8.3 req/s para margem de segurança
+            await new Promise(resolve => setTimeout(resolve, 120));
+            
+          } catch (error: any) {
+            errors.push(`Erro página ${page} - ASIN ${asin}: ${error.message}`);
+            consecutiveEmptyPages++;
+          }
+
+          totalPagesProcessed++;
+          
+          // Atualizar progresso
+          setExtractState(prev => ({ 
+            ...prev, 
+            progress: Math.min((totalPagesProcessed / totalPagesEstimated) * 100, 99)
+          }));
+
+          page++;
+        }
+      }
+
+      // Converter reviews para texto formatado para o campo reviewsData
+      const reviewsText = allReviews.map((review, index) => {
+        const title = review.review_title || 'Sem título';
+        const rating = review.review_star_rating || 'Sem avaliação';
+        const comment = review.review_comment || 'Sem comentário';
+        
+        return `=== REVIEW ${index + 1} ===
+Título: ${title}
+Avaliação: ${rating} estrelas
+Comentário: ${comment}
+
+`;
+      }).join('');
+
+      setExtractState(prev => ({
+        ...prev,
+        extractedReviews: allReviews,
+        errors,
+        isExtracting: false,
+        progress: 100
+      }));
+
+      // Atualizar o campo de dados de reviews
+      handleInputChange('reviewsData', reviewsText);
+
+      toast({
+        title: "Extração concluída!",
+        description: `${allReviews.length} reviews extraídos de ${extractState.products.length} produtos`,
+      });
+
     } catch (error: any) {
       setExtractState(prev => ({
         ...prev,
@@ -210,11 +359,6 @@ Comentário: ${review.review_comment || 'Sem comentário'}
       }));
     }
   };
-
-  const { toast } = useToast();
-  const { logAIGeneration, checkCredits, showInsufficientCreditsToast } = useCreditSystem();
-
-  const FEATURE_CODE = 'agents.amazon_listing';
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
@@ -594,86 +738,153 @@ Comentário: ${review.review_comment || 'Sem comentário'}
                         <div className="space-y-4">
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <p className="text-sm text-blue-700">
-                              Extraia avaliações diretamente da Amazon usando o ASIN dos produtos concorrentes.
+                              Extraia avaliações diretamente da Amazon usando URLs ou ASINs dos produtos concorrentes.
                             </p>
                           </div>
 
-                          {/* Lista de ASINs */}
-                          <div className="space-y-3">
-                            {extractState.urls.map((url) => (
-                              <div key={url.id} className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <div className="flex gap-3">
-                                  <div className="flex-1">
-                                    <Input 
-                                      placeholder="ASIN (ex: B08N5WRWNW)"
-                                      value={url.asin}
-                                      onChange={(e) => updateExtractUrl(url.id, 'asin', e.target.value.toUpperCase())}
-                                      disabled={extractState.isExtracting}
-                                      maxLength={10}
-                                    />
-                                  </div>
-                                  <Select
-                                    value={url.country}
-                                    onValueChange={(value) => updateExtractUrl(url.id, 'country', value)}
-                                    disabled={extractState.isExtracting}
-                                  >
-                                    <SelectTrigger className="w-[120px]">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="BR">Brasil</SelectItem>
-                                      <SelectItem value="US">EUA</SelectItem>
-                                      <SelectItem value="UK">Reino Unido</SelectItem>
-                                      <SelectItem value="DE">Alemanha</SelectItem>
-                                      <SelectItem value="ES">Espanha</SelectItem>
-                                      <SelectItem value="FR">França</SelectItem>
-                                      <SelectItem value="IT">Itália</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => removeExtractUrl(url.id)}
-                                    disabled={extractState.isExtracting}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                
-                                {/* Configurações do ASIN - Campos em vermelho conforme solicitado */}
-                                {url.asin && (
-                                  <div className="flex gap-2 flex-wrap">
-                                    <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
-                                      ASIN: {url.asin}
-                                    </span>
-                                    <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
-                                      País: {url.country === 'BR' ? '🇧🇷 Brasil' : 
-                                             url.country === 'US' ? '🇺🇸 EUA' :
-                                             url.country === 'UK' ? '🇬🇧 Reino Unido' :
-                                             url.country === 'DE' ? '🇩🇪 Alemanha' :
-                                             url.country === 'ES' ? '🇪🇸 Espanha' :
-                                             url.country === 'FR' ? '🇫🇷 França' :
-                                             url.country === 'IT' ? '🇮🇹 Itália' : url.country}
-                                    </span>
-                                    <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
-                                      Páginas: 1 (primeira página)
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                          {/* Configuração da Extração */}
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="md:col-span-2">
+                              <Input
+                                placeholder="URL da Amazon ou ASIN do produto"
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && addUrl()}
+                              />
+                            </div>
+                            <CountrySelector
+                              value={selectedCountry}
+                              onValueChange={setSelectedCountry}
+                            />
+                            <Button onClick={addUrl} disabled={!urlInput.trim()}>
+                              Adicionar
+                            </Button>
                           </div>
 
-                          {/* Botão adicionar */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Máximo de páginas por produto</label>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="50"
+                                value={extractState.totalPages}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value) || 10;
+                                  setExtractState(prev => ({ ...prev, totalPages: Math.max(1, Math.min(50, value)) }));
+                                }}
+                                disabled={extractState.isExtracting}
+                                className="w-full"
+                              />
+                              <p className="text-xs text-muted-foreground">
+                                O extrator para automaticamente após 2 páginas consecutivas vazias (mesmo antes do limite)
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Estimativa de reviews</label>
+                              <div className="p-3 bg-muted/50 rounded-md">
+                                <p className="text-sm">
+                                  Até <span className="font-semibold">{extractState.products.reduce((total, product) => total + product.maxPages, 0) * 10}</span> reviews
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  ({extractState.products.length} produtos × páginas variadas × ~10 reviews/página)
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {extractState.products.length > 0 && (
+                            <div className="space-y-2">
+                              <h3 className="font-medium">Produtos para extração:</h3>
+                              <div className="space-y-2">
+                                {extractState.products.map((product, index) => {
+                                  const asin = extractOrValidateASIN(product.url);
+                                  const country = COUNTRIES.find(c => c.code === product.country);
+                                  return (
+                                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                      <div className="flex items-center gap-3 flex-wrap">
+                                        <span className="font-mono text-sm bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
+                                          ASIN: {asin}
+                                        </span>
+                                        
+                                        {/* País selecionado - Campo em vermelho conforme solicitado */}
+                                        <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
+                                          País: {country?.flag} {country?.name}
+                                        </span>
+                                        
+                                        {/* Máximo de páginas - Campo em vermelho conforme solicitado */}
+                                        <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
+                                          Máx páginas: {product.maxPages}
+                                        </span>
+                                        
+                                        <ExternalLink 
+                                          className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground"
+                                          onClick={() => window.open(product.url, '_blank')}
+                                        />
+                                      </div>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => removeUrl(index)}
+                                        disabled={extractState.isExtracting}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
                           <Button
-                            variant="outline"
-                            onClick={addExtractUrl}
-                            disabled={extractState.isExtracting || extractState.urls.length >= 5}
+                            onClick={extractAmazonReviews}
+                            disabled={extractState.products.length === 0 || extractState.isExtracting}
                             className="w-full"
                           >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Adicionar ASIN (máx. 5)
+                            {extractState.isExtracting ? (
+                              <>
+                                <ButtonLoader />
+                                Extraindo...
+                              </>
+                            ) : (
+                              <>
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Extrair Reviews ({extractState.products.length} produtos)
+                              </>
+                            )}
                           </Button>
+
+                          {/* Progresso */}
+                          {extractState.isExtracting && (
+                            <div className="space-y-4">
+                              <div className="flex justify-between text-sm">
+                                <span>Progresso da extração</span>
+                                <span>
+                                  {Math.round(extractState.progress)}%
+                                  {extractState.progress >= 99 && extractState.progress < 100 && (
+                                    <span className="ml-2 text-orange-600 dark:text-orange-400">
+                                      (Finalizando...)
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                              <Progress value={extractState.progress} />
+                              <div className="text-sm text-muted-foreground space-y-1">
+                                <div>
+                                  Produto atual: <span className="font-mono">{extractState.currentProduct}</span>
+                                </div>
+                                <div>
+                                  Página: {extractState.currentPage}
+                                  {extractState.extractedReviews.length > 0 && (
+                                    <span className="ml-4 text-green-600 dark:text-green-400">
+                                      • {extractState.extractedReviews.length} reviews coletados
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Erros */}
                           {extractState.errors.length > 0 && (
@@ -681,43 +892,32 @@ Comentário: ${review.review_comment || 'Sem comentário'}
                               <AlertCircle className="h-4 w-4" />
                               <AlertDescription>
                                 <div className="space-y-1">
-                                  {extractState.errors.map((error, index) => (
-                                    <p key={index} className="text-sm">{error}</p>
+                                  <strong>Erros durante a extração:</strong>
+                                  {extractState.errors.slice(0, 3).map((error, index) => (
+                                    <div key={index} className="text-sm">• {error}</div>
                                   ))}
+                                  {extractState.errors.length > 3 && (
+                                    <div className="text-sm">... e mais {extractState.errors.length - 3} erros</div>
+                                  )}
                                 </div>
                               </AlertDescription>
                             </Alert>
                           )}
 
-                          {/* Reviews extraídos */}
+                          {/* Resultados */}
                           {extractState.extractedReviews.length > 0 && (
-                            <Alert>
-                              <CheckCircle2 className="h-4 w-4" />
-                              <AlertDescription>
-                                {extractState.extractedReviews.length} reviews extraídos com sucesso!
-                                Os dados foram adicionados automaticamente.
-                              </AlertDescription>
-                            </Alert>
+                            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                <span className="font-medium text-green-800 dark:text-green-200">
+                                  Extração concluída!
+                                </span>
+                              </div>
+                              <p className="text-sm text-green-700 dark:text-green-300">
+                                {extractState.extractedReviews.length} reviews extraídos e adicionados ao campo de dados automaticamente.
+                              </p>
+                            </div>
                           )}
-
-                          {/* Botão extrair */}
-                          <Button
-                            onClick={extractReviews}
-                            disabled={extractState.isExtracting || extractState.urls.filter(u => u.asin).length === 0}
-                            className="w-full"
-                          >
-                            {extractState.isExtracting ? (
-                              <>
-                                <ButtonLoader />
-                                Extraindo Reviews...
-                              </>
-                            ) : (
-                              <>
-                                <MessageSquare className="h-4 w-4 mr-2" />
-                                Extrair Reviews
-                              </>
-                            )}
-                          </Button>
                         </div>
                       </TabsContent>
                     </Tabs>
