@@ -61,7 +61,8 @@ export interface UseLayoutManagerReturn {
   renderWithLayout: (
     component: ComponentType<any>,
     layoutType: LayoutType,
-    isProtected: boolean
+    isProtected: boolean,
+    params?: any
   ) => ReactNode;
   getLayoutComponent: (layoutType: LayoutType) => ComponentType<LayoutProps> | null;
 }

@@ -45,6 +45,9 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
   const [, setLocation] = useLocation();
   const groupId = params?.id;
   const { toast } = useToast();
+  
+  console.log('🔍 [GroupDetail] Component mounted with params:', params);
+  console.log('🔍 [GroupDetail] Group ID:', groupId);
 
   // Fetch group data
   const { data: groupResponse, isLoading: groupLoading } = useQuery({

@@ -42,16 +42,17 @@ export function useLayoutManager(): UseLayoutManagerReturn {
   const renderWithLayout = (
     component: ComponentType<any>,
     layoutType: LayoutType = 'default',
-    isProtected: boolean = true
+    isProtected: boolean = true,
+    params?: any
   ): React.ReactNode => {
     const LayoutComponent = getLayoutComponent(layoutType);
     const ComponentToRender = component;
 
-    // Create the component tree
+    // Create the component tree with params
     const wrappedComponent = React.createElement(
       Suspense,
       { fallback: React.createElement(PageLoader) },
-      React.createElement(ComponentToRender)
+      React.createElement(ComponentToRender, { params })
     );
 
     // Apply layout wrapper if specified

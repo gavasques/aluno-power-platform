@@ -74,17 +74,18 @@ export function AppPresentation({
                   {/* Render all routes dynamically */}
                   {allRoutes.map((route) => (
                     <Route key={route.path} path={route.path}>
-                      {() => renderWithLayout(
+                      {(params) => renderWithLayout(
                         route.component,
                         route.layout || 'default',
-                        route.isProtected !== false
+                        route.isProtected !== false,
+                        params
                       )}
                     </Route>
                   ))}
                   
                   {/* Fallback route */}
                   <Route>
-                    {() => renderWithLayout(
+                    {(params) => renderWithLayout(
                       () => (
                         <div className="flex items-center justify-center min-h-screen">
                           <div className="text-center space-y-4">
@@ -100,7 +101,8 @@ export function AppPresentation({
                         </div>
                       ),
                       'default',
-                      true
+                      true,
+                      params
                     )}
                   </Route>
                 </Switch>
