@@ -204,6 +204,13 @@ YOUTUBE_API_KEY=your_youtube_key
 - Personal supplier management with files and contacts
 - Financial tracking and analytics
 
+## 🔒 Security Updates
+
+### Latest Security Patches Applied
+- **January 30, 2025**: Upgraded Vite from ^5.4.14 to ^5.4.15 to patch CVE-2025-30208 vulnerability
+  - **Impact**: Secured build process against potential vulnerabilities
+  - **Action Required**: Test application thoroughly before deployment
+
 ## 🔄 Development Guidelines
 
 ### When Adding New Features
