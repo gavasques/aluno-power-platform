@@ -231,8 +231,8 @@ export default function AmazonReviewExtractor() {
 
             }
             
-            // Delay para evitar rate limiting
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Delay otimizado: API aceita 10 requests/segundo (120ms = ~8.3 req/s para margem de segurança)
+            await new Promise(resolve => setTimeout(resolve, 120));
             
           } catch (error: any) {
             errors.push(`Erro página ${page} - ASIN ${asin}: ${error.message}`);

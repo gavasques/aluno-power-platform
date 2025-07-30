@@ -129,8 +129,14 @@ export default function AmazonListingsOptimizerNew() {
     const allReviews: any[] = [];
 
     try {
-      for (const url of extractState.urls) {
+      for (let i = 0; i < extractState.urls.length; i++) {
+        const url = extractState.urls[i];
         if (!url.asin) continue;
+
+        // Delay otimizado entre requests: API aceita 10 requests/segundo (120ms = ~8.3 req/s para margem de segurança)
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, 120));
+        }
 
         try {
           const token = localStorage.getItem('token');

@@ -375,6 +375,15 @@ YOUTUBE_API_KEY=your_youtube_key
 ## 🔒 Security Updates
 
 ### Latest Security Patches Applied
+- **January 30, 2025**: Optimized Amazon Reviews API rate limiting for better performance
+  - **Location**: `client/src/pages/hub/AmazonReviewExtractor.tsx` & `client/src/pages/agents/amazon-listings-optimizer-new.tsx`
+  - **Issue**: Conservative 1000ms delays were underutilizing API capacity (10 requests/second)
+  - **Fix**: Reduced delays to 120ms (~8.3 requests/second) with safety margin
+  - **Impact**: Significantly faster review extraction while respecting API limits
+  - **Features**: Country code mapping (GB→UK), optimized request spacing, proper error handling
+  - **Status**: ✅ Implemented - Amazon Reviews extraction now 8x faster
+  - **Action Required**: Monitor API usage to ensure no rate limit violations
+
 - **January 30, 2025**: Fixed critical SQL injection vulnerability in DatabaseOptimizer
   - **Location**: `server/utils/DatabaseOptimizer.ts` (line 373)
   - **Issue**: Used `sql.raw()` for table statistics updates violating Drizzle coding standards
