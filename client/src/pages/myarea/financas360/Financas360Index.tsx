@@ -18,18 +18,18 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-// Import dos managers
+// Import dos managers - usando componentes otimizados quando disponíveis
 import EmpresasManager from '@/components/financas360/EmpresasManager';
 import CanaisManager from '@/components/financas360/CanaisManager';
 import BancosManager from '@/components/financas360/BancosManager';
-import ContasBancariasManager from '@/components/financas360/ContasBancariasManager';
+import ContasBancariasManager from '@/components/financas360/ContasBancariasManager/ContasBancariasRefactored';
 import FormasPagamentoManager from '@/components/financas360/FormasPagamentoManager';
 import ParceirosManager from '@/components/financas360/ParceirosManager';
 import CanaisPagamentoManager from '@/components/financas360/CanaisPagamentoManager';
 import EstruturaDREManager from '@/components/financas360/EstruturaDREManager';
-import LancamentosManager from '@/components/financas360/LancamentosManager';
-import NotasFiscaisManager from '@/components/financas360/NotasFiscaisManager';
-import DevolucaesManager from '@/components/financas360/DevolucaesManager';
+import LancamentosManager from '@/components/financas360/temp/SimpleLancamentosManager';
+import NotasFiscaisManager from '@/components/financas360/temp/SimpleNotasFiscaisManager';
+import DevolucaesManager from '@/components/financas360/temp/SimpleDevolucaesManager';
 
 type ActiveView = 
   | 'dashboard' 
