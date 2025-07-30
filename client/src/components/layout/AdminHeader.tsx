@@ -1,4 +1,5 @@
 
+import { memo, useMemo } from "react";
 import { Link } from "wouter";
 import { AdminNav } from "@/components/layout/AdminNav";
 import { NotificationSystem } from "@/components/notifications/NotificationSystem";
@@ -59,7 +60,9 @@ const adminMenuItems = [
 
 ];
 
-export function AdminHeader() {
+export const AdminHeader = memo(() => {
+  // ✅ OTIMIZAÇÃO 3: useMemo para menu items evita recriação a cada render
+  const memoizedAdminMenuItems = useMemo(() => adminMenuItems, []);
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-border shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/95">
       <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
@@ -133,4 +136,7 @@ export function AdminHeader() {
       </div>
     </header>
   );
-}
+});
+
+// ✅ OTIMIZAÇÃO 1: React.memo() implementado com display name para debugging
+AdminHeader.displayName = 'AdminHeader';

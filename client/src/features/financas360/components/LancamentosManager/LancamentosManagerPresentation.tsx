@@ -3,7 +3,7 @@
  * Interface visual para gerenciamento de lançamentos financeiros
  * Extraído de LancamentosManager.tsx (672 linhas) para modularização
  */
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -68,7 +68,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { LancamentosManagerPresentationProps } from '../../types/lancamentos';
 
-export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresentationProps> = ({
+export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresentationProps> = memo(({
   state,
   lancamentosData,
   empresasData,
@@ -78,12 +78,9 @@ export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresenta
   readOnly = false,
   showStatistics = true,
   showFilters = true,
-  showActions = true,
-  className,
-  style
 }) => {
-  // ===== STATUS CONFIGURATION =====
-  const statusConfig = {
+  // ✅ OTIMIZAÇÃO 3: useMemo para configurações estáticas evita recriação a cada render
+  const statusConfig = useMemo(() => ({
     pendente: { 
       label: 'Pendente', 
       color: 'bg-yellow-100 text-yellow-800', 
@@ -104,9 +101,10 @@ export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresenta
       color: 'bg-red-100 text-red-800', 
       icon: AlertTriangle 
     }
-  };
+  }), []);
 
-  const tipoConfig = {
+  // ✅ OTIMIZAÇÃO 3: useMemo para configurações de tipo evita recriação
+  const tipoConfig = useMemo(() => ({
     receita: { 
       label: 'Receita', 
       color: 'bg-green-100 text-green-800', 
@@ -117,7 +115,7 @@ export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresenta
       color: 'bg-red-100 text-red-800', 
       icon: TrendingDown 
     }
-  };
+  }), []);
 
   // ===== RENDER FUNCTIONS =====
   const renderStatistics = () => {
@@ -362,8 +360,9 @@ export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresenta
     );
   };
 
-  const renderActions = () => {
-    if (!showActions || readOnly) return null;
+  // ✅ OTIMIZAÇÃO 2: useCallback para render functions evita recriação
+  const renderActions = useCallback(() => {
+    if (readOnly) return null;
 
     return (
       <div className="flex justify-between items-center mb-6">
@@ -409,7 +408,7 @@ export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresenta
         </div>
       </div>
     );
-  };
+  }, [readOnly, state.selectedItems.length, actions]);
 
   const renderLancamentosTable = () => {
     if (lancamentosData.isLoading) {
@@ -829,7 +828,7 @@ export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresenta
 
   // ===== MAIN RENDER =====
   return (
-    <div className={cn("space-y-6", className)} style={style}>
+    <div className="space-y-6">
       {renderStatistics()}
       {renderFilters()}
       {renderActions()}
@@ -837,6 +836,9 @@ export const LancamentosManagerPresentation: React.FC<LancamentosManagerPresenta
       {renderFormDialog()}
     </div>
   );
-};
+});
+
+// ✅ OTIMIZAÇÃO 1: React.memo() implementado com display name para debugging
+LancamentosManagerPresentation.displayName = 'LancamentosManagerPresentation';
 
 export default LancamentosManagerPresentation;

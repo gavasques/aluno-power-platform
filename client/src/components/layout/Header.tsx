@@ -1,4 +1,5 @@
 
+import { memo, useMemo } from "react";
 import { Link } from "wouter";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserNav } from "@/components/layout/UserNav";
@@ -41,7 +42,9 @@ import {
 
 const menuItems: any[] = [];
 
-export function Header() {
+export const Header = memo(() => {
+  // ✅ OTIMIZAÇÃO 3: useMemo para menu items evita recriação a cada render
+  const memoizedMenuItems = useMemo(() => menuItems, []);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background shadow-sm">
       <div className="flex h-16 items-center justify-between w-full px-4 sm:px-6">
@@ -166,4 +169,7 @@ export function Header() {
       </div>
     </header>
   );
-}
+});
+
+// ✅ OTIMIZAÇÃO 1: React.memo() implementado com display name para debugging
+Header.displayName = 'Header';

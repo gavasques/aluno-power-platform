@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { usePartners } from '@/contexts/PartnersContext';
 import {
   Card,
@@ -30,41 +30,57 @@ import {
 import type { Partner as DbPartner } from '@shared/schema';
 import PartnerForm from './PartnerForm';
 
-const PartnersManager = () => {
+const PartnersManager = memo(() => {
   const { partners, loading, deletePartner, searchPartners } = usePartners();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPartner, setSelectedPartner] = useState<DbPartner | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  const filteredPartners = searchQuery ? searchPartners(searchQuery) : partners || [];
+  // ✅ OTIMIZAÇÃO 3: useMemo para cálculos pesados - Map para O(1) lookup vs O(n) find
+  const categoriesMap = useMemo(() => {
+    return new Map([
+      [1, 'Contadores'],
+      [2, 'Advogados'],
+      [3, 'Fotógrafos'],
+      [4, 'Prep Centers'],
+      [5, 'Designers'],
+      [6, 'Consultores'],
+    ]);
+  }, []);
 
-  const handleDelete = (id: number) => {
+  // ✅ OTIMIZAÇÃO 3: useCallback para função de categoria evita recalculação
+  const getCategoryName = useCallback((categoryId: number | null) => {
+    if (categoryId === null) return 'Não definida';
+    return categoriesMap.get(categoryId) || 'Não definida';
+  }, [categoriesMap]);
+
+  // ✅ OTIMIZAÇÃO 3: useMemo para filtrar parceiros apenas quando necessário
+  const filteredPartners = useMemo(() => {
+    if (!partners) return [];
+    return searchQuery ? searchPartners(searchQuery) : partners;
+  }, [partners, searchQuery, searchPartners]);
+
+  // ✅ OTIMIZAÇÃO 2: useCallback para event handlers evita re-renders
+  const handleDelete = useCallback((id: number) => {
     if (confirm('Tem certeza que deseja excluir este parceiro?')) {
       deletePartner(id);
     }
-  };
+  }, [deletePartner]);
 
-  const handleEdit = (partner: DbPartner) => {
+  const handleEdit = useCallback((partner: DbPartner) => {
     setSelectedPartner(partner);
     setShowForm(true);
-  };
+  }, []);
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     setSelectedPartner(null);
     setShowForm(true);
-  };
+  }, []);
 
-  const getCategoryName = (categoryId: number | null) => {
-    const categories = [
-      { id: 1, name: 'Contadores' },
-      { id: 2, name: 'Advogados' },
-      { id: 3, name: 'Fotógrafos' },
-      { id: 4, name: 'Prep Centers' },
-      { id: 5, name: 'Designers' },
-      { id: 6, name: 'Consultores' },
-    ];
-    return categories.find(cat => cat.id === categoryId)?.name || 'Não definida';
-  };
+  const handleCloseForm = useCallback(() => {
+    setShowForm(false);
+    setSelectedPartner(null);
+  }, []);
 
   if (loading) {
     return (
@@ -154,7 +170,7 @@ const PartnersManager = () => {
                         <TableCell>{partner.email || 'Não informado'}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">
-                            {getCategoryName(partner.categoryId)}
+                            {getCategoryName(partner.partnerTypeId)}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -208,14 +224,14 @@ const PartnersManager = () => {
       {showForm && (
         <PartnerForm
           partner={selectedPartner}
-          onClose={() => {
-            setShowForm(false);
-            setSelectedPartner(null);
-          }}
+          onClose={handleCloseForm}
         />
       )}
     </div>
   );
-};
+});
+
+// ✅ OTIMIZAÇÃO 1: React.memo() implementado com display name para debugging
+PartnersManager.displayName = 'PartnersManager';
 
 export default PartnersManager;
