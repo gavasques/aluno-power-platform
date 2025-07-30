@@ -4571,14 +4571,16 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.get('/api/users/:id/groups', async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await db.execute(`
-        SELECT ugm.group_id as "groupId", ug.name as "groupName"
-        FROM user_group_members ugm
-        JOIN user_groups ug ON ugm.group_id = ug.id
-        WHERE ugm.user_id = $1
-      `, [id]);
+      const result = await db
+        .select({
+          groupId: userGroupMembers.groupId,
+          groupName: userGroups.name
+        })
+        .from(userGroupMembers)
+        .innerJoin(userGroups, eq(userGroupMembers.groupId, userGroups.id))
+        .where(eq(userGroupMembers.userId, parseInt(id)));
       
-      res.json(result.rows);
+      res.json(result);
     } catch (error) {
       console.error('Error fetching user groups:', error);
       res.status(500).json({ error: 'Failed to fetch user groups' });
@@ -4588,14 +4590,20 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // User Groups Management APIs
   app.get('/api/user-groups', async (req, res) => {
     try {
-      const result = await db.execute(`
-        SELECT id, name, description, permissions, is_active as "isActive", 
-               created_at as "createdAt", updated_at as "updatedAt"
-        FROM user_groups
-        ORDER BY name
-      `);
+      const result = await db
+        .select({
+          id: userGroups.id,
+          name: userGroups.name,
+          description: userGroups.description,
+          permissions: userGroups.permissions,
+          isActive: userGroups.isActive,
+          createdAt: userGroups.createdAt,
+          updatedAt: userGroups.updatedAt
+        })
+        .from(userGroups)
+        .orderBy(userGroups.name);
       
-      res.json(result.rows);
+      res.json(result);
     } catch (error) {
       console.error('Error fetching user groups:', error);
       res.status(500).json({ error: 'Failed to fetch user groups' });
@@ -4605,18 +4613,24 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.get('/api/user-groups/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await db.execute(`
-        SELECT id, name, description, permissions, is_active as "isActive", 
-               created_at as "createdAt", updated_at as "updatedAt"
-        FROM user_groups
-        WHERE id = $1
-      `, [id]);
+      const result = await db
+        .select({
+          id: userGroups.id,
+          name: userGroups.name,
+          description: userGroups.description,
+          permissions: userGroups.permissions,
+          isActive: userGroups.isActive,
+          createdAt: userGroups.createdAt,
+          updatedAt: userGroups.updatedAt
+        })
+        .from(userGroups)
+        .where(eq(userGroups.id, parseInt(id)));
       
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         return res.status(404).json({ error: 'Group not found' });
       }
       
-      res.json(result.rows[0]);
+      res.json(result[0]);
     } catch (error) {
       console.error('Error fetching user group:', error);
       res.status(500).json({ error: 'Failed to fetch user group' });
@@ -4627,13 +4641,24 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     try {
       const { name, description, permissions, isActive } = req.body;
       
-      const result = await db.execute(`
-        INSERT INTO user_groups (name, description, permissions, is_active)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, name, description, permissions, is_active as "isActive", created_at as "createdAt"
-      `, [name, description || '', JSON.stringify(permissions || []), isActive !== false]);
+      const result = await db
+        .insert(userGroups)
+        .values({
+          name,
+          description: description || '',
+          permissions: permissions || [],
+          isActive: isActive !== false
+        })
+        .returning({
+          id: userGroups.id,
+          name: userGroups.name,
+          description: userGroups.description,
+          permissions: userGroups.permissions,
+          isActive: userGroups.isActive,
+          createdAt: userGroups.createdAt
+        });
       
-      res.status(201).json(result.rows[0]);
+      res.status(201).json(result[0]);
     } catch (error: any) {
       console.error('Error creating user group:', error);
       
@@ -4652,18 +4677,30 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { id } = req.params;
       const { name, description, permissions, isActive } = req.body;
       
-      const result = await db.execute(`
-        UPDATE user_groups 
-        SET name = $1, description = $2, permissions = $3, is_active = $4, updated_at = NOW()
-        WHERE id = $5
-        RETURNING id, name, description, permissions, is_active as "isActive", updated_at as "updatedAt"
-      `, [name, description || '', JSON.stringify(permissions || []), isActive, id]);
+      const result = await db
+        .update(userGroups)
+        .set({
+          name,
+          description: description || '',
+          permissions: permissions || [],
+          isActive,
+          updatedAt: new Date()
+        })
+        .where(eq(userGroups.id, parseInt(id)))
+        .returning({
+          id: userGroups.id,
+          name: userGroups.name,
+          description: userGroups.description,
+          permissions: userGroups.permissions,
+          isActive: userGroups.isActive,
+          updatedAt: userGroups.updatedAt
+        });
       
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         return res.status(404).json({ error: 'Group not found' });
       }
       
-      res.json(result.rows[0]);
+      res.json(result[0]);
     } catch (error: any) {
       console.error('Error updating user group:', error);
       
@@ -4682,12 +4719,17 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { id } = req.params;
       
       // Remove all users from this group first
-      await db.execute('DELETE FROM user_group_members WHERE group_id = $1', [id]);
+      await db
+        .delete(userGroupMembers)
+        .where(eq(userGroupMembers.groupId, parseInt(id)));
       
       // Delete the group
-      const result = await db.execute('DELETE FROM user_groups WHERE id = $1 RETURNING id', [id]);
+      const result = await db
+        .delete(userGroups)
+        .where(eq(userGroups.id, parseInt(id)))
+        .returning({ id: userGroups.id });
       
-      if (result.rows.length === 0) {
+      if (result.length === 0) {
         return res.status(404).json({ error: 'Group not found' });
       }
       
