@@ -21,6 +21,7 @@ interface FormaPagamento {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  descricao?: string;
 }
 
 interface FormaPagamentoFormData {
@@ -30,6 +31,8 @@ interface FormaPagamentoFormData {
   taxaFixa: string;
   prazoRecebimento: number;
   contaBancariaId: number | null;
+  descricao?: string;
+  ativa?: boolean;
 }
 
 export default function FormasPagamentoManager() {
@@ -43,7 +46,9 @@ export default function FormasPagamentoManager() {
     taxaPercentual: '0.00',
     taxaFixa: '0.00',
     prazoRecebimento: 0,
-    contaBancariaId: null
+    contaBancariaId: null,
+    descricao: '',
+    ativa: true
   });
 
   const { toast } = useToast();
@@ -77,8 +82,7 @@ export default function FormasPagamentoManager() {
   // Filter formas
   const filteredFormas = formas.filter((forma: FormaPagamento) =>
     forma.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    forma.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (forma.descricao && forma.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
+    forma.tipo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Create mutation
@@ -196,7 +200,9 @@ export default function FormasPagamentoManager() {
       taxaPercentual: '0.00',
       taxaFixa: '0.00',
       prazoRecebimento: 0,
-      contaBancariaId: null
+      contaBancariaId: null,
+      descricao: '',
+      ativa: true
     });
   };
 
@@ -218,7 +224,9 @@ export default function FormasPagamentoManager() {
       taxaPercentual: forma.taxaPercentual,
       taxaFixa: forma.taxaFixa,
       prazoRecebimento: forma.prazoRecebimento,
-      contaBancariaId: forma.contaBancariaId
+      contaBancariaId: forma.contaBancariaId,
+      descricao: forma.descricao || '',
+      ativa: forma.isActive
     });
     setIsDialogOpen(true);
   };
