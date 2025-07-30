@@ -12,7 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { SalesChannel, ChannelCalculationResult } from '@/shared/types/channels';
 import { CHANNEL_METADATA } from '@/shared/constants/channels';
-import { formatCurrency, formatPercentage, getProfitabilityColor, getProfitabilityStatus } from '@/shared/utils/channelCalculations';
+import { formatUnifiedCurrency as formatCurrency, formatUnifiedPercentage as formatPercentage, getUnifiedProfitabilityColor as getProfitabilityColor, getUnifiedProfitabilityStatus as getProfitabilityStatus } from '@/shared/utils/unifiedChannelCalculations';
 import { ChannelForm } from './ChannelForm';
 import { ChannelSummary } from './ChannelSummary';
 

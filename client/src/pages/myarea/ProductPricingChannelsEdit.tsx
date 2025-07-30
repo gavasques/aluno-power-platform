@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { formatBRL } from "@/utils/pricingCalculations";
-import { calculateChannelProfitability } from "@/utils/channelCalculations";
+import { calculateUnifiedChannelProfitability as calculateChannelProfitability } from "@/shared/utils/unifiedChannelCalculations";
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 
 const pricingSchema = z.object({

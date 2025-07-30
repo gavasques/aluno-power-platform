@@ -71,6 +71,8 @@ export function calculateChannelResults(
   };
 }
 
+// MIGRATED TO: @/shared/utils/unifiedProductCalculations.ts
+// This file will be deprecated in favor of unified calculations
 import { formatCurrency as formatCurrencyUtil, formatPercentage as formatPercentageUtil } from '@/lib/utils/unifiedFormatters';
 
 export function formatCurrency(value: number): string {

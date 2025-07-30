@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useWatch } from 'react-hook-form';
 import { 
-  calculateChannelProfitability, 
-  type ChannelCalculationResult 
-} from '@/utils/channelCalculations';
+  calculateUnifiedChannelProfitability as calculateChannelProfitability,
+  type UnifiedChannelCalculationResult as ChannelCalculationResult 
+} from '@/shared/utils/unifiedChannelCalculations';
 import { ChannelFormData } from './useChannelsState';
 
 export const useChannelCalculations = (

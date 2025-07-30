@@ -13,7 +13,7 @@ import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner
 import { useChannelManager } from '@/hooks/useChannelManager';
 import { ChannelCard } from './ChannelCard';
 import { CHANNEL_CATEGORIES, CHANNEL_METADATA } from '@/shared/constants/channels';
-import { formatCurrency, formatPercentage } from '@/shared/utils/channelCalculations';
+import { formatUnifiedCurrency as formatCurrency, formatUnifiedPercentage as formatPercentage } from '@/shared/utils/unifiedChannelCalculations';
 
 interface ChannelManagerProps {
   productId: number;

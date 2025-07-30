@@ -21,6 +21,7 @@ import {
   ChannelType,
   CHANNEL_CONFIGS
 } from '../../types/channels';
+import { formatUnifiedCurrency, formatUnifiedPercentage } from '@/shared/utils/unifiedChannelCalculations';
 
 const ChannelsEditorPresentation: React.FC<ChannelsEditorPresentationProps> = ({
   state,
