@@ -24,6 +24,7 @@ interface ReviewData {
 interface ProductInfo {
   url: string;
   country: string;
+  maxPages: number;
 }
 
 interface ExtractorState {
@@ -119,7 +120,11 @@ export default function AmazonReviewExtractor() {
 
     setState(prev => ({
       ...prev,
-      products: [...prev.products, { url: urlInput, country: selectedCountry }]
+      products: [...prev.products, { 
+        url: urlInput, 
+        country: selectedCountry,
+        maxPages: state.totalPages
+      }]
     }));
     setUrlInput('');
   };
@@ -215,7 +220,7 @@ export default function AmazonReviewExtractor() {
         let page = 1;
         let consecutiveEmptyPages = 0;
         const MAX_CONSECUTIVE_EMPTY = 2;
-        const MAX_PAGES_PER_PRODUCT = state.totalPages;
+        const MAX_PAGES_PER_PRODUCT = product.maxPages;
 
         while (page <= MAX_PAGES_PER_PRODUCT && consecutiveEmptyPages < MAX_CONSECUTIVE_EMPTY) {
           try {
@@ -246,8 +251,9 @@ export default function AmazonReviewExtractor() {
           // Atualizar estimativa de progresso dinamicamente
           if (consecutiveEmptyPages >= MAX_CONSECUTIVE_EMPTY) {
             // Se atingiu o limite de páginas vazias, ajustar estimativa total
-            const remainingUrls = state.urls.length - (state.urls.indexOf(url) + 1);
-            totalPagesEstimated = totalPagesProcessed + (remainingUrls * page);
+            const currentProductIndex = state.products.findIndex(p => p.url === product.url);
+            const remainingProducts = state.products.length - (currentProductIndex + 1);
+            totalPagesEstimated = totalPagesProcessed + (remainingProducts * page);
           }
 
           setState(prev => ({ 
@@ -397,10 +403,10 @@ Comentário: ${comment}
               <label className="text-sm font-medium">Estimativa de reviews</label>
               <div className="p-3 bg-muted/50 rounded-md">
                 <p className="text-sm">
-                  Até <span className="font-semibold">{state.products.length * state.totalPages * 10}</span> reviews
+                  Até <span className="font-semibold">{state.products.reduce((total, product) => total + product.maxPages, 0) * 10}</span> reviews
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  ({state.products.length} produtos × {state.totalPages} páginas × ~10 reviews/página)
+                  ({state.products.length} produtos × páginas variadas × ~10 reviews/página)
                 </p>
               </div>
             </div>
@@ -427,7 +433,7 @@ Comentário: ${comment}
                         
                         {/* Máximo de páginas - Campo em vermelho conforme solicitado */}
                         <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded border border-red-300 dark:border-red-700">
-                          Máx páginas: {state.totalPages}
+                          Máx páginas: {product.maxPages}
                         </span>
                         
                         <ExternalLink 
