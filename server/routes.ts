@@ -4056,7 +4056,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   }
 
   // Endpoint para extrair reviews da Amazon
-  app.post('/api/amazon-reviews/extract', async (req: any, res: any) => {
+  app.post('/api/amazon-reviews/extract', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
     try {
       const { asin, page = 1, country = 'BR', sort_by = 'MOST_RECENT' } = req.body;
 

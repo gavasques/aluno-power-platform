@@ -122,9 +122,13 @@ export default function AmazonListingsOptimizerNew() {
         if (!url.asin) continue;
 
         try {
+          const token = localStorage.getItem('token');
           const response = await fetch('/api/amazon-reviews/extract', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({
               asin: url.asin.toUpperCase(),
               country: url.country,
@@ -139,8 +143,8 @@ export default function AmazonListingsOptimizerNew() {
           }
 
           const data = await response.json();
-          if (data.reviews) {
-            allReviews.push(...data.reviews.map((review: any) => ({
+          if (data.data && data.data.reviews) {
+            allReviews.push(...data.data.reviews.map((review: any) => ({
               ...review,
               asin: url.asin,
               country: url.country
