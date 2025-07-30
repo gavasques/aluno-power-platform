@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { usePermissions } from '@/contexts/PermissionContext';
+import { usePermissions } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';

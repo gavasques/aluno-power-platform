@@ -4,7 +4,7 @@
  * Otimizado para usar cache unificado ao invés de fetch manual
  */
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/UserContext";
 import { useGetFeatureCost, useCanProcessFeature } from "@/hooks/useFeatureCosts";
 import { useUnifiedUserProfile } from "@/hooks/useUnifiedUserProfile";
 import { logger } from "@/utils/logger";

@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, User } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/UserContext";
 
 export function RoleToggle() {
-  const { user, isAdmin, toggleRole } = useAuth();
+  const { user } = useAuth();
 
   if (!user) return null;
+
+  const isAdmin = user.role === 'admin';
 
   return (
     <div className="flex items-center gap-2">
@@ -23,14 +25,6 @@ export function RoleToggle() {
           </>
         )}
       </Badge>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={toggleRole}
-        className="text-xs h-7"
-      >
-        Alternar para {isAdmin ? 'Usuário' : 'Admin'}
-      </Button>
     </div>
   );
 }

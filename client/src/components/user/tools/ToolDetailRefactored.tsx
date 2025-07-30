@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useTools } from "@/contexts/ToolsContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/UserContext";
 import { ToolNavigation } from './ToolNavigation';
 import { ToolHeader } from './ToolHeader';
 import { ToolContentTabs } from './ToolContentTabs';
@@ -13,7 +13,8 @@ const ToolDetailRefactored = () => {
   const [, setLocation] = useLocation();
   const id = params?.id;
   const { tools, toolTypes } = useTools();
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   const tool = tools.find(t => t.id.toString() === id);
 
