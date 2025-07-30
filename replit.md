@@ -207,6 +207,14 @@ YOUTUBE_API_KEY=your_youtube_key
 ## 🔒 Security Updates
 
 ### Latest Security Patches Applied
+- **January 30, 2025**: Fixed critical SQL injection vulnerability in supplier deletion cascade
+  - **Location**: `server/routes/internationalSupplierBanking.ts` (lines 428-464)
+  - **Issue**: Raw SQL queries using string interpolation vulnerable to SQL injection
+  - **Fix**: Replaced `db.execute('DELETE FROM table WHERE id = ${id}')` with `db.execute(sql'DELETE FROM table WHERE id = ${id}')`
+  - **Impact**: Secured database operations against SQL injection attacks
+  - **Status**: ✅ Fixed - All raw queries converted to Drizzle's secure sql`` template literals
+  - **Action Required**: Test application thoroughly before deployment
+
 - **January 30, 2025**: Upgraded Vite from ^5.4.14 to ^5.4.15 to patch CVE-2025-30208 vulnerability
   - **Impact**: Secured build process against potential vulnerabilities
   - **Action Required**: Test application thoroughly before deployment
