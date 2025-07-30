@@ -5369,7 +5369,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           headers: {
             'X-RapidAPI-Key': process.env.RAPIDAPI_KEY!,
             'X-RapidAPI-Host': 'dados-cnpj.p.rapidapi.com',
-            'X-RapidAPI-App': 'default-application_10763288'
+            'X-RapidAPI-App': process.env.RAPIDAPI_APP || 'default-application_10763288'
           }
         });
 
