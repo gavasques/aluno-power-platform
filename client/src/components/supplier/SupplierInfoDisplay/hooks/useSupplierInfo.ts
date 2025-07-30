@@ -1,187 +1,138 @@
-import { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import type { SupplierInfo, SupplierContact, BankingInfo, SupplierInfoDisplayState } from '../types';
+import type { Supplier, SupplierInfoState, SupplierSection } from '../types';
 
-export const useSupplierInfo = (supplierId: number) => {
+export const useSupplierInfo = (supplier: Supplier) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [state, setState] = useState<Omit<SupplierInfoDisplayState, 'supplier' | 'contacts' | 'bankingInfo' | 'loading' | 'error'>>({
+  const [state, setState] = useState<SupplierInfoState>({
+    isEditing: false,
     editingSection: null,
-    formData: {}
+    formData: {},
+    hasChanges: false,
+    isSubmitting: false,
+    error: null
   });
 
-  // Fetch supplier info
-  const { data: supplier, isLoading: supplierLoading, error: supplierError } = useQuery<SupplierInfo>({
-    queryKey: ['/api/suppliers', supplierId],
-    queryFn: async () => {
-      const response = await apiRequest(`/api/suppliers/${supplierId}`);
-      return response.data;
+  // Update supplier mutation
+  const updateSupplierMutation = useMutation({
+    mutationFn: async (data: Partial<Supplier>) => {
+      return apiRequest(`/api/suppliers/${supplier.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
     },
-    enabled: !!supplierId
-  });
-
-  // Fetch contacts
-  const { data: contacts = [], isLoading: contactsLoading } = useQuery<SupplierContact[]>({
-    queryKey: ['/api/suppliers', supplierId, 'contacts'],
-    queryFn: async () => {
-      const response = await apiRequest(`/api/suppliers/${supplierId}/contacts`);
-      return response.data;
-    },
-    enabled: !!supplierId
-  });
-
-  // Fetch banking info
-  const { data: bankingInfo, isLoading: bankingLoading } = useQuery<BankingInfo>({
-    queryKey: ['/api/suppliers', supplierId, 'banking'],
-    queryFn: async () => {
-      const response = await apiRequest(`/api/suppliers/${supplierId}/banking`);
-      return response.data;
-    },
-    enabled: !!supplierId
-  });
-
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: async ({ section, data }: { section: string, data: any }) => {
-      switch (section) {
-        case 'basic':
-        case 'contact':
-        case 'commercial':
-          return apiRequest(`/api/suppliers/${supplierId}`, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-          });
-        case 'banking':
-          return apiRequest(`/api/suppliers/${supplierId}/banking`, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-          });
-        default:
-          throw new Error('Seção inválida');
-      }
-    },
-    onSuccess: (_, { section }) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/suppliers', supplierId] });
-      if (section === 'banking') {
-        queryClient.invalidateQueries({ queryKey: ['/api/suppliers', supplierId, 'banking'] });
-      }
-      setState(prev => ({ ...prev, editingSection: null, formData: {} }));
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/suppliers', supplier.id] });
+      setState(prev => ({
+        ...prev,
+        isEditing: false,
+        editingSection: null,
+        formData: {},
+        hasChanges: false,
+        isSubmitting: false
+      }));
       toast({
         title: "Sucesso",
-        description: "Informações atualizadas com sucesso!",
+        description: "Informações do fornecedor atualizadas com sucesso!",
       });
     },
     onError: (error: any) => {
+      setState(prev => ({
+        ...prev,
+        isSubmitting: false,
+        error: error.message
+      }));
       toast({
         title: "Erro",
-        description: error.message || "Erro ao atualizar informações.",
+        description: error.message || "Erro ao atualizar fornecedor.",
         variant: "destructive",
       });
     },
   });
 
-  const startEditing = useCallback((section: string) => {
-    let initialData = {};
-    
-    switch (section) {
-      case 'basic':
-        initialData = {
-          tradeName: supplier?.tradeName || '',
-          corporateName: supplier?.corporateName || '',
-          description: supplier?.description || '',
-          country: supplier?.country || '',
-          category: supplier?.category || ''
-        };
-        break;
-      case 'contact':
-        initialData = {
-          commercialEmail: supplier?.commercialEmail || '',
-          supportEmail: supplier?.supportEmail || '',
-          whatsappNumber: supplier?.whatsappNumber || '',
-          phone: supplier?.phone || '',
-          website: supplier?.website || '',
-          linkedin: supplier?.linkedin || '',
-          instagram: supplier?.instagram || '',
-          youtube: supplier?.youtube || ''
-        };
-        break;
-      case 'commercial':
-        initialData = {
-          paymentTerms: supplier?.paymentTerms || '',
-          minimumOrder: supplier?.minimumOrder || '',
-          deliveryTime: supplier?.deliveryTime || '',
-          certifications: supplier?.certifications || '',
-          internalNotes: supplier?.internalNotes || ''
-        };
-        break;
-      case 'banking':
-        initialData = {
-          bankName: bankingInfo?.bankName || '',
-          accountHolder: bankingInfo?.accountHolder || '',
-          accountNumber: bankingInfo?.accountNumber || '',
-          routingNumber: bankingInfo?.routingNumber || '',
-          swiftCode: bankingInfo?.swiftCode || '',
-          address: bankingInfo?.address || ''
-        };
-        break;
-    }
-
+  // Start editing a section
+  const startEditing = useCallback((section: SupplierSection) => {
     setState(prev => ({
       ...prev,
+      isEditing: true,
       editingSection: section,
-      formData: initialData
+      formData: { ...supplier },
+      error: null
     }));
-  }, [supplier, bankingInfo]);
+  }, [supplier]);
 
+  // Cancel editing
   const cancelEditing = useCallback(() => {
     setState(prev => ({
       ...prev,
+      isEditing: false,
       editingSection: null,
-      formData: {}
+      formData: {},
+      hasChanges: false,
+      error: null
     }));
   }, []);
 
+  // Save changes
   const saveChanges = useCallback(async () => {
-    if (!state.editingSection) return;
+    if (!state.hasChanges) return;
 
-    await updateMutation.mutateAsync({
-      section: state.editingSection,
-      data: state.formData
+    setState(prev => ({ ...prev, isSubmitting: true }));
+    
+    try {
+      await updateSupplierMutation.mutateAsync(state.formData);
+    } catch (error) {
+      // Error handled by mutation
+    }
+  }, [state.hasChanges, state.formData, updateSupplierMutation]);
+
+  // Update form field
+  const updateFormField = useCallback((field: keyof Supplier, value: any) => {
+    setState(prev => {
+      const newFormData = { ...prev.formData, [field]: value };
+      return {
+        ...prev,
+        formData: newFormData,
+        hasChanges: JSON.stringify(newFormData) !== JSON.stringify(supplier)
+      };
     });
-  }, [state.editingSection, state.formData, updateMutation]);
+  }, [supplier]);
 
-  const updateFormField = useCallback((field: string, value: any) => {
-    setState(prev => ({
-      ...prev,
-      formData: { ...prev.formData, [field]: value }
-    }));
-  }, []);
+  // Update rating
+  const updateRating = useCallback((rating: number) => {
+    updateFormField('rating', rating);
+  }, [updateFormField]);
 
-  const refreshData = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['/api/suppliers', supplierId] });
-    queryClient.invalidateQueries({ queryKey: ['/api/suppliers', supplierId, 'contacts'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/suppliers', supplierId, 'banking'] });
-  }, [queryClient, supplierId]);
+  // Add tag
+  const addTag = useCallback((tag: string) => {
+    if (!tag.trim()) return;
+    
+    const currentTags = state.formData.tags || supplier.tags || [];
+    if (!currentTags.includes(tag.trim())) {
+      updateFormField('tags', [...currentTags, tag.trim()]);
+    }
+  }, [state.formData.tags, supplier.tags, updateFormField]);
+
+  // Remove tag
+  const removeTag = useCallback((tag: string) => {
+    const currentTags = state.formData.tags || supplier.tags || [];
+    updateFormField('tags', currentTags.filter(t => t !== tag));
+  }, [state.formData.tags, supplier.tags, updateFormField]);
 
   return {
-    state: {
-      ...state,
-      supplier: supplier || null,
-      contacts,
-      bankingInfo: bankingInfo || null,
-      loading: supplierLoading || contactsLoading || bankingLoading,
-      error: supplierError?.message || null
-    },
+    state,
     actions: {
       startEditing,
       cancelEditing,
       saveChanges,
       updateFormField,
-      refreshData
-    },
-    isUpdating: updateMutation.isPending
+      updateRating,
+      addTag,
+      removeTag
+    }
   };
 };

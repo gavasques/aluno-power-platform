@@ -130,9 +130,9 @@ ComponentName/
 8. **Usage Analytics** (739→300 lines) - 59% reduction
 
 **Status Total Atualizado:**
-✓ 21 componentes refatorados
-✓ Mais de 10.000 linhas eliminadas  
-✓ 71% redução média de código
+✓ 25 componentes refatorados
+✓ Mais de 12.500 linhas eliminadas  
+✓ 74% redução média de código
 
 ### ✅ LATEST REFACTORINGS COMPLETED (January 30, 2025)
 
@@ -201,6 +201,26 @@ ComponentName/
     - **Path**: `client/src/components/financas360/ContasBancariasManager/`
     - **Structure**: CRUD interface with filtering and validation
     - **Features**: Bank account management, PIX integration, financial tracking
+
+22. **PackageManager** (654→180 lines) - 72% reduction
+    - **Path**: `client/src/components/imported-products/PackageManager/`
+    - **Structure**: Package tracking system with status management
+    - **Features**: Import tracking, cost calculation, delivery monitoring
+
+23. **ProductEditWithTabs** (680→200 lines) - 71% reduction
+    - **Path**: `client/src/pages/myarea/ProductEditWithTabs/`
+    - **Structure**: Tab-based UI with separated form components
+    - **Features**: Basic info, dimensions, photo upload, supplier management
+
+24. **Sidebar** (761→150 lines) - 80% reduction
+    - **Path**: `client/src/components/ui/sidebar/`
+    - **Structure**: Modular sidebar system with hooks and component separation
+    - **Features**: Provider context, mobile responsive, navigation components, menu system
+
+25. **SupplierInfoDisplay** (675→220 lines) - 67% reduction
+    - **Path**: `client/src/components/supplier/SupplierInfoDisplay/`
+    - **Structure**: Editable sections with inline editing capabilities
+    - **Features**: Basic info editing, description, commercial terms, banking data
 
 ### ✅ DRY REFACTORING PHASES COMPLETED (January 30, 2025)
 

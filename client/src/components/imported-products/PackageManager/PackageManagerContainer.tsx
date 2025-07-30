@@ -7,26 +7,18 @@ import React from 'react';
 import { usePackageManager } from './hooks/usePackageManager';
 import { PackageManagerPresentation } from './PackageManagerPresentation';
 
-export const PackageManagerContainer: React.FC = () => {
-  const { 
-    packages, 
-    loading, 
-    error, 
-    state, 
-    isUpdating, 
-    isDeleting, 
-    actions 
-  } = usePackageManager();
+interface PackageManagerContainerProps {
+  productId: string;
+}
+
+export const PackageManagerContainer: React.FC<PackageManagerContainerProps> = ({ productId }) => {
+  const { state, actions } = usePackageManager(productId);
 
   return (
     <PackageManagerPresentation
-      packages={packages}
-      loading={loading}
-      error={error}
       state={state}
-      isUpdating={isUpdating}
-      isDeleting={isDeleting}
       actions={actions}
+      productId={productId}
     />
   );
 };

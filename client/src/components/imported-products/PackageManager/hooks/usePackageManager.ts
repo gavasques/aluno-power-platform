@@ -1,249 +1,291 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import type { ProductPackage, PackageFormData, PackageManagerState } from '../types';
+import { useAuth } from '@/hooks/useAuth';
+import type { ProductPackage, PackageManagerState } from '../types';
 
-const defaultFormData: PackageFormData = {
-  name: '',
-  description: '',
-  supplier: '',
-  totalValue: 0,
-  totalWeight: 0,
-  shippingCost: 0,
-  customsCost: 0,
-  otherCosts: 0,
-  status: 'pending',
-  trackingCode: '',
-  orderDate: new Date().toISOString().split('T')[0],
-  expectedDelivery: '',
-  notes: ''
+const initialFormData: Partial<ProductPackage> = {
+  packageNumber: 1,
+  packageType: 'CAIXA',
+  contentsDescription: '',
+  packageEan: '',
+  dimensionsLength: 0,
+  dimensionsWidth: 0,
+  dimensionsHeight: 0,
+  weightGross: 0,
+  weightNet: 0,
+  unitsInPackage: 1,
+  packagingMaterial: '',
+  specialHandling: '',
 };
 
-export const usePackageManager = () => {
+export const usePackageManager = (productId: string) => {
+  const { token } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const [state, setState] = useState<Omit<PackageManagerState, 'packages' | 'loading' | 'error'>>({
+  const [state, setState] = useState<PackageManagerState>({
+    packages: [],
+    loading: false,
+    showAddForm: false,
     editingId: null,
-    deletingId: null,
-    showForm: false,
-    showProducts: false,
-    selectedPackageId: null,
-    formData: defaultFormData,
-    searchTerm: '',
-    statusFilter: '',
-    supplierFilter: ''
+    showDeleteModal: false,
+    packageToDelete: null,
+    formData: { ...initialFormData },
+    error: null,
   });
 
-  // Fetch packages
-  const { data: packages = [], isLoading: loading, error } = useQuery<ProductPackage[]>({
-    queryKey: ['/api/packages'],
-    queryFn: async () => {
-      const response = await apiRequest('/api/packages');
-      return response.data;
-    },
-  });
-
-  // Filter packages based on search and filters
-  const filteredPackages = useMemo(() => {
-    return packages.filter(pkg => {
-      const matchesSearch = !state.searchTerm || 
-        pkg.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-        pkg.supplier.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-        (pkg.trackingCode && pkg.trackingCode.toLowerCase().includes(state.searchTerm.toLowerCase()));
-
-      const matchesStatus = !state.statusFilter || pkg.status === state.statusFilter;
-      const matchesSupplier = !state.supplierFilter || 
-        pkg.supplier.toLowerCase().includes(state.supplierFilter.toLowerCase());
-
-      return matchesSearch && matchesStatus && matchesSupplier;
-    });
-  }, [packages, state.searchTerm, state.statusFilter, state.supplierFilter]);
-
-  // Create mutation
-  const createMutation = useMutation({
-    mutationFn: async (data: PackageFormData) => {
-      const finalCost = data.totalValue + data.shippingCost + data.customsCost + data.otherCosts;
-      return apiRequest('/api/packages', {
-        method: 'POST',
-        body: JSON.stringify({ ...data, finalCost }),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/packages'] });
-      setState(prev => ({ ...prev, showForm: false, formData: defaultFormData }));
-      toast({
-        title: "Sucesso",
-        description: "Pacote criado com sucesso!",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro",
-        description: error.message || "Erro ao criar pacote.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: async (data: PackageFormData) => {
-      const finalCost = data.totalValue + data.shippingCost + data.customsCost + data.otherCosts;
-      return apiRequest(`/api/packages/${state.editingId}`, {
-        method: 'PUT',
-        body: JSON.stringify({ ...data, finalCost }),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/packages'] });
-      setState(prev => ({ ...prev, showForm: false, formData: defaultFormData, editingId: null }));
-      toast({
-        title: "Sucesso",
-        description: "Pacote atualizado com sucesso!",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro",
-        description: error.message || "Erro ao atualizar pacote.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest(`/api/packages/${id}`, {
-        method: 'DELETE',
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/packages'] });
-      setState(prev => ({ ...prev, deletingId: null }));
-      toast({
-        title: "Sucesso",
-        description: "Pacote excluído com sucesso!",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro",
-        description: error.message || "Erro ao excluir pacote.",
-        variant: "destructive",
-      });
-      setState(prev => ({ ...prev, deletingId: null }));
-    },
-  });
-
-  const handleAdd = useCallback(() => {
+  // Calculate volume automatically when dimensions change
+  const calculateVolume = useCallback(() => {
+    const { dimensionsLength = 0, dimensionsWidth = 0, dimensionsHeight = 0 } = state.formData;
+    const volumeCbm = (dimensionsLength * dimensionsWidth * dimensionsHeight) / 1000000; // cm³ to m³
+    
     setState(prev => ({
       ...prev,
-      showForm: true,
-      editingId: null,
-      formData: defaultFormData
+      formData: { ...prev.formData, volumeCbm }
     }));
-  }, []);
+  }, [state.formData.dimensionsLength, state.formData.dimensionsWidth, state.formData.dimensionsHeight]);
 
-  const handleEdit = useCallback((pkg: ProductPackage) => {
-    setState(prev => ({
-      ...prev,
-      showForm: true,
-      editingId: pkg.id,
-      formData: {
-        name: pkg.name,
-        description: pkg.description || '',
-        supplier: pkg.supplier,
-        totalValue: pkg.totalValue,
-        totalWeight: pkg.totalWeight,
-        shippingCost: pkg.shippingCost,
-        customsCost: pkg.customsCost,
-        otherCosts: pkg.otherCosts,
-        status: pkg.status,
-        trackingCode: pkg.trackingCode || '',
-        orderDate: pkg.orderDate.split('T')[0],
-        expectedDelivery: pkg.expectedDelivery ? pkg.expectedDelivery.split('T')[0] : '',
-        notes: pkg.notes || ''
+  // Load packages from API
+  const loadPackages = useCallback(async () => {
+    if (!productId || productId === '') return;
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    
+    try {
+      const response = await fetch(`/api/imported-products/${productId}/packages`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar embalagens');
       }
-    }));
-  }, []);
 
-  const handleDelete = useCallback(async (id: number) => {
-    setState(prev => ({ ...prev, deletingId: id }));
-    await deleteMutation.mutateAsync(id);
-  }, [deleteMutation]);
-
-  const handleViewProducts = useCallback((id: number) => {
-    setState(prev => ({ 
-      ...prev, 
-      showProducts: true, 
-      selectedPackageId: id 
-    }));
-  }, []);
-
-  const handleSave = useCallback(async () => {
-    if (state.editingId) {
-      await updateMutation.mutateAsync(state.formData);
-    } else {
-      await createMutation.mutateAsync(state.formData);
+      const data = await response.json();
+      setState(prev => ({
+        ...prev,
+        packages: data.packages || [],
+        loading: false
+      }));
+    } catch (error: any) {
+      setState(prev => ({
+        ...prev,
+        error: error.message,
+        loading: false
+      }));
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
     }
-  }, [state.editingId, state.formData, updateMutation, createMutation]);
+  }, [productId, token, toast]);
 
-  const handleCancel = useCallback(() => {
+  // Create new package
+  const createPackage = useCallback(async () => {
+    if (!productId) return;
+
+    setState(prev => ({ ...prev, loading: true }));
+
+    try {
+      const response = await fetch(`/api/imported-products/${productId}/packages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(state.formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao criar embalagem');
+      }
+
+      await loadPackages();
+      setState(prev => ({
+        ...prev,
+        showAddForm: false,
+        formData: { ...initialFormData },
+        loading: false
+      }));
+
+      toast({
+        title: "Sucesso",
+        description: "Embalagem criada com sucesso!",
+      });
+    } catch (error: any) {
+      setState(prev => ({ ...prev, loading: false }));
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  }, [productId, token, state.formData, loadPackages, toast]);
+
+  // Update existing package
+  const updatePackage = useCallback(async () => {
+    if (!productId || !state.editingId) return;
+
+    setState(prev => ({ ...prev, loading: true }));
+
+    try {
+      const response = await fetch(`/api/imported-products/${productId}/packages/${state.editingId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(state.formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar embalagem');
+      }
+
+      await loadPackages();
+      setState(prev => ({
+        ...prev,
+        editingId: null,
+        formData: { ...initialFormData },
+        loading: false
+      }));
+
+      toast({
+        title: "Sucesso",
+        description: "Embalagem atualizada com sucesso!",
+      });
+    } catch (error: any) {
+      setState(prev => ({ ...prev, loading: false }));
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  }, [productId, state.editingId, token, state.formData, loadPackages, toast]);
+
+  // Delete package
+  const deletePackage = useCallback((pkg: ProductPackage) => {
     setState(prev => ({
       ...prev,
-      showForm: false,
-      showProducts: false,
-      editingId: null,
-      selectedPackageId: null,
-      formData: defaultFormData
+      packageToDelete: pkg,
+      showDeleteModal: true
     }));
   }, []);
 
-  const updateFormField = useCallback((field: keyof PackageFormData, value: any) => {
+  // Confirm delete
+  const confirmDelete = useCallback(async () => {
+    if (!productId || !state.packageToDelete) return;
+
+    setState(prev => ({ ...prev, loading: true }));
+
+    try {
+      const response = await fetch(`/api/imported-products/${productId}/packages/${state.packageToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao excluir embalagem');
+      }
+
+      await loadPackages();
+      setState(prev => ({
+        ...prev,
+        showDeleteModal: false,
+        packageToDelete: null,
+        loading: false
+      }));
+
+      toast({
+        title: "Sucesso",
+        description: "Embalagem excluída com sucesso!",
+      });
+    } catch (error: any) {
+      setState(prev => ({ ...prev, loading: false }));
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  }, [productId, state.packageToDelete, token, loadPackages, toast]);
+
+  // Start editing
+  const startEditing = useCallback((pkg: ProductPackage) => {
+    setState(prev => ({
+      ...prev,
+      editingId: pkg.id,
+      formData: { ...pkg },
+      showAddForm: false
+    }));
+  }, []);
+
+  // Start creating
+  const startCreating = useCallback(() => {
+    const nextPackageNumber = state.packages.length > 0 
+      ? Math.max(...state.packages.map(p => p.packageNumber)) + 1 
+      : 1;
+
+    setState(prev => ({
+      ...prev,
+      showAddForm: true,
+      editingId: null,
+      formData: { ...initialFormData, packageNumber: nextPackageNumber }
+    }));
+  }, [state.packages]);
+
+  // Cancel form
+  const cancelForm = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      showAddForm: false,
+      editingId: null,
+      formData: { ...initialFormData },
+      showDeleteModal: false,
+      packageToDelete: null
+    }));
+  }, []);
+
+  // Update form field
+  const updateFormField = useCallback((field: keyof ProductPackage, value: any) => {
     setState(prev => ({
       ...prev,
       formData: { ...prev.formData, [field]: value }
     }));
   }, []);
 
-  const updateSearch = useCallback((term: string) => {
-    setState(prev => ({ ...prev, searchTerm: term }));
-  }, []);
+  // Load packages on mount and productId change
+  useEffect(() => {
+    if (productId && productId !== '') {
+      loadPackages();
+    }
+  }, [productId, loadPackages]);
 
-  const updateStatusFilter = useCallback((status: string) => {
-    setState(prev => ({ ...prev, statusFilter: status }));
-  }, []);
-
-  const updateSupplierFilter = useCallback((supplier: string) => {
-    setState(prev => ({ ...prev, supplierFilter: supplier }));
-  }, []);
-
-  const refreshData = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['/api/packages'] });
-  }, [queryClient]);
+  // Auto-calculate volume when dimensions change
+  useEffect(() => {
+    if (state.formData.dimensionsLength || state.formData.dimensionsWidth || state.formData.dimensionsHeight) {
+      calculateVolume();
+    }
+  }, [state.formData.dimensionsLength, state.formData.dimensionsWidth, state.formData.dimensionsHeight, calculateVolume]);
 
   return {
-    packages: filteredPackages,
-    loading,
-    error,
     state,
-    isUpdating: createMutation.isPending || updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
     actions: {
-      handleAdd,
-      handleEdit,
-      handleDelete,
-      handleViewProducts,
-      handleSave,
-      handleCancel,
+      loadPackages,
+      createPackage,
+      updatePackage,
+      deletePackage,
+      confirmDelete,
+      startEditing,
+      startCreating,
+      cancelForm,
       updateFormField,
-      updateSearch,
-      updateStatusFilter,
-      updateSupplierFilter,
-      refreshData
+      calculateVolume
     }
   };
 };

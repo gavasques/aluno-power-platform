@@ -1,241 +1,232 @@
 import React, { memo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, X, Calculator } from 'lucide-react';
-import { ButtonLoader } from '@/components/common/LoadingSpinner';
-import { PACKAGE_STATUSES, type PackageFormData } from '../types';
+import { PACKAGE_TYPES, PACKAGING_MATERIALS, SPECIAL_HANDLING, type ProductPackage } from '../types';
 
 interface PackageFormProps {
-  open: boolean;
-  isEditing: boolean;
-  formData: PackageFormData;
-  isUpdating: boolean;
+  formData: Partial<ProductPackage>;
+  onUpdateField: (field: keyof ProductPackage, value: any) => void;
   onSave: () => void;
   onCancel: () => void;
-  onFieldChange: (field: keyof PackageFormData, value: any) => void;
+  isEditing: boolean;
+  loading: boolean;
 }
 
 export const PackageForm = memo<PackageFormProps>(({
-  open,
-  isEditing,
   formData,
-  isUpdating,
+  onUpdateField,
   onSave,
   onCancel,
-  onFieldChange
+  isEditing,
+  loading
 }) => {
-  const totalCost = formData.totalValue + formData.shippingCost + formData.customsCost + formData.otherCosts;
-
   return (
-    <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Editar Pacote' : 'Novo Pacote'}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome do Pacote *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => onFieldChange('name', e.target.value)}
-                placeholder="Ex: Eletrônicos Dezembro 2024"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="supplier">Fornecedor *</Label>
-              <Input
-                id="supplier"
-                value={formData.supplier}
-                onChange={(e) => onFieldChange('supplier', e.target.value)}
-                placeholder="Nome do fornecedor"
-              />
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => onFieldChange('description', e.target.value)}
-                placeholder="Descrição detalhada do pacote..."
-                rows={3}
-              />
-            </div>
-          </div>
-
-          {/* Financial Information */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium flex items-center gap-2">
-              <Calculator className="w-4 h-4" />
-              Informações Financeiras
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="totalValue">Valor dos Produtos (USD)</Label>
-                <Input
-                  id="totalValue"
-                  type="number"
-                  step="0.01"
-                  value={formData.totalValue}
-                  onChange={(e) => onFieldChange('totalValue', parseFloat(e.target.value) || 0)}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="totalWeight">Peso Total (kg)</Label>
-                <Input
-                  id="totalWeight"
-                  type="number"
-                  step="0.01"
-                  value={formData.totalWeight}
-                  onChange={(e) => onFieldChange('totalWeight', parseFloat(e.target.value) || 0)}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="shippingCost">Custo de Envio (USD)</Label>
-                <Input
-                  id="shippingCost"
-                  type="number"
-                  step="0.01"
-                  value={formData.shippingCost}
-                  onChange={(e) => onFieldChange('shippingCost', parseFloat(e.target.value) || 0)}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="customsCost">Taxa Alfandegária (USD)</Label>
-                <Input
-                  id="customsCost"
-                  type="number"
-                  step="0.01"
-                  value={formData.customsCost}
-                  onChange={(e) => onFieldChange('customsCost', parseFloat(e.target.value) || 0)}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="otherCosts">Outros Custos (USD)</Label>
-                <Input
-                  id="otherCosts"
-                  type="number"
-                  step="0.01"
-                  value={formData.otherCosts}
-                  onChange={(e) => onFieldChange('otherCosts', parseFloat(e.target.value) || 0)}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Custo Total (USD)</Label>
-                <div className="text-lg font-semibold text-green-600 p-2 bg-green-50 rounded">
-                  ${totalCost.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Shipping Information */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium">Informações de Envio</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={formData.status} 
-                  onValueChange={(value) => onFieldChange('status', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PACKAGE_STATUSES.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="trackingCode">Código de Rastreamento</Label>
-                <Input
-                  id="trackingCode"
-                  value={formData.trackingCode}
-                  onChange={(e) => onFieldChange('trackingCode', e.target.value)}
-                  placeholder="Ex: BR123456789US"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orderDate">Data do Pedido</Label>
-                <Input
-                  id="orderDate"
-                  type="date"
-                  value={formData.orderDate}
-                  onChange={(e) => onFieldChange('orderDate', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="expectedDelivery">Entrega Prevista</Label>
-                <Input
-                  id="expectedDelivery"
-                  type="date"
-                  value={formData.expectedDelivery}
-                  onChange={(e) => onFieldChange('expectedDelivery', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Notes */}
+    <Card className="border-2 border-blue-200">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Calculator className="w-5 h-5" />
+          {isEditing ? 'Editar Embalagem' : 'Nova Embalagem'}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Package Number */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Observações</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => onFieldChange('notes', e.target.value)}
-              placeholder="Observações adicionais sobre o pacote..."
-              rows={3}
+            <Label htmlFor="packageNumber">Número da Embalagem</Label>
+            <Input
+              id="packageNumber"
+              type="number"
+              value={formData.packageNumber || ''}
+              onChange={(e) => onUpdateField('packageNumber', parseInt(e.target.value) || 0)}
+              min="1"
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={onCancel} disabled={isUpdating}>
-              <X className="w-4 h-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button onClick={onSave} disabled={isUpdating}>
-              {isUpdating ? (
-                <ButtonLoader>Salvando...</ButtonLoader>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  {isEditing ? 'Atualizar' : 'Criar'}
-                </>
-              )}
-            </Button>
+          {/* Package Type */}
+          <div className="space-y-2">
+            <Label htmlFor="packageType">Tipo de Embalagem</Label>
+            <Select
+              value={formData.packageType || ''}
+              onValueChange={(value) => onUpdateField('packageType', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {PACKAGE_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* EAN */}
+          <div className="space-y-2">
+            <Label htmlFor="packageEan">EAN da Embalagem</Label>
+            <Input
+              id="packageEan"
+              value={formData.packageEan || ''}
+              onChange={(e) => onUpdateField('packageEan', e.target.value)}
+              placeholder="Código EAN"
+            />
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Dimensions */}
+        <div className="space-y-2">
+          <Label>Dimensões (cm)</Label>
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor="length" className="text-sm">Comprimento</Label>
+              <Input
+                id="length"
+                type="number"
+                value={formData.dimensionsLength || ''}
+                onChange={(e) => onUpdateField('dimensionsLength', parseFloat(e.target.value) || 0)}
+                placeholder="cm"
+                min="0"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="width" className="text-sm">Largura</Label>
+              <Input
+                id="width"
+                type="number"
+                value={formData.dimensionsWidth || ''}
+                onChange={(e) => onUpdateField('dimensionsWidth', parseFloat(e.target.value) || 0)}
+                placeholder="cm"
+                min="0"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="height" className="text-sm">Altura</Label>
+              <Input
+                id="height"
+                type="number"
+                value={formData.dimensionsHeight || ''}
+                onChange={(e) => onUpdateField('dimensionsHeight', parseFloat(e.target.value) || 0)}
+                placeholder="cm"
+                min="0"
+                step="0.1"
+              />
+            </div>
+          </div>
+          {formData.volumeCbm && (
+            <p className="text-sm text-muted-foreground">
+              Volume: {formData.volumeCbm.toFixed(4)} m³
+            </p>
+          )}
+        </div>
+
+        {/* Weights and Units */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="weightGross">Peso Bruto (kg)</Label>
+            <Input
+              id="weightGross"
+              type="number"
+              value={formData.weightGross || ''}
+              onChange={(e) => onUpdateField('weightGross', parseFloat(e.target.value) || 0)}
+              min="0"
+              step="0.1"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="weightNet">Peso Líquido (kg)</Label>
+            <Input
+              id="weightNet"
+              type="number"
+              value={formData.weightNet || ''}
+              onChange={(e) => onUpdateField('weightNet', parseFloat(e.target.value) || 0)}
+              min="0"
+              step="0.1"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="unitsInPackage">Unidades na Embalagem</Label>
+            <Input
+              id="unitsInPackage"
+              type="number"
+              value={formData.unitsInPackage || ''}
+              onChange={(e) => onUpdateField('unitsInPackage', parseInt(e.target.value) || 1)}
+              min="1"
+            />
+          </div>
+        </div>
+
+        {/* Material and Handling */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="packagingMaterial">Material da Embalagem</Label>
+            <Select
+              value={formData.packagingMaterial || ''}
+              onValueChange={(value) => onUpdateField('packagingMaterial', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o material" />
+              </SelectTrigger>
+              <SelectContent>
+                {PACKAGING_MATERIALS.map((material) => (
+                  <SelectItem key={material} value={material}>
+                    {material}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="specialHandling">Manuseio Especial</Label>
+            <Select
+              value={formData.specialHandling || ''}
+              onValueChange={(value) => onUpdateField('specialHandling', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {SPECIAL_HANDLING.map((handling) => (
+                  <SelectItem key={handling} value={handling}>
+                    {handling}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Contents Description */}
+        <div className="space-y-2">
+          <Label htmlFor="contentsDescription">Descrição do Conteúdo</Label>
+          <Textarea
+            id="contentsDescription"
+            value={formData.contentsDescription || ''}
+            onChange={(e) => onUpdateField('contentsDescription', e.target.value)}
+            placeholder="Descreva o conteúdo da embalagem..."
+            rows={3}
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={onCancel}>
+            <X className="w-4 h-4 mr-2" />
+            Cancelar
+          </Button>
+          <Button onClick={onSave} disabled={loading}>
+            <Save className="w-4 h-4 mr-2" />
+            {loading ? 'Salvando...' : 'Salvar'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 });

@@ -1,86 +1,78 @@
-export interface SupplierInfo {
+export interface Supplier {
   id: number;
-  tradeName: string;
-  corporateName: string;
-  description: string;
-  country: string;
-  category: string;
-  commercialEmail: string;
-  supportEmail: string;
-  whatsappNumber: string;
-  phone: string;
-  website: string;
-  linkedin: string;
-  instagram: string;
-  youtube: string;
-  paymentTerms: string;
-  minimumOrder: string;
-  deliveryTime: string;
-  certifications: string;
-  qualityRating: number;
-  communicationRating: number;
-  deliveryRating: number;
-  priceRating: number;
-  overallRating: number;
-  internalNotes: string;
+  name: string;
+  companyName?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  contactPerson?: string;
+  description?: string;
+  rating?: number;
   isActive: boolean;
-  isPremium: boolean;
-  isVerified: boolean;
+  tags?: string[];
+  commercialTerms?: string;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  minimumOrder?: number;
+  leadTime?: number;
+  bankName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  swiftCode?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface SupplierContact {
-  id: number;
-  name: string;
-  role: string;
-  email: string;
-  phone: string;
-  whatsapp: string;
-  notes: string;
-}
-
-export interface BankingInfo {
-  bankName: string;
-  accountHolder: string;
-  accountNumber: string;
-  routingNumber: string;
-  swiftCode: string;
-  address: string;
-}
-
-export interface SupplierInfoDisplayState {
-  supplier: SupplierInfo | null;
-  contacts: SupplierContact[];
-  bankingInfo: BankingInfo | null;
-  loading: boolean;
-  error: string | null;
+export interface SupplierInfoState {
+  isEditing: boolean;
   editingSection: string | null;
-  formData: any;
+  formData: Partial<Supplier>;
+  hasChanges: boolean;
+  isSubmitting: boolean;
+  error: string | null;
 }
 
-export interface SupplierInfoDisplayActions {
+export interface SupplierInfoActions {
   startEditing: (section: string) => void;
   cancelEditing: () => void;
   saveChanges: () => Promise<void>;
-  updateFormField: (field: string, value: any) => void;
-  refreshData: () => void;
+  updateFormField: (field: keyof Supplier, value: any) => void;
+  updateRating: (rating: number) => void;
+  addTag: (tag: string) => void;
+  removeTag: (tag: string) => void;
 }
 
-export interface SupplierInfoDisplayProps {
-  supplierId: number;
-}
+export const SUPPLIER_SECTIONS = [
+  {
+    id: 'basic',
+    title: 'Informações Básicas',
+    fields: ['name', 'companyName', 'email', 'phone', 'website', 'contactPerson']
+  },
+  {
+    id: 'address',
+    title: 'Endereço',
+    fields: ['address', 'city', 'state', 'zipCode', 'country']
+  },
+  {
+    id: 'commercial',
+    title: 'Termos Comerciais',
+    fields: ['commercialTerms', 'paymentTerms', 'deliveryTerms', 'minimumOrder', 'leadTime']
+  },
+  {
+    id: 'banking',
+    title: 'Dados Bancários',
+    fields: ['bankName', 'accountNumber', 'routingNumber', 'swiftCode']
+  },
+  {
+    id: 'description',
+    title: 'Descrição e Avaliação',
+    fields: ['description', 'rating', 'tags']
+  }
+] as const;
 
-export const EDITABLE_SECTIONS = {
-  BASIC: 'basic',
-  CONTACT: 'contact',
-  COMMERCIAL: 'commercial',
-  BANKING: 'banking'
-} as const;
-
-export const RATING_LABELS = {
-  qualityRating: 'Qualidade',
-  communicationRating: 'Comunicação',
-  deliveryRating: 'Entrega',
-  priceRating: 'Preço'
-};
+export type SupplierSection = typeof SUPPLIER_SECTIONS[number]['id'];
