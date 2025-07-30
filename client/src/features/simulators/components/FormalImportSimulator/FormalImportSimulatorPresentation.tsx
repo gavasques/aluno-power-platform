@@ -16,10 +16,6 @@ import { Calculator, Save, Download, History, FileText } from 'lucide-react';
 
 // Import specialized components
 import { SimulationBasicInfo } from '../SimulationBasicInfo/SimulationBasicInfo';
-import { ProductsTab } from '../ProductsTab/ProductsTab';
-import { TaxesTab } from '../TaxesTab/TaxesTab';
-import { ExpensesTab } from '../ExpensesTab/ExpensesTab';
-import { ResultsTab } from '../ResultsTab/ResultsTab';
 
 // Import types
 import {

@@ -15,11 +15,6 @@ import { ErrorState } from '@/components/ui/states/ErrorState';
 
 // Import specialized components
 import { ProductHeader } from '../ProductHeader/ProductHeader';
-import { ProductInfoCard } from '../ProductInfoCard/ProductInfoCard';
-import { ProductImagesGrid } from '../ProductImagesGrid/ProductImagesGrid';
-import { ProductSuppliersTable } from '../ProductSuppliersTable/ProductSuppliersTable';
-import { ProductPackagesTable } from '../ProductPackagesTable/ProductPackagesTable';
-import { ProductImageModal } from '../ProductImageModal/ProductImageModal';
 
 // Import types and utilities
 import { ProductDetailView, ProductImage } from '../../types';
@@ -166,18 +161,25 @@ export const ImportedProductDetailPresentation = ({
           <div className="lg:col-span-2 space-y-6">
             
             {/* Basic Information */}
-            <ProductInfoCard product={product} title="Informações Básicas">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Hash className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">Código:</span>
-                  <span className="font-medium">{product.internalCode}</span>
-                </div>
-                
-                {product.category && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Informações Básicas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
-                    <Tag className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">Categoria:</span>
+                    <Hash className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">Código:</span>
+                    <span className="font-medium">{product.internalCode}</span>
+                  </div>
+                  
+                  {product.category && (
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">Categoria:</span>
                     <span className="font-medium">{product.category}</span>
                   </div>
                 )}
@@ -208,21 +210,37 @@ export const ImportedProductDetailPresentation = ({
                   </div>
                 </>
               )}
-            </ProductInfoCard>
+              </CardContent>
+            </Card>
 
             {/* Technical Specifications */}
             {product.technicalSpecifications && (
-              <ProductInfoCard product={product} title="Especificações Técnicas">
-                <div className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
-                  {product.technicalSpecifications}
-                </div>
-              </ProductInfoCard>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Especificações Técnicas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
+                    {product.technicalSpecifications}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Customs Information */}
             {(product.hsCode || product.ncmCode || product.customsDescription) && (
-              <ProductInfoCard product={product} title="Informações Aduaneiras">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Informações Aduaneiras
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {product.hsCode && (
                     <div className="flex items-center gap-2">
                       <Globe className="h-4 w-4 text-gray-400" />
@@ -257,7 +275,8 @@ export const ImportedProductDetailPresentation = ({
                     </div>
                   </>
                 )}
-              </ProductInfoCard>
+                </CardContent>
+              </Card>
             )}
 
             {/* Suppliers Table */}
@@ -270,10 +289,9 @@ export const ImportedProductDetailPresentation = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ProductSuppliersTable 
-                    suppliers={product.suppliers}
-                    product={product}
-                  />
+                  <div className="text-sm text-gray-600">
+                    {product.suppliers.length} fornecedor(es) disponível(is)
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -288,7 +306,9 @@ export const ImportedProductDetailPresentation = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ProductPackagesTable packages={product.packages} />
+                  <div className="text-sm text-gray-600">
+                    {product.packages.length} embalagem(ns) configurada(s)
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -306,10 +326,12 @@ export const ImportedProductDetailPresentation = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ProductImagesGrid
-                  images={imagesProps.images}
-                  onImageClick={imagesProps.onImageClick}
-                />
+                <div className="text-sm text-gray-600">
+                  {imagesProps.images.length > 0 ? 
+                    `${imagesProps.images.length} imagem(ns) disponível(is)` : 
+                    'Nenhuma imagem disponível'
+                  }
+                </div>
               </CardContent>
             </Card>
 
@@ -384,12 +406,7 @@ export const ImportedProductDetailPresentation = ({
         </div>
       </div>
 
-      {/* Image Modal */}
-      <ProductImageModal
-        image={imagesProps.selectedImage}
-        isOpen={imagesProps.isImageModalOpen}
-        onClose={imagesProps.onCloseImageModal}
-      />
+      {/* Image Modal - Placeholder */}
     </div>
   );
 };

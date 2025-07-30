@@ -25,14 +25,10 @@ import {
   XCircle
 } from 'lucide-react';
 
-// Import specialized components (to be created)
+// Import specialized components
 import { DevolucaoList } from '../DevolucaoList/DevolucaoList';
 import { DevolucaoForm } from '../DevolucaoForm/DevolucaoForm';
 import { DevolucaoFilters } from '../DevolucaoFilters/DevolucaoFilters';
-import { DevolucaoStats } from '../DevolucaoStats/DevolucaoStats';
-import { DevolucaoItemsDialog } from '../DevolucaoItemsDialog/DevolucaoItemsDialog';
-import { DevolucaoAnexosDialog } from '../DevolucaoAnexosDialog/DevolucaoAnexosDialog';
-import { DevolucaoProcessingDialog } from '../DevolucaoProcessingDialog/DevolucaoProcessingDialog';
 
 // Import types
 import { DevolucaesManagerPresentationProps } from '../../types/devolucoes';

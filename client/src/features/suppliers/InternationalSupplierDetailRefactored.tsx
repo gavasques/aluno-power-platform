@@ -9,18 +9,18 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 // Hooks especializados
-import { useSupplierData } from '../hooks/useSupplierData';
-import { useSupplierActions } from '../hooks/useSupplierActions';
-import { useSupplierModals } from '../hooks/useSupplierModals';
-import { useSupplierTabs } from '../hooks/useSupplierTabs';
-import { useSupplierFilters } from '../hooks/useSupplierFilters';
+import { useSupplierData } from './hooks/useSupplierData';
+import { useSupplierActions } from './hooks/useSupplierActions';
+import { useSupplierModals } from './hooks/useSupplierModals';
+import { useSupplierTabs } from './hooks/useSupplierTabs';
+import { useSupplierFilters } from './hooks/useSupplierFilters';
 
 // Componentes de apresentação
-import { SupplierOverview } from '../components/SupplierOverview/SupplierOverview';
-import { SupplierContacts } from '../components/SupplierContacts/SupplierContacts';
-import { SupplierContracts } from '../components/SupplierContracts/SupplierContracts';
-import { SupplierDocuments } from '../components/SupplierDocuments/SupplierDocuments';
-import { SupplierCommunications } from '../components/SupplierCommunications/SupplierCommunications';
+import { SupplierOverview } from './components/SupplierOverview/SupplierOverview';
+import { SupplierContacts } from './components/SupplierContacts/SupplierContacts';
+import { SupplierContracts } from './components/SupplierContracts/SupplierContracts';
+import { SupplierDocuments } from './components/SupplierDocuments/SupplierDocuments';
+import { SupplierCommunications } from './components/SupplierCommunications/SupplierCommunications';
 
 // Componente de loading
 const LoadingState = () => (

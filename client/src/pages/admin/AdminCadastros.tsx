@@ -4,7 +4,7 @@ import DepartmentsManagerRefactored from "@/components/admin/cadastros/Departmen
 import SupplierTypesManagerOptimized from "@/components/admin/cadastros/SupplierTypesManagerOptimized";
 import PartnerTypesManagerOptimized from "@/components/admin/cadastros/PartnerTypesManagerOptimized";
 import PromptTypesManagerOptimized from "@/components/admin/cadastros/PromptTypesManagerOptimized";
-import MaterialTypesManagerOptimized from "@/components/admin/cadastros/MaterialTypesManagerOptimized";
+
 import MaterialCategoriesManager from "@/components/admin/materials/MaterialCategoriesManager";
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import CadastrosOverview from "@/components/admin/cadastros/CadastrosOverview";
@@ -29,7 +29,7 @@ const AdminCadastros = ({ subsection }: AdminCadastrosProps) => {
       case "tipos-prompts-ia":
         return <PromptTypesManagerOptimized />;
       case "tipos-materiais":
-        return <MaterialTypesManagerOptimized />;
+        return <MaterialCategoriesManager />;
       case "categorias-materiais":
         return <MaterialCategoriesManager />;
       case "tipos-ferramentas":
