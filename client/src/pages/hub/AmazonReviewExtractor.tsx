@@ -59,6 +59,28 @@ const extractOrValidateASIN = (input: string): string | null => {
 
 const FEATURE_CODE = 'tools.amazon_reviews';
 
+// Mapeamento de códigos de país para API Amazon
+const mapCountryCodeForAmazon = (countryCode: string): string => {
+  const mapping: Record<string, string> = {
+    'GB': 'UK', // Reino Unido
+    'AE': 'AE', // Emirados Árabes
+    'SA': 'SA', // Arábia Saudita
+    'EG': 'EG', // Egito
+    'TR': 'TR', // Turquia
+    'SE': 'SE', // Suécia
+    'PL': 'PL', // Polônia
+    'BE': 'BE', // Bélgica
+    'CL': 'CL', // Chile
+    'NL': 'NL', // Holanda
+    'AU': 'AU', // Austrália
+    'JP': 'JP', // Japão
+    'SG': 'SG', // Singapura
+    'IN': 'IN', // Índia
+  };
+  
+  return mapping[countryCode] || countryCode;
+};
+
 export default function AmazonReviewExtractor() {
   const { user, token } = useAuth();
   const [urlInput, setUrlInput] = useState('');
@@ -120,7 +142,7 @@ export default function AmazonReviewExtractor() {
           body: JSON.stringify({
             asin,
             page,
-            country: selectedCountry,
+            country: mapCountryCodeForAmazon(selectedCountry),
             sort_by: 'MOST_RECENT'
           })
         })

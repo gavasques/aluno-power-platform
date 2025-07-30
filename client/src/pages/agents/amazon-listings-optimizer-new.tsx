@@ -104,6 +104,17 @@ export default function AmazonListingsOptimizerNew() {
     }));
   };
 
+  // Mapeamento de códigos de país para API Amazon
+  const mapCountryCodeForAmazon = (countryCode: string): string => {
+    const mapping: Record<string, string> = {
+      'GB': 'UK', // Reino Unido
+      'AE': 'AE', 'SA': 'SA', 'EG': 'EG', 'TR': 'TR', 'SE': 'SE',
+      'PL': 'PL', 'BE': 'BE', 'CL': 'CL', 'NL': 'NL', 'AU': 'AU',
+      'JP': 'JP', 'SG': 'SG', 'IN': 'IN'
+    };
+    return mapping[countryCode] || countryCode;
+  };
+
   const extractReviews = async () => {
     if (extractState.urls.filter(u => u.asin).length === 0) {
       toast({
@@ -131,7 +142,7 @@ export default function AmazonListingsOptimizerNew() {
             },
             body: JSON.stringify({
               asin: url.asin.toUpperCase(),
-              country: url.country,
+              country: mapCountryCodeForAmazon(url.country),
               page: 1,
               sort_by: 'MOST_RECENT'
             })
