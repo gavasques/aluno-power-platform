@@ -22,7 +22,7 @@ const ferramentas = [
   {
     title: "Remover de Fundo PRO",
     description: "Remova backgrounds de imagens com precisão de IA profissional",
-    href: "/ferramentas/background-removal-pro",
+    href: "/ferramentas/remover-fundo-pro",
     icon: Sparkles,
     category: "Imagem",
     credits: 2,
@@ -49,7 +49,7 @@ const ferramentas = [
   {
     title: "Gerador de Logomarcas PRO",
     description: "Crie logomarcas profissionais com inteligência artificial",
-    href: "/ferramentas/logo-generator-pro",
+    href: "/ferramentas/gerador-logomarcas-pro",
     icon: Palette,
     category: "Design",
     credits: 10,

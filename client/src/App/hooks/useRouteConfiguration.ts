@@ -186,11 +186,11 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/ferramentas/keyword-suggestions', component: lazyComponents.AmazonKeywordSuggestions, isProtected: true },
       { path: '/ai/image-upscale', component: lazyComponents.ImageUpscale, isProtected: true },
       { path: '/ai/background-removal', component: lazyComponents.BackgroundRemoval, isProtected: true },
-      { path: '/tools/background-removal-pro', component: lazyComponents.BackgroundRemovalPro, isProtected: true },
-      { path: '/tools/logo-generator-pro', component: lazyComponents.LogoGeneratorPro, isProtected: true },
-      { path: '/tools/ultra-melhorador-pro', component: lazyComponents.UltraMelhoradorPro, isProtected: true },
-      { path: '/tools/upscale-pro', component: lazyComponents.UpscalePro, isProtected: true },
-      { path: '/tools/amazon-ads-editor', component: lazyComponents.AmazonAdsEditor, isProtected: true }
+      { path: '/ferramentas/remover-fundo-pro', component: lazyComponents.BackgroundRemovalPro, isProtected: true },
+      { path: '/ferramentas/gerador-logomarcas-pro', component: lazyComponents.LogoGeneratorPro, isProtected: true },
+      { path: '/ferramentas/ultra-melhorador-pro', component: lazyComponents.UltraMelhoradorPro, isProtected: true },
+      { path: '/ferramentas/upscale-pro', component: lazyComponents.UpscalePro, isProtected: true },
+      { path: '/ferramentas/amazon-ads-editor', component: lazyComponents.AmazonAdsEditor, isProtected: true }
     ],
     
     // Agent Routes (Protected)
