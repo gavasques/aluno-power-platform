@@ -89,10 +89,10 @@ const UserManagement = memo(() => {
 
   // Permission groups query
   const { data: groupsResponse } = useQuery({
-    queryKey: ['/api/admin/permissions/groups'],
+    queryKey: ['/api/permissions/groups'],
     queryFn: async () => {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/admin/permissions/groups', {
+      const response = await fetch('/api/permissions/groups', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
