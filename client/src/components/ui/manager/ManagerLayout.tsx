@@ -200,20 +200,19 @@ export function ManagerLayout<T = any>({
             hasFilters={hasActiveFilters}
             onClearFilters={onClearFilters}
             onClearSearch={onSearchChange ? () => onSearchChange('') : undefined}
-            title={noResultsTitle}
-            description={noResultsDescription}
           />
         )}
 
         {/* Empty State */}
         {showEmptyState && (
           <EmptyState
-            icon={emptyStateIcon}
             title={emptyStateTitle || `Nenhum ${title.toLowerCase().slice(0, -1)} cadastrado`}
             description={emptyStateDescription || `Comece criando seu primeiro ${title.toLowerCase().slice(0, -1)}.`}
             actionLabel={`Novo ${title.slice(0, -1)}`}
             onAction={onCreateClick}
-          />
+          >
+            {emptyStateIcon && React.createElement(emptyStateIcon, { className: "h-12 w-12 text-gray-400 mx-auto mb-4" })}
+          </EmptyState>
         )}
       </div>
 
