@@ -2,7 +2,7 @@
 import { FC } from "react";
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { Truck } from 'lucide-react';
-import type { SupplierType } from '@shared/schema';
+// Using BaseItem interface instead of SupplierType from schema
 
 // Extend BaseItem para SupplierType
 interface SupplierTypeItem extends BaseItem {
@@ -96,7 +96,7 @@ const supplierTypesConfig: BaseTypesManagerConfig<SupplierTypeItem> = {
 };
 
 const SupplierTypesManagerOptimized: FC = () => {
-  return <BaseTypesManager<SupplierTypeItem> config={supplierTypesConfig} />;
+  return <BaseTypesManager config={supplierTypesConfig} />;
 };
 
 export default SupplierTypesManagerOptimized;

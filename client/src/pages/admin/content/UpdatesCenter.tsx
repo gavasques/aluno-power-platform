@@ -221,7 +221,7 @@ export function UpdatesCenter() {
         onConfirm={confirmDelete}
         title="Excluir Novidade"
         description={`Tem certeza que deseja excluir a novidade "${deletingUpdate?.title}"? Esta ação não pode ser desfeita.`}
-        isLoading={deleteMutation.isPending}
+
       />
     </div>
   );

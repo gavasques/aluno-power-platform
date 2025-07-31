@@ -96,7 +96,7 @@ const promptTypesConfig: BaseTypesManagerConfig<PromptTypeItem> = {
 };
 
 const PromptTypesManagerOptimized: FC = () => {
-  return <BaseTypesManager<PromptTypeItem> config={promptTypesConfig} />;
+  return <BaseTypesManager config={promptTypesConfig} />;
 };
 
 export default PromptTypesManagerOptimized;

@@ -75,6 +75,15 @@ const ContentManagement = () => {
     return <UpdatesCenter />;
   }
 
+  // Áreas de gestão de conteúdo adicionais
+  if (subsection === 'categorias') {
+    return <Card className="p-6"><CardHeader><CardTitle>Categorias de Materiais</CardTitle></CardHeader><CardContent>Sistema de categorização de conteúdo em desenvolvimento.</CardContent></Card>;
+  }
+
+  if (subsection === 'tags') {
+    return <Card className="p-6"><CardHeader><CardTitle>Tags e Marcadores</CardTitle></CardHeader><CardContent>Sistema de tags para organização de conteúdo em desenvolvimento.</CardContent></Card>;
+  }
+
   // Exibe direto o hub de recursos, sem tabs
   return (
     <div className="space-y-6">
@@ -190,6 +199,48 @@ const ContentManagement = () => {
             <p className="text-muted-foreground text-sm mb-4">Biblioteca de prompts para inteligência artificial</p>
             <div className="flex justify-between items-center">
               <Badge className="bg-purple-100 text-purple-800 border-purple-200">{prompts.length} prompts</Badge>
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                Gerenciar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => setLocation('/admin/conteudo/noticias')}
+        >
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Central de Notícias</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm mb-4">Publique e gerencie notícias da plataforma</p>
+            <div className="flex justify-between items-center">
+              <Badge className="bg-blue-100 text-blue-800 border-blue-200">Sistema ativo</Badge>
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                Gerenciar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="bg-white border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => setLocation('/admin/conteudo/novidades')}
+        >
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Plus className="h-5 w-5 text-primary" />
+              <CardTitle className="text-foreground">Central de Novidades</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm mb-4">Gerencie atualizações e novidades da plataforma</p>
+            <div className="flex justify-between items-center">
+              <Badge className="bg-green-100 text-green-800 border-green-200">Sistema ativo</Badge>
               <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Gerenciar
               </Button>

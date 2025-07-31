@@ -287,8 +287,8 @@ const MaterialsManagerRefactored = () => {
 
       <MaterialForm
         formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleSubmit}
+        setFormData={updateField}
+        onSubmit={handleFormSubmit}
         editingMaterial={editingMaterial}
         materialTypes={materialTypes}
         isOpen={isDialogOpen}

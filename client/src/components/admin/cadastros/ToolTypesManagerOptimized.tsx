@@ -96,7 +96,7 @@ const toolTypesConfig: BaseTypesManagerConfig<ToolTypeItem> = {
 };
 
 const ToolTypesManagerOptimized: FC = () => {
-  return <BaseTypesManager<ToolTypeItem> config={toolTypesConfig} />;
+  return <BaseTypesManager config={toolTypesConfig} />;
 };
 
 export default ToolTypesManagerOptimized;

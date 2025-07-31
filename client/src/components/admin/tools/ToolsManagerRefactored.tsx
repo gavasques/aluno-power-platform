@@ -73,7 +73,7 @@ const ToolsManagerRefactored = () => {
       name: data.name,
       description: data.description,
       typeId: parseInt(data.typeId),
-      logo: data.logo || null,
+      logo: data.logo || "",
       website: data.website || null,
       features: data.features.length > 0 ? data.features : null,
       pros: data.pros.length > 0 ? data.pros : null,
