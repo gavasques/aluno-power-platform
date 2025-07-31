@@ -186,7 +186,9 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
 
   // Handle delete group click
   const handleDeleteGroup = useCallback(async () => {
-    if (!group || group.isSystem) {
+    const currentGroup = groupResponse?.group;
+    
+    if (!currentGroup || currentGroup.isSystem) {
       toast({
         title: "Erro",
         description: "Grupos do sistema não podem ser excluídos",
@@ -203,7 +205,7 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
 
     // Get group members
     getGroupMembers.mutate(parseInt(groupId!));
-  }, [group, groupId, getGroupMembers, toast]);
+  }, [groupResponse, groupId, getGroupMembers, toast]);
 
   // Handle confirm delete
   const handleConfirmDelete = useCallback(() => {
@@ -311,7 +313,7 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
         onClick: () => setLocation(`/admin/usuarios/grupos/${groupId}/edit`),
         icon: Edit
       }}
-      secondaryActions={!group?.isSystem ? [
+      secondaryActions={group && !group.isSystem ? [
         {
           label: 'Excluir Grupo',
           onClick: handleDeleteGroup,
