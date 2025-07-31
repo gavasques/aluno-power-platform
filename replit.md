@@ -62,7 +62,7 @@ This is a comprehensive educational e-commerce platform focused on Amazon FBA an
   - Removed internal AI provider dependency for this agent
   - Simplified agent configuration (no provider settings needed)
   - Direct integration with n8n workflow automation
-- **Data Sent**: prompt, userId, userName
+- **Data Sent**: text (user input only), userId, userName
 - **Expected Response**: success, response/text, inputTokens, outputTokens, totalTokens, cost
 
 ## 🤖 AI Agents System

@@ -197,28 +197,6 @@ Garantia de 12 meses`;
     const startTime = Date.now();
     
     try {
-      const prompt = `${textInput}
-
-# Regra 1: NUNCA EXCEDA 1900 Caracteres. Com espaços símbolos e tudo mais
-Baseando-se na breve descrição que te dei do meu produto, por favor escreva uma descrição de produto PODEROSA e PERSUASIVA para Amazon. A descrição deve captar a atenção dos compradores e convencê-los de que meu produto é a melhor opção disponível na Amazon.
-
-Comprimento da descrição:
-a. Deve ter entre 1400 a 1800 Caracteres. Com espaços símbolos e tudo mais
-b. Não pode ter menos de 1400 caracteres no total. Com espaços símbolos e tudo mais
-c. Não pode ter mais de 1800 caracteres. Com espaços símbolos e tudo mais
-
-Tom da Descrição:
-A descrição deve ser envolvente, divertida e atraente, NUNCA entediante ou corporativa. O texto deve brilhar e se destacar da concorrência, transmitindo confiança e emoção ao comprador.
-a. Mantenha um foco nos benefícios principais do produto, e como este melhora a vida do cliente.
-
-Objetivo:
-A descrição deve gerar urgência e levar o cliente a querer comprar o produto imediatamente. Deve soar natural, mas também ser incrivelmente persuasiva, destacando porque meu produto é o melhor que qualquer outra opção.
-
-Fechamento Persuasivo:
-Termine a descrição com uma chamada para ação direta e convincente, motivando o cliente a adicionar o produto ao carrinho imediatamente.
-
-A descrição deve usar sempre que possível o que esse produto resolve, o porquê desse produto. Ex. Essa cadeira diminui a dor nas costas, devido a seguir a NR 17.`;
-
       const response = await fetch('https://n8n.guivasques.app/webhook-test/gerar-html-agente', {
         method: 'POST',
         headers: {
@@ -226,7 +204,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify({
-          prompt: prompt,
+          text: textInput,
           userId: user.id,
           userName: user.name || user.email
         })
@@ -249,7 +227,7 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
         featureCode: FEATURE_CODE,
         provider: 'webhook', // Indicar que foi usado webhook
         model: 'webhook-n8n',
-        prompt: prompt,
+        prompt: `User input: ${textInput}`, // Log apenas indica que foi entrada do usuário
         response: responseText,
         inputTokens: data.inputTokens || 0,
         outputTokens: data.outputTokens || 0,
