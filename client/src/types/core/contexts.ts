@@ -6,7 +6,6 @@
 import { ReactNode } from 'react';
 import { 
   User, 
-  Product, 
   Supplier, 
   Material, 
   Agent, 
@@ -16,6 +15,7 @@ import {
   Message,
   ActivityLog
 } from './domain';
+import { Product } from './product';
 
 // ============================================================================
 // CONTEXTO DE AUTENTICAÇÃO

@@ -15,7 +15,8 @@ import {
   X
 } from 'lucide-react';
 import { AmazonAdsRow, FilterState } from '../utils/types';
-import { formatCurrency, formatPercentage } from '../utils/validation';
+import { formatPercentage } from '../utils/validation';
+import { formatCurrency } from '@/lib/utils/unifiedFormatters';
 
 interface DataTableProps {
   data: AmazonAdsRow[];

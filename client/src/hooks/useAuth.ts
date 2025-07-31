@@ -29,12 +29,12 @@ export const useAuth = () => {
     hasAdminAccess
   };
 };
-const handleApiError = (error: any) => {
+export const handleApiError = (error: any) => {
     if (error.response?.status === 401) {
       const errorCode = error.response?.data?.code;
       if (errorCode === 'TOKEN_EXPIRED' || errorCode === 'USER_NOT_FOUND') {
         console.log('🔄 [AUTH] Token expired or user not found, logging out');
-        logout();
+        // Note: logout should be called from the component using this function
         return;
       }
     }

@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import type { Product as DbProduct, InsertProduct } from '@shared/schema';
-import { useAuth } from './AuthContext';
+import { useAuth } from './UserContext';
 
 interface ProductContextType {
   products: DbProduct[];

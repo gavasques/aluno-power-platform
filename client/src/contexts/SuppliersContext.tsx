@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import type { Supplier as DbSupplier, InsertSupplier } from '@shared/schema';
-import { useAuth } from './AuthContext';
+import { useAuth } from './UserContext';
 
 interface SuppliersContextType {
   suppliers: DbSupplier[];

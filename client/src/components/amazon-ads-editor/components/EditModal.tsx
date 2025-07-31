@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Save, AlertTriangle, Info } from 'lucide-react';
 import { AmazonAdsRow, STATES, MATCH_TYPES, BIDDING_STRATEGIES } from '../utils/types';
-import { formatCurrency } from '../utils/validation';
+import { formatCurrency } from '@/lib/utils/unifiedFormatters';
 import { BaseModal } from '@/components/ui/BaseModal';
 
 interface EditModalProps {

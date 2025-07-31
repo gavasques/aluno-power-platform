@@ -364,4 +364,3 @@ export default {
   ...Generators,
   ...Utils,
 };
-};
