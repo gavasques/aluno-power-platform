@@ -78,9 +78,13 @@ const UserEdit = memo(() => {
       const url = isNewUser ? '/api/admin/users' : `/api/admin/users/${userId}`;
       const method = isNewUser ? 'POST' : 'PATCH';
       
+      const token = localStorage.getItem('token');
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(data)
       });
       
