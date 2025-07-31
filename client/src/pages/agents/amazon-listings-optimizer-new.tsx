@@ -31,7 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
-import Layout from "@/components/layout/Layout";
+// Layout removed - component is already wrapped by app layout
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { CountrySelector, COUNTRIES } from '@/components/common/CountrySelector';
 import { Progress } from '@/components/ui/progress';
@@ -444,9 +444,8 @@ Comentário: ${comment}
      extractState.extractedReviews.length > 0);
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-6">
           <Link href="/agentes">
@@ -980,8 +979,7 @@ Comentário: ${comment}
             </div>
           </div>
         </PermissionGuard>
-        </div>
       </div>
-    </Layout>
+    </div>
   );
 }

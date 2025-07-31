@@ -9,7 +9,7 @@ import { Mail, Bot, AlertCircle, ArrowRight, Clock, Target, ArrowLeft } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { PermissionGuard } from "@/components/guards/PermissionGuard";
-import Layout from "@/components/layout/Layout";
+// Layout removed - component is already wrapped by app layout
 import { Link } from "wouter";
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 
@@ -126,12 +126,11 @@ Aguardo retorno urgente.
 João Silva`;
 
   return (
-    <Layout>
-      <PermissionGuard 
-        featureCode="agents.customer_service"
-        showMessage={true}
-        message="Você não tem permissão para usar o Amazon Customer Service Email Response."
-      >
+    <PermissionGuard 
+      featureCode="agents.customer_service"
+      showMessage={true}
+      message="Você não tem permissão para usar o Amazon Customer Service Email Response."
+    >
         <div className="container mx-auto p-6 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
@@ -296,8 +295,7 @@ João Silva`;
         </div>
       </div>
         </div>
-      </PermissionGuard>
-    </Layout>
+    </PermissionGuard>
   );
 };
 
