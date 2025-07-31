@@ -169,9 +169,17 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
       const method = isNewGroup ? 'POST' : 'PUT';
       
       // Save basic group info first
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Token de autenticação não encontrado');
+      }
+      
       const groupResponse = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           name: formData.name,
           description: formData.description,
@@ -190,7 +198,10 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
       if (formData.permissions.length > 0) {
         const permissionsResponse = await fetch(`/api/permissions/groups/${targetGroupId}/permissions`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
             permissions: formData.permissions
           })

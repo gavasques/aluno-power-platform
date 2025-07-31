@@ -331,7 +331,19 @@ ComponentName/
 - **Email**: gavasques@gmail.com
 - **Password**: admin123!
 
-### Latest User Management Simplifications (January 31, 2025)
+### Latest User Management Fixes (January 31, 2025)
+- **Token Authentication Fix**: Resolved critical authentication issues in admin forms
+  - **Problem**: Mixed usage of 'token' vs 'auth_token' localStorage keys causing 401 errors
+  - **Solution**: Standardized all admin forms to use 'auth_token' key consistently
+  - **Files Fixed**: UserEdit.tsx, GroupEdit.tsx now properly authenticate API requests
+  - **Status**: ✅ User and group editing forms now save successfully
+
+- **YouTube Permissions Cleanup**: Removed obsolete YouTube video management feature
+  - **Removed**: system_features record (ID 26) for 'content.videos' permission
+  - **Impact**: Cleaner permissions interface, no more obsolete YouTube checkbox
+  - **Database**: Safely removed from system_features and group_permissions tables
+  - **Status**: ✅ Permission system cleaned up and streamlined
+
 - **Major Simplification**: Removed redundant fields from user management system
 - **Fields Removed**: 
   - "Nível de Acesso" (role field) - redundant with group system
