@@ -375,6 +375,15 @@ YOUTUBE_API_KEY=your_youtube_key
 ## 🔒 Security Updates
 
 ### Latest Updates Applied
+- **January 31, 2025**: Implemented group deletion functionality with user transfer system
+  - **Location**: `client/src/pages/admin/UserManagement.tsx` & `server/routes/permissions.ts`
+  - **Features**: Safe group deletion with automatic user verification and transfer options
+  - **Protection**: System groups cannot be deleted, user confirmation required
+  - **User Transfer**: Automatic detection of group members with transfer-to-group selection
+  - **API Endpoints**: Added `/groups/:id/members` (GET) and `/groups/:id` (DELETE)
+  - **UI Components**: Modal dialog with member list and group selection dropdown
+  - **Status**: ✅ Completed and tested - Groups can be safely deleted with proper user handling
+
 - **January 31, 2025**: Major permissions system reorganization and optimization
   - **Location**: Database schema reorganization for better categorization
   - **Changes**: Moved importation simulators from "Simuladores" to "Importações" category
