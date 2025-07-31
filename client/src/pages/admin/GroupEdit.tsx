@@ -205,7 +205,7 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/permissions/groups'] });
-      setLocation('/admin/usuarios');
+      setLocation('/admin/usuarios?tab=groups');
     },
     onError: (error) => {
       setErrors({ general: error instanceof Error ? error.message : 'Erro ao salvar grupo' });
@@ -333,7 +333,7 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => setLocation('/admin/usuarios')}
+            onClick={() => setLocation('/admin/usuarios?tab=groups')}
           >
             <X className="h-4 w-4 mr-2" />
             Cancelar

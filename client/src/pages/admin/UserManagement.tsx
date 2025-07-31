@@ -64,7 +64,14 @@ interface PaginatedUsersResponse {
 const UserManagement = memo(() => {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTab, setSelectedTab] = useState<'users' | 'groups'>('users');
+  
+  // Initialize tab from URL query parameters
+  const [selectedTab, setSelectedTab] = useState<'users' | 'groups'>(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    return tab === 'groups' ? 'groups' : 'users';
+  });
+  
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10; // Fixed page size
   const queryClient = useQueryClient();
