@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { eq, count, or, ilike } from 'drizzle-orm';
 import { db } from '../../db';
-import { users, userGroups } from '../../../shared/schema';
+import { users, userGroups, userGroupMembers } from '../../../shared/schema';
 import { enhancedAuth } from '../../middleware/enhancedAuth';
 import bcrypt from 'bcryptjs';
 
@@ -96,11 +96,11 @@ router.get('/permissions/groups', enhancedAuth, async (req, res) => {
   }
 });
 
-// PATCH /api/admin/users/:id - Update user (admin only)
+// PATCH /api/admin/users/:id - Update user with groups (admin only)
 router.patch('/users/:id', enhancedAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, isActive } = req.body;
+    const { name, email, isActive, groupIds } = req.body;
 
     const [updatedUser] = await db
       .update(users)
@@ -118,6 +118,23 @@ router.patch('/users/:id', enhancedAuth, async (req, res) => {
         isActive: users.isActive
       });
 
+    // Update user groups if provided
+    if (Array.isArray(groupIds)) {
+      // Remove existing group memberships
+      await db.delete(userGroupMembers).where(eq(userGroupMembers.userId, parseInt(id)));
+      
+      // Add new group memberships
+      if (groupIds.length > 0) {
+        await db.insert(userGroupMembers).values(
+          groupIds.map((groupId: number) => ({
+            userId: parseInt(id),
+            groupId,
+            addedAt: new Date()
+          }))
+        );
+      }
+    }
+
     res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error('❌ Admin User Update Error:', error);
@@ -125,10 +142,10 @@ router.patch('/users/:id', enhancedAuth, async (req, res) => {
   }
 });
 
-// POST /api/admin/users - Create new user (admin only)
+// POST /api/admin/users - Create new user with groups (admin only)
 router.post('/users', enhancedAuth, async (req, res) => {
   try {
-    const { name, email, isActive, password } = req.body;
+    const { name, email, isActive, password, groupIds } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
@@ -154,6 +171,17 @@ router.post('/users', enhancedAuth, async (req, res) => {
         isActive: users.isActive
       });
 
+    // Add user to groups if provided
+    if (Array.isArray(groupIds) && groupIds.length > 0) {
+      await db.insert(userGroupMembers).values(
+        groupIds.map((groupId: number) => ({
+          userId: newUser.id,
+          groupId,
+          addedAt: new Date()
+        }))
+      );
+    }
+
     res.json({ success: true, user: newUser });
   } catch (error) {
     console.error('❌ Admin User Create Error:', error);
@@ -161,7 +189,7 @@ router.post('/users', enhancedAuth, async (req, res) => {
   }
 });
 
-// GET /api/admin/users/:id - Get specific user (admin only)
+// GET /api/admin/users/:id - Get specific user with groups (admin only)
 router.get('/users/:id', enhancedAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -184,7 +212,20 @@ router.get('/users/:id', enhancedAuth, async (req, res) => {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    res.json(user);
+    // Get user's groups
+    const userGroups = await db
+      .select({
+        groupId: userGroupMembers.groupId,
+        groupName: userGroups.name
+      })
+      .from(userGroupMembers)
+      .innerJoin(userGroups, eq(userGroupMembers.groupId, userGroups.id))
+      .where(eq(userGroupMembers.userId, parseInt(id)));
+
+    res.json({
+      ...user,
+      groups: userGroups.map(ug => ug.groupId)
+    });
   } catch (error) {
     console.error('❌ Admin User Get Error:', error);
     res.status(500).json({ error: 'Erro ao buscar usuário' });

@@ -56,8 +56,14 @@ const UserEdit = memo(() => {
 
   const groups = (groupsResponse as any)?.groups || [];
 
-  // For now, set empty user groups - we'll implement group assignment later
-  const userGroups = [];
+  // Fetch user groups when editing existing user
+  const { data: userGroupsData } = useQuery({
+    queryKey: [`/api/admin/users/${userId}/groups`],
+    enabled: !isNewUser && !!userId,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const userGroupIds = (userGroupsData as any)?.groups || [];
 
   // Set form data when user is loaded
   useEffect(() => {
@@ -68,8 +74,7 @@ const UserEdit = memo(() => {
         name: userData.name || '',
         email: userData.email || '',
         isActive: userData.isActive !== false,
-        // Keep existing groupIds for now
-        groupIds: prev.groupIds
+        groupIds: userData.groups || []
       }));
     }
   }, [user]);
