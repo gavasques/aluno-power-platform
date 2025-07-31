@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Layout from '@/components/layout/Layout';
+
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -160,7 +160,7 @@ const HtmlDescriptionAgent: React.FC = () => {
   }, [textInput]);
 
   // Exemplo de texto
-  const exampleText = `Maca BKZA é top, ela é dobrável e super resistente, aguenta até 200kg, e tem bolsa para levar.
+  const exampleText = `Cadeira de escritório ergonômica com apoio lombar, ajuste de altura e rodinhas para fácil movimentação.
 
 Material resistente e durável
 Ideal para uso diário
@@ -196,10 +196,10 @@ Garantia de 12 meses`;
     setIsGenerating(true);
     const startTime = Date.now();
     
-    // Toast de debug
+    // Toast de progresso
     toast({
-      title: "🔄 Processando...",
-      description: "Enviando requisição para o webhook n8n"
+      title: "🔄 Gerando...",
+      description: "Criando sua descrição otimizada"
     });
     
     try {
@@ -273,12 +273,12 @@ Garantia de 12 meses`;
       
       let errorDescription = "Falha ao gerar descrição com IA. Tente novamente.";
       
-      // Tratamento específico para erro 404 do n8n
+      // Tratamento específico para diferentes tipos de erro
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('404')) {
-        errorDescription = "Webhook n8n não está ativo. Execute o workflow no n8n primeiro e tente novamente.";
+        errorDescription = "Serviço de geração temporariamente indisponível. Tente novamente em alguns instantes.";
       } else if (errorMessage.includes('500')) {
-        errorDescription = "Erro interno no webhook n8n. Verifique a configuração do workflow.";
+        errorDescription = "Erro interno no serviço de geração. Nossa equipe foi notificada.";
       }
       
       toast({
@@ -335,12 +335,11 @@ Garantia de 12 meses`;
   }, []);
 
   return (
-    <Layout>
-      <PermissionGuard 
-        featureCode="agents.html_descriptions"
-        showMessage={true}
-        message="Você não tem permissão para usar o Gerador de Descrições HTML."
-      >
+    <PermissionGuard 
+      featureCode="agents.html_descriptions"
+      showMessage={true}
+      message="Você não tem permissão para usar o Gerador de Descrições HTML."
+    >
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-6 space-y-6">
         {/* Header do Agente */}
@@ -527,7 +526,6 @@ Garantia de 12 meses`;
         </AlertDialogContent>
       </AlertDialog>
       </PermissionGuard>
-    </Layout>
   );
 };
 

@@ -41,6 +41,22 @@ This is a comprehensive educational e-commerce platform focused on Amazon FBA an
 
 ## 📋 Recent Changes (January 31, 2025)
 
+### ✅ HTML Description Agent UI/UX Improvements (January 31, 2025)
+- **Issue**: User interface had multiple issues affecting user experience
+- **Problems Fixed**:
+  - **Header Duplication**: Removed duplicate Layout wrapper causing double header
+  - **Technical References**: Removed all mentions of "n8n", "webhook" from user-facing messages
+  - **Hardcoded Brand Names**: Replaced "BKZA" and "MACA" with generic examples
+- **Files Modified**:
+  - `client/src/pages/agents/HtmlDescriptionAgent.tsx` - Main UI component
+  - `server/routes/webhookProxy.ts` - Fixed authentication import
+- **User Experience Improvements**:
+  - Clean single header layout (removed Layout wrapper)
+  - Generic progress messages ("Gerando..." instead of "Enviando para webhook n8n")
+  - Professional example text using office chair instead of brand names
+  - Error messages now hide technical implementation details
+- **Result**: Professional, clean interface that doesn't expose backend technical details
+
 ### ✅ Deployment Error Fix
 - **Issue**: Build failed due to unresolved AuthContext imports in multiple files
 - **Root Cause**: Migration from AuthContext to UserContext was incomplete
