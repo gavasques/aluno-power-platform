@@ -289,6 +289,103 @@ permissionRoutes.put("/groups/:groupId/permissions", requireAuth, async (req: Re
   }
 });
 
+// Check group members before deletion (admin only)
+permissionRoutes.get("/groups/:groupId/members", requireAuth, async (req: Request, res: Response) => {
+  try {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const groupId = parseInt(req.params.groupId);
+    
+    // Get users in this group
+    const members = await db
+      .select({
+        userId: userPermissionGroups.userId,
+        userName: users.name,
+        userEmail: users.email
+      })
+      .from(userPermissionGroups)
+      .leftJoin(users, eq(userPermissionGroups.userId, users.id))
+      .where(eq(userPermissionGroups.groupId, groupId));
+
+    res.json({ members, count: members.length });
+  } catch (error) {
+    console.error("Error getting group members:", error);
+    res.status(500).json({ error: "Failed to get group members" });
+  }
+});
+
+// Delete group with user transfer (admin only)
+permissionRoutes.delete("/groups/:groupId", requireAuth, async (req: Request, res: Response) => {
+  try {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const groupId = parseInt(req.params.groupId);
+    const { transferToGroupId } = req.body;
+
+    // Check if group exists and is not system group
+    const group = await db
+      .select()
+      .from(permissionGroups)
+      .where(eq(permissionGroups.id, groupId))
+      .limit(1);
+
+    if (!group[0]) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    if (group[0].isSystem) {
+      return res.status(400).json({ error: "Cannot delete system groups" });
+    }
+
+    // If transferToGroupId is provided, transfer users
+    if (transferToGroupId) {
+      const transferGroup = await db
+        .select()
+        .from(permissionGroups)
+        .where(eq(permissionGroups.id, transferToGroupId))
+        .limit(1);
+
+      if (!transferGroup[0]) {
+        return res.status(400).json({ error: "Transfer target group not found" });
+      }
+
+      // Transfer users to new group
+      await db
+        .update(userPermissionGroups)
+        .set({ groupId: transferToGroupId })
+        .where(eq(userPermissionGroups.groupId, groupId));
+    } else {
+      // Remove all user assignments
+      await db
+        .delete(userPermissionGroups)
+        .where(eq(userPermissionGroups.groupId, groupId));
+    }
+
+    // Delete group permissions
+    await db
+      .delete(groupPermissions)
+      .where(eq(groupPermissions.groupId, groupId));
+
+    // Delete the group
+    await db
+      .delete(permissionGroups)
+      .where(eq(permissionGroups.id, groupId));
+
+    res.json({ 
+      message: transferToGroupId 
+        ? `Group deleted and users transferred to group ${transferToGroupId}` 
+        : "Group deleted successfully" 
+    });
+  } catch (error) {
+    console.error("Error deleting group:", error);
+    res.status(500).json({ error: "Failed to delete group" });
+  }
+});
+
 // Assign user to group (admin only)
 permissionRoutes.post("/users/:userId/group", requireAuth, async (req: Request, res: Response) => {
   try {

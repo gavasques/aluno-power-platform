@@ -15,8 +15,24 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  AlertTriangle
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -53,6 +69,19 @@ const UserManagement = memo(() => {
   const pageSize = 10; // Fixed page size
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // Delete group dialog state
+  const [deleteGroupDialog, setDeleteGroupDialog] = useState<{
+    isOpen: boolean;
+    group: any | null;
+    members: any[];
+    transferToGroupId: string;
+  }>({
+    isOpen: false,
+    group: null,
+    members: [],
+    transferToGroupId: ''
+  });
 
   // Debounced search to avoid too many API calls
   const debouncedSearchTerm = useMemo(() => {
@@ -190,6 +219,98 @@ const UserManagement = memo(() => {
       });
     }
   });
+
+  // Delete group mutation
+  const deleteGroup = useMutation({
+    mutationFn: async ({ groupId, transferToGroupId }: { groupId: number; transferToGroupId?: number }) => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/permissions/groups/${groupId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ transferToGroupId })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete group');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Grupo excluído",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions/groups'] });
+      setDeleteGroupDialog({ isOpen: false, group: null, members: [], transferToGroupId: '' });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao excluir grupo",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Get group members mutation
+  const getGroupMembers = useMutation({
+    mutationFn: async (groupId: number) => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/permissions/groups/${groupId}/members`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to get group members');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setDeleteGroupDialog(prev => ({
+        ...prev,
+        members: data.members || []
+      }));
+    }
+  });
+
+  // Handle delete group click
+  const handleDeleteGroup = useCallback(async (group: any) => {
+    if (group.isSystem) {
+      toast({
+        title: "Erro",
+        description: "Grupos do sistema não podem ser excluídos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDeleteGroupDialog({
+      isOpen: true,
+      group,
+      members: [],
+      transferToGroupId: ''
+    });
+
+    // Get group members
+    getGroupMembers.mutate(group.id);
+  }, [getGroupMembers, toast]);
+
+  // Handle confirm delete
+  const handleConfirmDelete = useCallback(() => {
+    if (!deleteGroupDialog.group) return;
+
+    const transferToGroupId = deleteGroupDialog.transferToGroupId 
+      ? parseInt(deleteGroupDialog.transferToGroupId) 
+      : undefined;
+
+    deleteGroup.mutate({
+      groupId: deleteGroupDialog.group.id,
+      transferToGroupId
+    });
+  }, [deleteGroupDialog, deleteGroup]);
 
   // Reset to first page when search term changes
   const handleSearchChange = useCallback((value: string) => {
@@ -494,15 +615,33 @@ const UserManagement = memo(() => {
                       <div>
                         <h3 className="font-medium">{group.name}</h3>
                         <p className="text-sm text-gray-500">{group.description}</p>
+                        {group.isSystem && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Sistema
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setLocation(`/admin/usuarios/grupos/${group.id}`)}
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setLocation(`/admin/usuarios/grupos/${group.id}`)}
+                        title="Configurar grupo"
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                      {!group.isSystem && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteGroup(group)}
+                          title="Excluir grupo"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
@@ -521,6 +660,99 @@ const UserManagement = memo(() => {
           </AdminCard>
         )}
       </div>
+
+      {/* Delete Group Dialog */}
+      <Dialog open={deleteGroupDialog.isOpen} onOpenChange={(open) => {
+        if (!open) {
+          setDeleteGroupDialog({ isOpen: false, group: null, members: [], transferToGroupId: '' });
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              <span>Excluir Grupo</span>
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir o grupo "{deleteGroupDialog.group?.name}"?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {deleteGroupDialog.members.length > 0 && (
+              <>
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" />
+                    <span className="text-sm font-medium text-orange-800">
+                      Atenção: Este grupo possui {deleteGroupDialog.members.length} usuário(s)
+                    </span>
+                  </div>
+                  <ul className="text-xs text-orange-700 space-y-1">
+                    {deleteGroupDialog.members.slice(0, 3).map((member: any, index: number) => (
+                      <li key={index}>• {member.userName} ({member.userEmail})</li>
+                    ))}
+                    {deleteGroupDialog.members.length > 3 && (
+                      <li>• ... e mais {deleteGroupDialog.members.length - 3} usuário(s)</li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Para qual grupo transferir os usuários?
+                  </label>
+                  <Select 
+                    value={deleteGroupDialog.transferToGroupId} 
+                    onValueChange={(value) => 
+                      setDeleteGroupDialog(prev => ({ ...prev, transferToGroupId: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um grupo ou deixe vazio para remover" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Remover usuários do grupo</SelectItem>
+                      {groups
+                        .filter((g: any) => g.id !== deleteGroupDialog.group?.id)
+                        .map((group: any) => (
+                          <SelectItem key={group.id} value={group.id.toString()}>
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500">
+                    Se não selecionar um grupo, os usuários serão removidos de todos os grupos.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {deleteGroupDialog.members.length === 0 && (
+              <p className="text-sm text-gray-600">
+                Este grupo não possui usuários associados. A exclusão será imediata.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteGroupDialog({ isOpen: false, group: null, members: [], transferToGroupId: '' })}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteGroup.isPending}
+            >
+              {deleteGroup.isPending ? 'Excluindo...' : 'Excluir Grupo'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminStandardLayout>
   );
 });
