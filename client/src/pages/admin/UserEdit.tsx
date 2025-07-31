@@ -19,7 +19,6 @@ import AdminStandardLayout, { AdminCard, AdminLoader } from '@/components/layout
 interface UserForm {
   name: string;
   email: string;
-  username: string;
   isActive: boolean;
   password?: string;
   groupIds: number[];
@@ -35,7 +34,6 @@ const UserEdit = memo(() => {
   const [form, setForm] = useState<UserForm>({
     name: '',
     email: '',
-    username: '',
     isActive: true,
     password: '',
     groupIds: []
@@ -69,7 +67,6 @@ const UserEdit = memo(() => {
         ...prev,
         name: userData.name || '',
         email: userData.email || '',
-        username: userData.username || '',
         isActive: userData.isActive !== false,
         // Keep existing groupIds for now
         groupIds: prev.groupIds
@@ -118,9 +115,7 @@ const UserEdit = memo(() => {
       newErrors.email = 'Email inválido';
     }
 
-    if (!form.username.trim()) {
-      newErrors.username = 'Username é obrigatório';
-    }
+
 
     if (isNewUser && !form.password) {
       newErrors.password = 'Senha é obrigatória para novos usuários';
@@ -199,17 +194,7 @@ const UserEdit = memo(() => {
                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
 
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={form.username}
-                  onChange={(e) => handleInputChange('username', e.target.value)}
-                  placeholder="Digite o username"
-                  className={errors.username ? 'border-red-500' : ''}
-                />
-                {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
-              </div>
+
 
               {isNewUser && (
                 <div>

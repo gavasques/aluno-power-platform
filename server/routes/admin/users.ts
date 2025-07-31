@@ -100,14 +100,13 @@ router.get('/permissions/groups', enhancedAuth, async (req, res) => {
 router.patch('/users/:id', enhancedAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, username, isActive } = req.body;
+    const { name, email, isActive } = req.body;
 
     const [updatedUser] = await db
       .update(users)
       .set({ 
         name, 
         email, 
-        username, 
         isActive, 
         updatedAt: new Date() 
       })
@@ -116,7 +115,6 @@ router.patch('/users/:id', enhancedAuth, async (req, res) => {
         id: users.id,
         name: users.name,
         email: users.email,
-        username: users.username,
         isActive: users.isActive
       });
 
@@ -130,16 +128,19 @@ router.patch('/users/:id', enhancedAuth, async (req, res) => {
 // POST /api/admin/users - Create new user (admin only)
 router.post('/users', enhancedAuth, async (req, res) => {
   try {
-    const { name, email, username, isActive, password } = req.body;
+    const { name, email, isActive, password } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Generate username from email (before @ symbol)
+    const username = email.split('@')[0];
     
     const [newUser] = await db
       .insert(users)
       .values({
         name,
         email,
-        username,
+        username, // Auto-generated from email
         role: 'user', // Default role
         isActive,
         password: hashedPassword,
@@ -150,7 +151,6 @@ router.post('/users', enhancedAuth, async (req, res) => {
         id: users.id,
         name: users.name,
         email: users.email,
-        username: users.username,
         isActive: users.isActive
       });
 
