@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -9,10 +9,27 @@ import {
   CheckCircle,
   XCircle,
   Settings,
-  User
+  User,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import AdminStandardLayout, { AdminCard, AdminGrid, AdminLoader } from '@/components/layout/AdminStandardLayout';
 
@@ -26,6 +43,7 @@ interface GroupData {
   description: string;
   permissions: string[];
   isActive: boolean;
+  isSystem: boolean;
   createdAt: string;
   memberCount?: number;
 }
@@ -45,6 +63,18 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
   const [, setLocation] = useLocation();
   const groupId = params?.id;
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Delete group dialog state
+  const [deleteGroupDialog, setDeleteGroupDialog] = useState<{
+    isOpen: boolean;
+    members: any[];
+    transferToGroupId: string;
+  }>({
+    isOpen: false,
+    members: [],
+    transferToGroupId: ''
+  });
 
   // Fetch group data
   const { data: groupResponse, isLoading: groupLoading } = useQuery({
@@ -81,6 +111,114 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Fetch available groups for transfer options
+  const { data: groupsResponse } = useQuery({
+    queryKey: ['/api/permissions/groups'],
+    queryFn: async () => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/permissions/groups', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch groups');
+      return response.json();
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Delete group mutation
+  const deleteGroup = useMutation({
+    mutationFn: async ({ groupId, transferToGroupId }: { groupId: number; transferToGroupId?: number }) => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/permissions/groups/${groupId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ transferToGroupId })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete group');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Grupo excluído",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions/groups'] });
+      setLocation('/admin/usuarios');
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao excluir grupo",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Get group members mutation
+  const getGroupMembers = useMutation({
+    mutationFn: async (groupId: number) => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/permissions/groups/${groupId}/members`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to get group members');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setDeleteGroupDialog(prev => ({
+        ...prev,
+        members: data.members || []
+      }));
+    }
+  });
+
+  // Handle delete group click
+  const handleDeleteGroup = useCallback(async () => {
+    if (!group || group.isSystem) {
+      toast({
+        title: "Erro",
+        description: "Grupos do sistema não podem ser excluídos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDeleteGroupDialog({
+      isOpen: true,
+      members: [],
+      transferToGroupId: ''
+    });
+
+    // Get group members
+    getGroupMembers.mutate(parseInt(groupId!));
+  }, [group, groupId, getGroupMembers, toast]);
+
+  // Handle confirm delete
+  const handleConfirmDelete = useCallback(() => {
+    if (!groupId) return;
+
+    const transferToGroupId = deleteGroupDialog.transferToGroupId 
+      ? parseInt(deleteGroupDialog.transferToGroupId) 
+      : undefined;
+
+    deleteGroup.mutate({
+      groupId: parseInt(groupId),
+      transferToGroupId
+    });
+  }, [groupId, deleteGroupDialog, deleteGroup]);
+
   // Fetch group members count
   const { data: membersResponse } = useQuery({
     queryKey: ['/api/admin/users/by-group', groupId],
@@ -99,10 +237,11 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
     staleTime: 2 * 60 * 1000,
   });
 
-  const group: GroupData | undefined = groupResponse?.group;
-  const features: PermissionCategory = featuresResponse?.features || {};
-  const memberCount = membersResponse?.users?.length || 0;
   const isLoading = groupLoading || featuresLoading;
+  const group: GroupData | undefined = groupResponse?.group;
+  const features: PermissionCategory = featuresResponse?.features || {};  
+  const groups = groupsResponse?.groups || [];
+  const memberCount = membersResponse?.users?.length || 0;
 
   // Get all permissions that the group has
   const groupPermissions = Array.isArray(group?.permissions) ? group.permissions : [];
@@ -172,6 +311,14 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
         onClick: () => setLocation(`/admin/usuarios/grupos/${groupId}/edit`),
         icon: Edit
       }}
+      secondaryActions={!group?.isSystem ? [
+        {
+          label: 'Excluir Grupo',
+          onClick: handleDeleteGroup,
+          icon: Trash2,
+          variant: 'destructive' as const
+        }
+      ] : undefined}
     >
       <div className="space-y-6">
         {/* Group Basic Info */}
@@ -325,6 +472,99 @@ const GroupDetail = memo(({ params }: GroupDetailProps = {}) => {
           </div>
         </AdminCard>
       </div>
+
+      {/* Delete Group Dialog */}
+      <Dialog open={deleteGroupDialog.isOpen} onOpenChange={(open) => {
+        if (!open) {
+          setDeleteGroupDialog({ isOpen: false, members: [], transferToGroupId: '' });
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              <span>Excluir Grupo</span>
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir o grupo "{group?.name}"?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {deleteGroupDialog.members.length > 0 && (
+              <>
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" />
+                    <span className="text-sm font-medium text-orange-800">
+                      Atenção: Este grupo possui {deleteGroupDialog.members.length} usuário(s)
+                    </span>
+                  </div>
+                  <ul className="text-xs text-orange-700 space-y-1">
+                    {deleteGroupDialog.members.slice(0, 3).map((member: any, index: number) => (
+                      <li key={index}>• {member.userName} ({member.userEmail})</li>
+                    ))}
+                    {deleteGroupDialog.members.length > 3 && (
+                      <li>• ... e mais {deleteGroupDialog.members.length - 3} usuário(s)</li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Para qual grupo transferir os usuários?
+                  </label>
+                  <Select 
+                    value={deleteGroupDialog.transferToGroupId} 
+                    onValueChange={(value) => 
+                      setDeleteGroupDialog(prev => ({ ...prev, transferToGroupId: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um grupo ou deixe vazio para remover" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Remover usuários do grupo</SelectItem>
+                      {groups
+                        .filter((g: any) => g.id !== group?.id)
+                        .map((availableGroup: any) => (
+                          <SelectItem key={availableGroup.id} value={availableGroup.id.toString()}>
+                            {availableGroup.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500">
+                    Se não selecionar um grupo, os usuários serão removidos de todos os grupos.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {deleteGroupDialog.members.length === 0 && (
+              <p className="text-sm text-gray-600">
+                Este grupo não possui usuários associados. A exclusão será imediata.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteGroupDialog({ isOpen: false, members: [], transferToGroupId: '' })}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteGroup.isPending}
+            >
+              {deleteGroup.isPending ? 'Excluindo...' : 'Excluir Grupo'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminStandardLayout>
   );
 });

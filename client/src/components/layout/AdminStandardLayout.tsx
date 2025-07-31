@@ -13,6 +13,12 @@ interface AdminStandardLayoutProps {
     onClick: () => void;
     icon?: React.ComponentType<{ className?: string }>;
   };
+  secondaryActions?: Array<{
+    label: string;
+    onClick: () => void;
+    icon?: React.ComponentType<{ className?: string }>;
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  }>;
   children: React.ReactNode;
 }
 
@@ -22,6 +28,7 @@ const AdminStandardLayout = memo(({
   description, 
   showBackButton = false, 
   primaryAction,
+  secondaryActions,
   children 
 }: AdminStandardLayoutProps) => {
   const [, setLocation] = useLocation();
@@ -51,12 +58,25 @@ const AdminStandardLayout = memo(({
               </div>
             </div>
             
-            {primaryAction && (
-              <Button onClick={primaryAction.onClick} size="sm">
-                {primaryAction.icon && <primaryAction.icon className="h-4 w-4 mr-2" />}
-                {primaryAction.label}
-              </Button>
-            )}
+            <div className="flex items-center space-x-2">
+              {secondaryActions && secondaryActions.map((action, index) => (
+                <Button 
+                  key={index}
+                  onClick={action.onClick} 
+                  size="sm"
+                  variant={action.variant || 'outline'}
+                >
+                  {action.icon && <action.icon className="h-4 w-4 mr-2" />}
+                  {action.label}
+                </Button>
+              ))}
+              {primaryAction && (
+                <Button onClick={primaryAction.onClick} size="sm">
+                  {primaryAction.icon && <primaryAction.icon className="h-4 w-4 mr-2" />}
+                  {primaryAction.label}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
