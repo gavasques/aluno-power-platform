@@ -9,6 +9,7 @@ import { Plus } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
 import { LoadingState, ErrorState, EmptyState, NoResultsState } from '@/components/ui/states';
+import React from 'react';
 import { FormDialog } from './FormDialog';
 import { FilterBar } from './FilterBar';
 import { ItemCard } from './ItemCard';
