@@ -402,7 +402,7 @@ Comentário: ${comment}
       if (response && response.success) {
         // Log da geração para o sistema de créditos
         await logAIGeneration({
-          feature: FEATURE_CODE,
+          featureCode: FEATURE_CODE,
           provider: response.provider || 'openai',
           model: response.model || 'gpt-4o',
           inputTokens: response.tokensUsed?.input || 0,

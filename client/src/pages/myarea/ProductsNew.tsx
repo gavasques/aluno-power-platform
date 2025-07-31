@@ -39,9 +39,9 @@ const ProductsNew: React.FC = () => {
 
   // Filter and search products
   const filteredProducts = useMemo(() => {
-    if (!products?.data?.data) return [];
+    if (!products || !Array.isArray(products)) return [];
 
-    let filtered = products.data.data as Product[];
+    let filtered = products as Product[];
 
     // Apply search filter
     if (searchTerm) {
@@ -61,10 +61,10 @@ const ProductsNew: React.FC = () => {
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const allProducts = products?.data?.data || [];
+    const allProducts = Array.isArray(products) ? products : [];
     const activeCount = allProducts.filter((p: Product) => p.active).length;
     const withChannelsCount = allProducts.filter((p: Product) => 
-      p.channels && p.channels.some((ch: any) => ch.isActive)
+      p.channels && Array.isArray(p.channels) && p.channels.some((ch: any) => ch.isActive)
     ).length;
 
     return {
@@ -89,8 +89,8 @@ const ProductsNew: React.FC = () => {
     setLocation(`/produtos-pro/${productId}/editar`);
   };
 
-  const getActiveChannelsCount = (channels: any[]) => {
-    if (!channels) return 0;
+  const getActiveChannelsCount = (channels: any[] | undefined) => {
+    if (!channels || !Array.isArray(channels)) return 0;
     return channels.filter((ch: any) => ch.isActive).length;
   };
 
