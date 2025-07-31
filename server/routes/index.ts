@@ -34,6 +34,7 @@ import adminDashboardRoutes from './admin/dashboard';
 import adminUsersRoutes from './admin/users';
 import auditRoutes from './audit';
 import importedProductsRoutes from './importedProducts';
+import webhookProxyRoutes from './webhookProxy';
 
 
 /**
@@ -111,6 +112,9 @@ export function registerModularRoutes(app: Express): void {
   
   // Imported Products Management Routes - PHASE 2: Backend APIs
   app.use('/api/imported-products', importedProductsRoutes);
+  
+  // Webhook Proxy Routes - n8n Integration
+  app.use('/api/webhook-proxy', webhookProxyRoutes);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

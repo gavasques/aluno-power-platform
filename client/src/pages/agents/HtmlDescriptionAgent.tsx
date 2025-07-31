@@ -211,7 +211,7 @@ Garantia de 12 meses`;
       
       console.log('Sending to webhook:', requestPayload); // Log do payload
       
-      const response = await fetch('https://n8n.guivasques.app/webhook-test/gerar-html-agente', {
+      const response = await fetch('/api/webhook-proxy/gerar-html-agente', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ Garantia de 12 meses`;
       // Aceitar diferentes formatos de resposta
       let responseText = '';
       if (data.success !== false) { // Se não for explicitamente false, tentar extrair resposta
-        responseText = data.response || data.text || data.result || data.content || '';
+        responseText = data.response || data.text || data.result || data.content || data.texto_limpo || '';
       }
       
       if (!responseText && data.success === false) {
