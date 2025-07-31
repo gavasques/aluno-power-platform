@@ -211,10 +211,21 @@ Garantia de 12 meses`;
       });
 
       if (!response.ok) {
-        throw new Error('Erro na API da IA');
+        let errorMessage = `Erro HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage += ` - ${errorData.message}`;
+          }
+        } catch (e) {
+          // Se não conseguir fazer parse do JSON, usar mensagem padrão
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Webhook response:', data); // Log para debug
+      
       if (!data.success) {
         throw new Error(data.message || 'Erro na resposta da API');
       }
@@ -242,10 +253,20 @@ Garantia de 12 meses`;
       
     } catch (error) {
       logger.error('Erro ao gerar descrição:', error);
+      
+      let errorDescription = "Falha ao gerar descrição com IA. Tente novamente.";
+      
+      // Tratamento específico para erro 404 do n8n
+      if (error.message && error.message.includes('404')) {
+        errorDescription = "Webhook n8n não está ativo. Execute o workflow no n8n primeiro e tente novamente.";
+      } else if (error.message && error.message.includes('500')) {
+        errorDescription = "Erro interno no webhook n8n. Verifique a configuração do workflow.";
+      }
+      
       toast({
         variant: "destructive",
         title: "❌ Erro",
-        description: "Falha ao gerar descrição com IA. Tente novamente."
+        description: errorDescription
       });
     } finally {
       setIsGenerating(false);
