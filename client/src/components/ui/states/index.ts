@@ -42,6 +42,10 @@ export type {
 } from './EmptyState';
 
 // Convenience re-exports for common combinations
+import { LoadingState, InlineLoadingState } from './LoadingState';
+import { ErrorState, NetworkErrorState, ValidationErrorState } from './ErrorState';
+import { EmptyState, NoResultsState } from './EmptyState';
+
 export const StateComponents = {
   LoadingState,
   ErrorState,
