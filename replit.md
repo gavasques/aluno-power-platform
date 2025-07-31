@@ -55,6 +55,16 @@ This is a comprehensive educational e-commerce platform focused on Amazon FBA an
   - Resolved formatCurrency import conflicts in Amazon components
 - **Result**: Build now completes successfully (28.62s, 3465 modules)
 
+### ✅ HTML Description Agent Webhook Integration
+- **Change**: Modified HTML Description Generator to use external webhook
+- **Webhook URL**: `https://n8n.guivasques.app/webhook-test/gerar-html-agente`
+- **Impact**: 
+  - Removed internal AI provider dependency for this agent
+  - Simplified agent configuration (no provider settings needed)
+  - Direct integration with n8n workflow automation
+- **Data Sent**: prompt, userId, userName
+- **Expected Response**: success, response/text, inputTokens, outputTokens, totalTokens, cost
+
 ## 🤖 AI Agents System
 
 ### Purpose

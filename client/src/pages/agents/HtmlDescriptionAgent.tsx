@@ -40,12 +40,6 @@ const HtmlDescriptionAgent: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedDescription, setGeneratedDescription] = useState('');
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
-  const [agentConfig, setAgentConfig] = useState({
-    provider: 'openai',
-    model: 'gpt-4o-mini',
-    temperature: 0.7,
-    maxTokens: 2000
-  });
   const { toast } = useToast();
   const { user } = useAuth();
   const { logAIGeneration, checkCredits, showInsufficientCreditsToast } = useCreditSystem();
@@ -59,25 +53,6 @@ const HtmlDescriptionAgent: React.FC = () => {
   const MAX_CHARS = 2000;
   const WARNING_THRESHOLD = 1800;
   const FEATURE_CODE = 'agents.html_descriptions';
-
-  // Buscar configurações do agente
-  const { data: agent } = useQuery({
-    queryKey: ['/api/agents/html-description-generator'],
-    enabled: true
-  });
-
-  // Atualizar configurações quando o agente for carregado
-  useEffect(() => {
-    if (agent) {
-      const agentData = agent as any;
-      setAgentConfig({
-        provider: agentData?.provider || 'openai',
-        model: agentData?.model || 'gpt-4o-mini',
-        temperature: parseFloat(agentData?.temperature || '0.7'),
-        maxTokens: agentData?.maxTokens || 2000
-      });
-    }
-  }, [agent]);
 
   // Símbolos permitidos pela Amazon
   const allowedSymbols = [
@@ -244,18 +219,16 @@ Termine a descrição com uma chamada para ação direta e convincente, motivand
 
 A descrição deve usar sempre que possível o que esse produto resolve, o porquê desse produto. Ex. Essa cadeira diminui a dor nas costas, devido a seguir a NR 17.`;
 
-      const response = await fetch('/api/ai-providers/test', {
+      const response = await fetch('https://n8n.guivasques.app/webhook-test/gerar-html-agente', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify({
-          provider: agentConfig.provider,
-          model: agentConfig.model,
           prompt: prompt,
-          maxTokens: agentConfig.maxTokens,
-          temperature: agentConfig.temperature
+          userId: user.id,
+          userName: user.name || user.email
         })
       });
 
@@ -268,19 +241,19 @@ A descrição deve usar sempre que possível o que esse produto resolve, o porqu
         throw new Error(data.message || 'Erro na resposta da API');
       }
 
-      const responseText = data.response || '';
+      const responseText = data.response || data.text || '';
       const duration = Date.now() - startTime;
 
       // Salvar log da geração com dedução automática de créditos
       await logAIGeneration({
         featureCode: FEATURE_CODE,
-        provider: agentConfig.provider,
-        model: agentConfig.model,
+        provider: 'webhook', // Indicar que foi usado webhook
+        model: 'webhook-n8n',
         prompt: prompt,
         response: responseText,
-        inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
-        outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
-        totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
+        inputTokens: data.inputTokens || 0,
+        outputTokens: data.outputTokens || 0,
+        totalTokens: data.totalTokens || 0,
         cost: data.cost || 0,
         creditsUsed: 0, // 0 para dedução automática através do LoggingService
         duration: duration
