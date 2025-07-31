@@ -117,7 +117,30 @@ permissionRoutes.get("/groups/:groupId", requireAuth, async (req: Request, res: 
       return res.status(403).json({ error: "Admin access required" });
     }
 
-    const groupId = parseInt(req.params.groupId);
+    const groupIdParam = req.params.groupId;
+    
+    // Handle special case for "novo" (new group)
+    if (groupIdParam === 'novo') {
+      console.log(`🔍 [DEBUG] Request for new group creation form`);
+      return res.status(200).json({ 
+        group: {
+          id: 'novo',
+          name: '',
+          description: '',
+          code: '',
+          priority: 50,
+          isActive: true,
+          isSystem: false,
+          permissions: []
+        }
+      });
+    }
+
+    const groupId = parseInt(groupIdParam);
+    if (isNaN(groupId)) {
+      return res.status(400).json({ error: "ID do grupo inválido" });
+    }
+    
     console.log(`🔍 [DEBUG] Looking for group with ID: ${groupId}`);
     
     // Get group from permission_groups table
