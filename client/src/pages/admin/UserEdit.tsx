@@ -78,7 +78,13 @@ const UserEdit = memo(() => {
       const url = isNewUser ? '/api/admin/users' : `/api/admin/users/${userId}`;
       const method = isNewUser ? 'POST' : 'PATCH';
       
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
+      console.log('Token from localStorage:', token);
+      
+      if (!token) {
+        throw new Error('Token de autenticação não encontrado');
+      }
+      
       const response = await fetch(url, {
         method,
         headers: { 
