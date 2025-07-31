@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
-import { usePartners } from '@/contexts/PartnersContext';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,6 @@ import {
   Mail, 
   ExternalLink,
 } from 'lucide-react';
-import { PARTNER_CATEGORIES } from '@/types/partner';
 import {
   Select,
   SelectTrigger,
@@ -26,7 +25,20 @@ import {
 
 const Partners = () => {
   const [, setLocation] = useLocation();
-  const { partners, loading, searchPartners } = usePartners();
+  
+  // Direct query instead of using context
+  const { data: partners = [], isLoading: loading } = useQuery({
+    queryKey: ['/api/partners'],
+  }) as { data: any[]; isLoading: boolean };
+
+  // Search function replacement
+  const searchPartners = (query: string) => {
+    if (!query) return partners;
+    return (partners as any[]).filter((partner: any) =>
+      partner.name?.toLowerCase().includes(query.toLowerCase()) ||
+      partner.description?.toLowerCase().includes(query.toLowerCase())
+    );
+  };
   const [searchQuery, setSearchQuery] = useState('');
   // Use "all" instead of "" for Select's no-filter state
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -34,10 +46,10 @@ const Partners = () => {
   const filteredPartners = React.useMemo(() => {
     let result = searchQuery ? searchPartners(searchQuery) : partners;
     if (selectedCategory && selectedCategory !== 'all') {
-      result = result.filter(partner => partner.categoryId?.toString() === selectedCategory);
+      result = result.filter((partner: any) => partner.partnerTypeId?.toString() === selectedCategory);
     }
     return result;
-  }, [partners, searchQuery, selectedCategory, searchPartners]);
+  }, [partners, searchQuery, selectedCategory]);
 
   if (loading) {
     return (
@@ -87,11 +99,12 @@ const Partners = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              {PARTNER_CATEGORIES.map(category => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
+              <SelectItem value="1">Contadores</SelectItem>
+              <SelectItem value="2">Advogados</SelectItem>
+              <SelectItem value="3">Fotógrafos</SelectItem>
+              <SelectItem value="4">Prep Centers</SelectItem>
+              <SelectItem value="5">Designers</SelectItem>
+              <SelectItem value="6">Consultores</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -99,7 +112,7 @@ const Partners = () => {
 
       {/* Partners Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPartners.map((partner) => (
+        {filteredPartners.map((partner: any) => (
           <Card key={partner.id} className="hover:shadow-lg transition-all cursor-pointer">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -129,7 +142,13 @@ const Partners = () => {
                     </div>
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {PARTNER_CATEGORIES.find(cat => cat.id === partner.categoryId?.toString())?.name || 'Categoria não definida'}
+                    {partner.partnerTypeId === 1 ? 'Contadores' :
+                     partner.partnerTypeId === 2 ? 'Advogados' :
+                     partner.partnerTypeId === 3 ? 'Fotógrafos' :
+                     partner.partnerTypeId === 4 ? 'Prep Centers' :
+                     partner.partnerTypeId === 5 ? 'Designers' :
+                     partner.partnerTypeId === 6 ? 'Consultores' :
+                     'Categoria não definida'}
                   </Badge>
                 </div>
               </div>

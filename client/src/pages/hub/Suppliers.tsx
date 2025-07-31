@@ -27,12 +27,12 @@ const Suppliers = () => {
   // Buscar categorias
   const { data: categories = [] } = useQuery({
     queryKey: ['/api/categories'],
-  });
+  }) as { data: any[] };
 
   // Buscar departamentos
   const { data: departments = [] } = useQuery({
     queryKey: ['/api/departments'],
-  });
+  }) as { data: any[] };
 
   // Buscar fornecedores com paginação
   const { data: suppliersResponse, isLoading } = useQuery({

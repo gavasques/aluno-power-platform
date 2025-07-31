@@ -6,6 +6,13 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 ## User Preferences
 **Communication Style**: Simple, everyday language (user is non-technical)
 
+## Recent Changes (January 31, 2025)
+- **Tools Routes Fixed**: Corrected all PRO tool routes from `/tools/` to `/ferramentas/` prefix for consistency
+- **LoadingState Error Fixed**: Resolved import/export issues in states/index.ts that was causing "LoadingState is not defined" errors
+- **Hub Pages Optimized**: Removed PartnersProvider dependency from Partners.tsx to prevent context errors
+- **Agent Pages Layout**: All agent pages now use PermissionGuard without Layout wrapper to prevent header duplication
+- **Route Configuration**: Standardized all 10 tools to use `/ferramentas/` prefix for uniform user experience
+
 ## System Architecture
 ### Frontend Architecture
 The frontend is built with React 18, TypeScript, and Vite. Styling is handled by Tailwind CSS and shadcn/ui components. State management uses TanStack Query and React Context, with Wouter for client-side routing. The code adheres to a DRY-compliant modular system, featuring generic services (e.g., `BaseCrudService`), unified hooks (`useCrudQuery`), a component library (e.g., `EntityManager`, `FormDialog`), and a utility system for data formatting. A strict Container/Presentational pattern is enforced for complex components.
