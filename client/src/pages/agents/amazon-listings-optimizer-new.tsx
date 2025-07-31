@@ -408,8 +408,7 @@ Comentário: ${comment}
           inputTokens: response.tokensUsed?.input || 0,
           outputTokens: response.tokensUsed?.output || 0,
           totalTokens: response.tokensUsed?.total || 0,
-          cost: response.cost || 0,
-          processingTime: response.processingTime || 0
+          cost: response.cost || 0
         });
 
         // Redirecionar para a página de resultados com os dados

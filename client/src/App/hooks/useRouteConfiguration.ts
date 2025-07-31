@@ -252,7 +252,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area/importacoes/simuladores/importacao-formal-direta', component: lazyComponents.FormalImportSimulatorFixed, isProtected: true },
       { path: '/simuladores/simples-nacional', component: lazyComponents.SimplesNacional, isProtected: true },
       { path: '/simuladores/simulador-simples-nacional-completo', component: lazyComponents.SimplesNacionalCompleto, isProtected: true },
-      { path: '/simuladores/investimentos-roi', component: lazyComponents.InvestimentosROI, isProtected: true }
+      { path: '/simuladores/simulador-de-investimentos-e-roi', component: lazyComponents.InvestimentosROI, isProtected: true }
     ],
     
     // Legal Routes (Public)
