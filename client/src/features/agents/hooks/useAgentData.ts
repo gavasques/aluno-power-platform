@@ -5,10 +5,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/UserContext';
 import type { Agent, ModelConfig, ProviderStatus, KnowledgeBase } from '../types/agent.types';
 
 // Hook principal para dados dos agentes
 export const useAgentData = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -22,7 +24,8 @@ export const useAgentData = () => {
       return data.status || {};
     },
     staleTime: 1000 * 60 * 5, // 5 minutos
-    retry: 2
+    retry: 2,
+    enabled: !!user && user.role === 'admin'
   });
 
   // Query para modelos disponíveis
@@ -35,7 +38,8 @@ export const useAgentData = () => {
       return data.models || [];
     },
     staleTime: 1000 * 60 * 10, // 10 minutos
-    retry: 2
+    retry: 2,
+    enabled: !!user && user.role === 'admin'
   });
 
   // Query para agentes

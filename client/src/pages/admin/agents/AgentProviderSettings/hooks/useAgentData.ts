@@ -26,7 +26,7 @@ export function useAgentData(): UseAgentDataReturn {
     },
     isLoading: isLoadingStatus 
   } = useQuery<ProviderStatus>({
-    queryKey: ['/api/ai-providers/status'],
+    queryKey: ['/api/agents/provider-status'],
     enabled: user?.role === 'admin',
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -37,7 +37,7 @@ export function useAgentData(): UseAgentDataReturn {
     data: models = [], 
     isLoading: isLoadingModels 
   } = useQuery<ModelConfig[]>({
-    queryKey: ['/api/ai-providers/models'],
+    queryKey: ['/api/agents/models'],
     enabled: user?.role === 'admin',
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
