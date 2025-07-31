@@ -212,19 +212,22 @@ router.get('/users/:id', enhancedAuth, async (req, res) => {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    // Get user's groups
-    const userGroups = await db
+    // Get user's groups using aliases to avoid naming conflicts
+    const ugm = userGroupMembers;
+    const ug = userGroups;
+    
+    const groupMemberships = await db
       .select({
-        groupId: userGroupMembers.groupId,
-        groupName: userGroups.name
+        groupId: ugm.groupId,
+        groupName: ug.name
       })
-      .from(userGroupMembers)
-      .innerJoin(userGroups, eq(userGroupMembers.groupId, userGroups.id))
-      .where(eq(userGroupMembers.userId, parseInt(id)));
+      .from(ugm)
+      .innerJoin(ug, eq(ugm.groupId, ug.id))
+      .where(eq(ugm.userId, parseInt(id)));
 
     res.json({
       ...user,
-      groups: userGroups.map(ug => ug.groupId)
+      groups: groupMemberships.map(membership => membership.groupId)
     });
   } catch (error) {
     console.error('❌ Admin User Get Error:', error);

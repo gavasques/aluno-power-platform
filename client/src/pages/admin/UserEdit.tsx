@@ -56,14 +56,7 @@ const UserEdit = memo(() => {
 
   const groups = (groupsResponse as any)?.groups || [];
 
-  // Fetch user groups when editing existing user
-  const { data: userGroupsData } = useQuery({
-    queryKey: [`/api/admin/users/${userId}/groups`],
-    enabled: !isNewUser && !!userId,
-    staleTime: 2 * 60 * 1000,
-  });
-
-  const userGroupIds = (userGroupsData as any)?.groups || [];
+  // User groups are now included in the user data, no separate call needed
 
   // Set form data when user is loaded
   useEffect(() => {
