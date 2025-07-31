@@ -43,24 +43,40 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
   // Fetch available features from the permission system
   const { data: featuresResponse, isLoading: featuresLoading } = useQuery({
     queryKey: ['/api/permissions/features'],
+    queryFn: async () => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/permissions/features', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch features');
+      return response.json();
+    },
     staleTime: 5 * 60 * 1000,
   });
 
   // Fetch group data for editing
-  const { data: group, isLoading: groupLoading } = useQuery({
+  const { data: groupResponse, isLoading: groupLoading } = useQuery({
     queryKey: ['/api/permissions/groups', groupId],
-    enabled: !isNewGroup && !!groupId,
-    staleTime: 2 * 60 * 1000,
-  });
-
-  // Fetch group permissions for editing
-  const { data: groupPermissions } = useQuery({
-    queryKey: ['/api/permissions/groups', groupId, 'permissions'],
+    queryFn: async () => {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/permissions/groups/${groupId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch group');
+      return response.json();
+    },
     enabled: !isNewGroup && !!groupId,
     staleTime: 2 * 60 * 1000,
   });
 
   const features = featuresResponse?.features || {};
+  const group = groupResponse?.group;
 
   // Set form data when group is loaded
   useEffect(() => {
@@ -74,20 +90,20 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
     }
   }, [group, isNewGroup]);
 
-  // Set permissions when loaded
+  // Set permissions when group and features are loaded
   useEffect(() => {
-    if (groupPermissions && Array.isArray(groupPermissions.permissions)) {
-      const permissionMap = groupPermissions.permissions.reduce((acc: any, perm: any) => {
-        acc[perm.featureId] = perm.hasAccess;
-        return acc;
-      }, {});
-
+    if (group && features && Object.keys(features).length > 0) {
       // Create permissions array for all features
       const allPermissions: { featureId: number; hasAccess: boolean }[] = [];
+      
+      // Get all features from all categories
       Object.values(features).flat().forEach((feature: any) => {
+        // Check if this feature is in the group's permissions array
+        const hasAccess = group.permissions ? group.permissions.includes(feature.code) : false;
+        
         allPermissions.push({
           featureId: feature.id,
-          hasAccess: permissionMap[feature.id] || false
+          hasAccess
         });
       });
 
@@ -96,7 +112,7 @@ const GroupEdit = memo(({ params }: GroupEditProps = {}) => {
         permissions: allPermissions
       }));
     }
-  }, [groupPermissions, features]);
+  }, [group, features]);
 
   const handleInputChange = (field: keyof GroupForm, value: any) => {
     setForm(prev => ({ ...prev, [field]: value }));
