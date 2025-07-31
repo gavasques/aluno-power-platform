@@ -20,7 +20,6 @@ interface UserForm {
   name: string;
   email: string;
   username: string;
-  role: string;
   isActive: boolean;
   password?: string;
   groupIds: number[];
@@ -37,7 +36,6 @@ const UserEdit = memo(() => {
     name: '',
     email: '',
     username: '',
-    role: 'user',
     isActive: true,
     password: '',
     groupIds: []
@@ -72,7 +70,6 @@ const UserEdit = memo(() => {
         name: userData.name || '',
         email: userData.email || '',
         username: userData.username || '',
-        role: userData.role || 'user',
         isActive: userData.isActive !== false,
         // Keep existing groupIds for now
         groupIds: prev.groupIds
@@ -231,22 +228,9 @@ const UserEdit = memo(() => {
             </div>
           </AdminCard>
 
-          {/* Role and Status */}
-          <AdminCard title="Permissões e Status">
+          {/* Status */}
+          <AdminCard title="Status do Usuário">
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="role">Nível de Acesso</Label>
-                <Select value={form.role} onValueChange={(value) => handleInputChange('role', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o nível" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">Usuário</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="isActive"

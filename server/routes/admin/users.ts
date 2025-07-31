@@ -96,18 +96,31 @@ router.get('/permissions/groups', enhancedAuth, async (req, res) => {
   }
 });
 
-// PATCH /api/admin/users/:id - Update user status (minimal)
+// PATCH /api/admin/users/:id - Update user (admin only)
 router.patch('/users/:id', enhancedAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { isActive } = req.body;
+    const { name, email, username, isActive } = req.body;
 
-    await db
+    const [updatedUser] = await db
       .update(users)
-      .set({ isActive, updatedAt: new Date() })
-      .where(eq(users.id, parseInt(id)));
+      .set({ 
+        name, 
+        email, 
+        username, 
+        isActive, 
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, parseInt(id)))
+      .returning({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        username: users.username,
+        isActive: users.isActive
+      });
 
-    res.json({ success: true });
+    res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error('❌ Admin User Update Error:', error);
     res.status(500).json({ error: 'Erro ao atualizar usuário' });
@@ -117,7 +130,7 @@ router.patch('/users/:id', enhancedAuth, async (req, res) => {
 // POST /api/admin/users - Create new user (admin only)
 router.post('/users', enhancedAuth, async (req, res) => {
   try {
-    const { name, email, username, role, isActive, password } = req.body;
+    const { name, email, username, isActive, password } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
@@ -127,7 +140,7 @@ router.post('/users', enhancedAuth, async (req, res) => {
         name,
         email,
         username,
-        role,
+        role: 'user', // Default role
         isActive,
         password: hashedPassword,
         createdAt: new Date(),
@@ -138,7 +151,6 @@ router.post('/users', enhancedAuth, async (req, res) => {
         name: users.name,
         email: users.email,
         username: users.username,
-        role: users.role,
         isActive: users.isActive
       });
 
