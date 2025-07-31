@@ -1942,6 +1942,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Agent provider status endpoint - MUST come before /:id route
+  app.get('/api/agents/provider-status', async (req, res) => {
+    try {
+      const status = aiProviderService.getProviderStatus();
+      res.json({ success: true, status });
+    } catch (error) {
+      console.error('❌ [AGENT_PROVIDER_STATUS] Failed to get status:', error);
+      res.status(500).json({ error: 'Failed to fetch provider status' });
+    }
+  });
+
+  // Agent models endpoint - MUST come before /:id route
+  app.get('/api/agents/models', async (req, res) => {
+    try {
+      const models = await aiProviderService.getAllModels();
+      res.json({ success: true, models });
+    } catch (error) {
+      console.error('❌ [AGENT_MODELS] Failed to get models:', error);
+      res.status(500).json({ error: 'Failed to fetch models' });
+    }
+  });
+
   app.get('/api/agents/:id', async (req, res) => {
     try {
       let agentId = req.params.id;
@@ -2024,27 +2046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Agent provider status endpoint
-  app.get('/api/agents/provider-status', async (req, res) => {
-    try {
-      const status = aiProviderService.getProviderStatus();
-      res.json({ success: true, status });
-    } catch (error) {
-      console.error('❌ [AGENT_PROVIDER_STATUS] Failed to get status:', error);
-      res.status(500).json({ error: 'Failed to fetch provider status' });
-    }
-  });
 
-  // Agent models endpoint
-  app.get('/api/agents/models', async (req, res) => {
-    try {
-      const models = await aiProviderService.getAllModels();
-      res.json({ success: true, models });
-    } catch (error) {
-      console.error('❌ [AGENT_MODELS] Failed to get models:', error);
-      res.status(500).json({ error: 'Failed to fetch models' });
-    }
-  });
 
   // Amazon Customer Service Agent - Specific endpoints
   app.post('/api/agents/amazon-customer-service/sessions', requireAuth, async (req: any, res: any) => {
