@@ -307,10 +307,12 @@ ComponentName/
 
 ## 🛡️ Security & Permissions
 
-### Role-Based Access Control
-- **admin**: Full system access
-- **support**: Limited administrative functions
-- **user**: Standard user permissions
+### Role-Based Access Control (Clean Architecture - Updated July 31, 2025)
+- **admin** (priority 100): Full system access - System administrators
+- **mentorados** (priority 4): Mentorship participants with special access
+- **alunos** (priority 3): Course students with educational access
+- **pagantes** (priority 2): Paying subscribers with premium features
+- **gratuito** (priority 1): Free tier users with basic access
 
 ### Security Features
 - Granular permissions for critical routes
@@ -318,6 +320,12 @@ ComponentName/
 - Rate limiting (auth: 10/15min, simulators: 100/15min)
 - Input sanitization and XSS protection
 - CSRF protection and secure headers
+
+### Permission Groups Cleanup (July 31, 2025)
+- ✅ Removed duplicate 'administradores' group (consolidated into 'admin')
+- ✅ Removed unnecessary groups: 'editores_conteudo', 'suporte', 'usuarios_premium', 'usuarios_basicos'
+- ✅ Migrated all permissions from duplicate groups to proper groups
+- ✅ Clean 5-group architecture now active
 
 ### Admin Credentials
 - **Email**: gavasques@gmail.com
