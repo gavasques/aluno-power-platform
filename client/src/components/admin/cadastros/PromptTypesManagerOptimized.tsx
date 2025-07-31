@@ -2,7 +2,7 @@
 import { FC } from "react";
 import BaseTypesManager, { type BaseItem, type BaseTypesManagerConfig } from '@/components/admin/base/BaseTypesManager';
 import { MessageSquare } from 'lucide-react';
-import type { PromptType } from '@shared/schema';
+// Using BaseItem interface instead of PromptType from schema
 
 // Extend BaseItem para PromptType
 interface PromptTypeItem extends BaseItem {

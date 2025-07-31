@@ -32,6 +32,7 @@ const lazyComponents = {
   GroupDetail: lazy(() => import('../../pages/admin/GroupDetail')),
   ContentManagement: lazy(() => import('../../pages/admin/ContentManagement')),
   AgentProviderSettings: lazy(() => import('../../pages/admin/agents/AgentProviderSettings')),
+  AdminCadastros: lazy(() => import('../../pages/admin/AdminCadastros')),
   
   // Hub
   Hub: lazy(() => import('../../pages/Hub')),
@@ -156,7 +157,10 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/admin/usuarios/grupos/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/groups/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/content', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
-      { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' }
+      { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' },
+      { path: '/admin/cadastros', component: lazyComponents.AdminCadastros, isProtected: true, layout: 'admin' },
+      { path: '/admin/cadastros/:subsection', component: lazyComponents.AdminCadastros, isProtected: true, layout: 'admin' },
+      { path: '/admin/configuracoes', component: lazyComponents.AdminDashboard, isProtected: true, layout: 'admin' }
     ],
     
     // Hub Routes (Protected)

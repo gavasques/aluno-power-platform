@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { ColumnDef } from '@tanstack/react-table';
 import { EntityManager } from '@/components/common/EntityManager';
 import { FormDialog } from '@/components/common/FormDialog';
 import { BaseCrudService } from '@/lib/services/base/BaseCrudService';
@@ -38,25 +37,23 @@ const departmentSchema = z.object({
 type DepartmentFormData = z.infer<typeof departmentSchema>;
 
 // Table columns configuration
-const columns: ColumnDef<Department>[] = [
+const columns = [
   {
-    accessorKey: "name",
+    key: "name",
     header: "Nome",
   },
   {
-    accessorKey: "description", 
+    key: "description", 
     header: "Descrição",
-    cell: ({ row }) => {
-      const description = row.getValue("description") as string;
-      return description || "-";
+    render: (row: Department) => {
+      return row.description || "-";
     },
   },
   {
-    accessorKey: "created_at",
+    key: "createdAt",
     header: "Criado em",
-    cell: ({ row }) => {
-      const date = row.getValue("created_at") as string;
-      return new Date(date).toLocaleDateString('pt-BR');
+    render: (row: Department) => {
+      return new Date(row.createdAt).toLocaleDateString('pt-BR');
     },
   },
 ];
