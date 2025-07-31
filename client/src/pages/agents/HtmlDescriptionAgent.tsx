@@ -196,24 +196,37 @@ Garantia de 12 meses`;
     setIsGenerating(true);
     const startTime = Date.now();
     
+    // Toast de debug
+    toast({
+      title: "🔄 Processando...",
+      description: "Enviando requisição para o webhook n8n"
+    });
+    
     try {
+      const requestPayload = {
+        text: textInput,
+        userId: user.id,
+        userName: user.name || user.email
+      };
+      
+      console.log('Sending to webhook:', requestPayload); // Log do payload
+      
       const response = await fetch('https://n8n.guivasques.app/webhook-test/gerar-html-agente', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
-        body: JSON.stringify({
-          text: textInput,
-          userId: user.id,
-          userName: user.name || user.email
-        })
+        body: JSON.stringify(requestPayload)
       });
+
+      console.log('Webhook response status:', response.status); // Log do status
 
       if (!response.ok) {
         let errorMessage = `Erro HTTP ${response.status}: ${response.statusText}`;
         try {
           const errorData = await response.json();
+          console.log('Error response:', errorData); // Log do erro
           if (errorData.message) {
             errorMessage += ` - ${errorData.message}`;
           }
@@ -224,13 +237,18 @@ Garantia de 12 meses`;
       }
 
       const data = await response.json();
-      console.log('Webhook response:', data); // Log para debug
+      console.log('Webhook response data:', data); // Log da resposta completa
       
-      if (!data.success) {
+      // Aceitar diferentes formatos de resposta
+      let responseText = '';
+      if (data.success !== false) { // Se não for explicitamente false, tentar extrair resposta
+        responseText = data.response || data.text || data.result || data.content || '';
+      }
+      
+      if (!responseText && data.success === false) {
         throw new Error(data.message || 'Erro na resposta da API');
       }
 
-      const responseText = data.response || data.text || '';
       const duration = Date.now() - startTime;
 
       // Salvar log da geração com dedução automática de créditos
@@ -244,7 +262,6 @@ Garantia de 12 meses`;
         outputTokens: data.outputTokens || 0,
         totalTokens: data.totalTokens || 0,
         cost: data.cost || 0,
-        creditsUsed: 0, // 0 para dedução automática através do LoggingService
         duration: duration
       });
 
@@ -257,9 +274,10 @@ Garantia de 12 meses`;
       let errorDescription = "Falha ao gerar descrição com IA. Tente novamente.";
       
       // Tratamento específico para erro 404 do n8n
-      if (error.message && error.message.includes('404')) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('404')) {
         errorDescription = "Webhook n8n não está ativo. Execute o workflow no n8n primeiro e tente novamente.";
-      } else if (error.message && error.message.includes('500')) {
+      } else if (errorMessage.includes('500')) {
         errorDescription = "Erro interno no webhook n8n. Verifique a configuração do workflow.";
       }
       
