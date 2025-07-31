@@ -47,8 +47,8 @@ const UserEdit = memo(() => {
 
   // Fetch user data for editing
   const { data: user, isLoading } = useQuery({
-    queryKey: ['/api/admin/users', userId],
-    enabled: !isNewUser,
+    queryKey: [`/api/admin/users/${userId}`],
+    enabled: !isNewUser && !!userId,
     staleTime: 2 * 60 * 1000,
   });
 
@@ -60,26 +60,25 @@ const UserEdit = memo(() => {
 
   const groups = (groupsResponse as any)?.groups || [];
 
-  // Fetch user groups for editing
-  const { data: userGroups } = useQuery({
-    queryKey: ['/api/admin/users', userId, 'groups'],
-    enabled: !isNewUser,
-    staleTime: 2 * 60 * 1000,
-  });
+  // For now, set empty user groups - we'll implement group assignment later
+  const userGroups = [];
 
   // Set form data when user is loaded
   useEffect(() => {
     if (user && typeof user === 'object') {
-      setForm({
-        name: (user as any).name || '',
-        email: (user as any).email || '',
-        username: (user as any).username || '',
-        role: (user as any).role || 'user',
-        isActive: (user as any).isActive !== false,
-        groupIds: Array.isArray(userGroups) ? userGroups.map((ug: any) => ug.groupId) : []
-      });
+      const userData = user as any;
+      setForm(prev => ({
+        ...prev,
+        name: userData.name || '',
+        email: userData.email || '',
+        username: userData.username || '',
+        role: userData.role || 'user',
+        isActive: userData.isActive !== false,
+        // Keep existing groupIds for now
+        groupIds: prev.groupIds
+      }));
     }
-  }, [user, userGroups]);
+  }, [user]);
 
   // Save user mutation
   const saveUser = useMutation({
