@@ -12,7 +12,7 @@ import {
   Shield, 
   Users
 } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { useLocation, useParams } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminStandardLayout, { AdminCard, AdminLoader } from '@/components/layout/AdminStandardLayout';
 
@@ -26,14 +26,11 @@ interface UserForm {
   groupIds: number[];
 }
 
-interface UserEditProps {
-  params?: { id?: string };
-}
-
-const UserEdit = memo(({ params }: UserEditProps = {}) => {
+const UserEdit = memo(() => {
   const [, setLocation] = useLocation();
+  const params = useParams();
   const queryClient = useQueryClient();
-  const userId = params?.id;
+  const userId = params.id;
   const isNewUser = userId === 'novo';
 
   const [form, setForm] = useState<UserForm>({

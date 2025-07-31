@@ -331,6 +331,17 @@ ComponentName/
 - **Email**: gavasques@gmail.com
 - **Password**: admin123!
 
+### Latest Navigation Fixes (January 31, 2025)
+- **Issue Fixed**: "Editar usuário" button was not working due to route mismatch
+- **Root Cause**: Button was navigating to `/admin/usuarios/${id}/editar` but route was `/admin/usuarios/${id}/edit`
+- **Solutions Applied**: 
+  - Fixed edit button route from `/editar` to `/edit` in UserManagement.tsx
+  - Added missing route `/admin/usuarios/novo` for new user creation
+  - Updated UserEdit component to use `useParams()` hook properly instead of props
+  - Fixed TypeScript error by removing unsupported `disabled` property from secondary actions
+- **Status**: ✅ User edit functionality now working - users can edit name, email, username, role, status, groups
+- **Navigation Flow**: User Management → Edit User → Form with all user fields → Save returns to user list
+
 ## 🚀 Deployment Strategy
 
 ### Development Environment

@@ -406,8 +406,7 @@ const UserManagement = memo(() => {
             }
           },
           icon: Trash2,
-          variant: 'destructive' as const,
-          disabled: deleteTestUsers.isPending
+          variant: 'destructive' as const
         }
       ]}
     >
@@ -490,7 +489,7 @@ const UserManagement = memo(() => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setLocation(`/admin/usuarios/${user.id}/editar`)}
+                            onClick={() => setLocation(`/admin/usuarios/${user.id}/edit`)}
                             title="Editar usuário"
                           >
                             <Edit className="h-4 w-4" />

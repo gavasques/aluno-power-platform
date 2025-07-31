@@ -151,6 +151,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/admin/usuarios', component: lazyComponents.UserManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/users/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
+      { path: '/admin/usuarios/novo', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/grupos/:id', component: lazyComponents.GroupDetail, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/grupos/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/groups/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
