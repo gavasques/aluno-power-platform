@@ -18,13 +18,13 @@ export const useAgentData = () => {
 
   // Fetch provider status
   const { data: status = { openai: false, anthropic: false, gemini: false, deepseek: false, xai: false, openrouter: false } } = useQuery<ProviderStatus>({
-    queryKey: ['/api/agents/provider-status'],
+    queryKey: ['/api/ai-providers/status'],
     enabled: user?.role === 'admin'
   });
 
   // Fetch available models
   const { data: models = [] } = useQuery<ModelConfig[]>({
-    queryKey: ['/api/agents/models'],
+    queryKey: ['/api/ai-providers/models'],
     enabled: user?.role === 'admin'
   });
 
