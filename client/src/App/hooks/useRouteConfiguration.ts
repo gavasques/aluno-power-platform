@@ -156,7 +156,8 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/admin/usuarios/grupos/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/groups/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/content', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
-      { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' }
+      { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' },
+      { path: '/admin/agents/providers', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' }
     ],
     
     // Hub Routes (Protected)
