@@ -374,7 +374,17 @@ YOUTUBE_API_KEY=your_youtube_key
 
 ## 🔒 Security Updates
 
-### Latest Security Patches Applied
+### Latest Updates Applied
+- **January 31, 2025**: Major permissions system reorganization and optimization
+  - **Location**: Database schema reorganization for better categorization
+  - **Changes**: Moved importation simulators from "Simuladores" to "Importações" category
+  - **Cleanup**: Removed duplicate permissions (importacoes.produtos_importados vs myarea.imported_products)
+  - **Renaming**: Updated simulator codes for consistency (importacoes.simulador_*)
+  - **Organization**: Now 9 categories with 73 total permissions properly distributed
+  - **Categories**: Admin (4), Agentes (10), Conteúdo (3), Ferramentas (13), Finanças360 (7), HUB (6), Importações (9), Minha Área (15), Simuladores (6)
+  - **Status**: ✅ Completed - Permission system fully optimized and organized
+  - **Impact**: Better permission management and elimination of duplications/inconsistencies
+
 - **January 30, 2025**: Optimized Amazon Reviews API rate limiting for better performance
   - **Location**: `client/src/pages/hub/AmazonReviewExtractor.tsx` & `client/src/pages/agents/amazon-listings-optimizer-new.tsx`
   - **Issue**: Conservative 1000ms delays were underutilizing API capacity (10 requests/second)
