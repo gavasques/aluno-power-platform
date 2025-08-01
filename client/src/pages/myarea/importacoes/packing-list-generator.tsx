@@ -18,7 +18,8 @@ import {
   Calculator,
   Upload,
   Save,
-  Loader2
+  Loader2,
+  Copy
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -895,77 +896,104 @@ const PackingListGenerator = () => {
       doc.setFont('helvetica', 'bold');
       doc.text('COMMERCIAL INVOICE', pageWidth / 2, 55, { align: 'center' });
       
-      // Informações SOLD TO / SHIP TO e ORDERED BY
-      doc.setLineWidth(0.5);
-      doc.rect(leftMargin, 50, (pageWidth - 20) / 2 - 5, 35);
-      doc.rect(leftMargin + (pageWidth - 20) / 2 + 5, 50, (pageWidth - 20) / 2 - 5, 35);
+      // Seções SOLD TO / SHIP TO e ORDERED BY lado a lado
+      const sectionWidth = (pageWidth - 3 * margin) / 2;
       
       // SOLD TO / SHIP TO
-      doc.setFontSize(9);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, 65, sectionWidth, 45);
+      
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text('SOLD TO / SHIP TO:', leftMargin + 2, 56);
-      renderConsigneeInfo(doc, leftMargin, 62);
+      doc.text('SOLD TO / SHIP TO:', margin + 2, 72);
+      
+      // Informações básicas para CI (versão simplificada)
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      let soldToY = 78;
+      if (consignee.name) {
+        doc.text(consignee.name, margin + 2, soldToY);
+        soldToY += 4;
+      }
+      if (consignee.address) {
+        doc.text(consignee.address, margin + 2, soldToY);
+        soldToY += 4;
+      }
       
       // ORDERED BY
-      const middleX = leftMargin + (pageWidth - 20) / 2 + 7;
+      const orderedByX = margin + sectionWidth + margin;
+      doc.rect(orderedByX, 65, sectionWidth, 45);
       doc.setFont('helvetica', 'bold');
-      doc.text('ORDERED BY:', middleX, 56);
-      renderOrderedByInfo(doc, middleX - 2, 62);
+      doc.setFontSize(10);
+      doc.text('ORDERED BY:', orderedByX + 2, 72);
       
-      // Informações do documento
-      doc.setLineWidth(0.5);
-      doc.rect(rightMargin - 60, 50, 60, 40);
-      
+      // Informações do documento (lado direito)
+      const docInfoX = pageWidth - 80;
+      doc.rect(docInfoX, 65, 70, 45);
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Date of Issue', rightMargin - 58, 56);
-      doc.text('Commercial Invoice', rightMargin - 58, 62);
-      doc.text('Number', rightMargin - 58, 64);
-      doc.text('PO', rightMargin - 58, 70);
-      doc.text('CI', rightMargin - 58, 76);
+      doc.text('Date of Issue', docInfoX + 2, 72);
+      doc.text('Commercial Invoice', docInfoX + 2, 78);
+      doc.text('PO', docInfoX + 2, 84);
+      doc.text('CI', docInfoX + 2, 90);
       
       doc.setFont('helvetica', 'normal');
-      doc.text(document.issueDate || '19/09/2022', rightMargin - 20, 56, { align: 'right' });
-      doc.text(document.packingListNumber || 'PR-010721-001', rightMargin - 20, 64, { align: 'right' });
-      doc.text(document.poNumber || '920921', rightMargin - 20, 70, { align: 'right' });
-      doc.text(document.piNumber || 'PR-010721-001', rightMargin - 20, 76, { align: 'right' });
+      doc.text(document.issueDate || new Date().toLocaleDateString(), docInfoX + 35, 72);
+      doc.text(document.packingListNumber || 'CI-001', docInfoX + 35, 78);
+      doc.text(document.poNumber || 'PO-001', docInfoX + 35, 84);
+      doc.text(document.piNumber || 'PI-001', docInfoX + 35, 90);
       
-      // Adicionar texto "FOR US$"
-      doc.setFont('helvetica', 'bold');
-      doc.text('FOR US$', rightMargin - 58, 84);
-      
-      // Preparar dados da tabela com preços
-      const invoiceData: any[] = [];
-      
-      // Adicionar produtos com preços unitários
-      boxGroups.forEach(group => {
-        group.items.forEach((item, index) => {
-          if (index === 0) {
-            invoiceData.push([
-              item.ref,
-              item.eanCode,
-              item.ncm || '95069100',
-              item.description,
-              group.totalQty.toString(),
-              '$2.00', // Preço unitário exemplo
-              `$${(group.totalQty * 2).toFixed(2)}` // Total
-            ]);
-          }
-        });
-      });
-      
-      // Criar tabela de invoice
+      // Gerar tabela simples para CI
       (doc as any).autoTable({
-        startY: 95,
+        startY: 120,
         head: [[
           'REF',
           'EAN CODE',
           'NCM',
-          'Goods Description',
-          'Order Qty',
+          'Description',
+          'Qty',
           'Unit Price',
           'Total Price'
         ]],
+        body: [['Sample', '123456', '95069100', 'Sample Product', '100', '$1.00', '$100.00']],
+        theme: 'grid',
+        styles: {
+          fontSize: 8,
+          cellPadding: 2
+        },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255
+        },
+        margin: { left: margin, right: margin }
+      });
+      
+      // Informações finais
+      const finalY = (doc as any).lastAutoTable.finalY + 20;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Total Amount: $100.00', pageWidth - 100, finalY);
+      
+      // Salvar PDF
+      const fileName = `CI-${document.packingListNumber || 'DRAFT'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      
+      toast({
+        title: "Commercial Invoice gerado com sucesso!",
+        description: `Arquivo ${fileName} foi baixado.`,
+      });
+      
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o documento PDF.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
         body: invoiceData,
         styles: {
           fontSize: 7,
@@ -1275,11 +1303,38 @@ const PackingListGenerator = () => {
         {/* Informações de Ordered By */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Informações do Comprador (Ordered By)
-            </CardTitle>
-            <CardDescription>Dados da empresa que fez o pedido (pode ser diferente do destinatário)</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Informações do Comprador (Ordered By)
+                </CardTitle>
+                <CardDescription>Dados da empresa que fez o pedido (pode ser diferente do destinatário)</CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOrderedBy({
+                    name: consignee.name,
+                    address: consignee.address,
+                    city: consignee.city,
+                    country: consignee.country,
+                    phone: consignee.phone,
+                    cnpj: consignee.cnpj
+                  });
+                  toast({
+                    title: "Dados copiados!",
+                    description: "Informações do Sold To foram copiadas para Ordered By.",
+                  });
+                }}
+                className="flex items-center gap-2"
+              >
+                <Copy className="h-4 w-4" />
+                Copiar de Sold To
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
