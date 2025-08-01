@@ -82,7 +82,7 @@ router.post("/", requireAuth, async (req, res) => {
         website: supplierData.website,
         description: supplierData.description,
         status: supplierData.status,
-        categoryId: supplierData.categoryId,
+        categoryId: supplierData.categoryId || null,
       })
       .returning();
 
