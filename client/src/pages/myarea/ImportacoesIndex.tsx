@@ -39,6 +39,16 @@ const importacaoItems: ImportacaoItem[] = [
     isNew: true,
   },
   {
+    id: "gerador-packing-list",
+    title: "Gerador de Packing List",
+    description: "Gere packing lists profissionais com agrupamento por caixa e exportação para PDF",
+    href: "/minha-area/importacoes/packing-list-generator",
+    icon: Package,
+    category: "Documentos",
+    isAvailable: true,
+    isNew: true,
+  },
+  {
     id: "gerador-po-proforma",
     title: "Gerador de PO, Proforma Invoice",
     description: "Gere Purchase Orders e Proforma Invoices profissionais para seus fornecedores",

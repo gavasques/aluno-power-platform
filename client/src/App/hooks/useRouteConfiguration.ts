@@ -109,6 +109,9 @@ const lazyComponents = {
   // Finanças360
   Financas360Index: lazy(() => import('../../pages/myarea/financas360/Financas360Index')),
   
+  // Packing List Generator
+  PackingListGenerator: lazy(() => import('../../pages/myarea/importacoes/packing-list-generator')),
+  
   // Simulators
   SimuladoresIndex: lazy(() => import('../../pages/SimuladoresIndex')),
   SimuladorSimplificado: lazy(() => import('../../pages/simuladores/SimuladorSimplificado')),
@@ -244,6 +247,9 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area/importacoes/produtos/novo', component: lazyComponents.ImportedProductForm, isProtected: true },
       { path: '/minha-area/importacoes/produtos/:id', component: lazyComponents.ImportedProductDetail, isProtected: true },
       { path: '/minha-area/importacoes/produtos/:id/editar', component: lazyComponents.ImportedProductForm, isProtected: true },
+      
+      // Packing List Generator
+      { path: '/minha-area/importacoes/packing-list-generator', component: lazyComponents.PackingListGenerator, isProtected: true },
       
       // Finanças360
       { path: '/minha-area/financas360', component: lazyComponents.Financas360Index, isProtected: true }
