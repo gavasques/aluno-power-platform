@@ -18,6 +18,8 @@ interface SupplierFormData {
   postalCode: string;
   address: string;
   phone: string;
+  fax: string;
+  mobile: string;
   email: string;
   website: string;
   description: string;
@@ -41,6 +43,8 @@ export default function InternationalSupplierForm() {
     postalCode: '',
     address: '',
     phone: '',
+    fax: '',
+    mobile: '',
     email: '',
     website: '',
     description: '',
@@ -274,7 +278,7 @@ export default function InternationalSupplierForm() {
             </div>
 
             {/* Contato */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Telefone</Label>
                 <Input
@@ -285,6 +289,29 @@ export default function InternationalSupplierForm() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="fax">FAX</Label>
+                <Input
+                  id="fax"
+                  value={formData.fax}
+                  onChange={(e) => handleInputChange('fax', e.target.value)}
+                  placeholder="Ex: +86 755 1234 5679"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mobile">Mobile</Label>
+                <Input
+                  id="mobile"
+                  value={formData.mobile}
+                  onChange={(e) => handleInputChange('mobile', e.target.value)}
+                  placeholder="Ex: +86 138 0013 8000"
+                />
+              </div>
+            </div>
+
+            {/* E-mail em linha separada */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
                 <Input
