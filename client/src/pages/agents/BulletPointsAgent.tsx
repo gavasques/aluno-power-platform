@@ -82,7 +82,8 @@ const BulletPointsAgent: React.FC = () => {
                 country: state.country,
                 reviewsData: state.reviewsData,
                 isExtractingReviews: state.isExtractingReviews,
-                extractionProgress: state.extractionProgress
+                extractionProgress: state.extractionProgress,
+                asinList: state.asinList
               }}
               onChange={(field, value) => updateState({ [field]: value })}
               onGenerate={generateWithAI}

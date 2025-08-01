@@ -29,6 +29,7 @@ interface GenerationState {
   reviewsData: string;
   isExtractingReviews: boolean;
   extractionProgress: number;
+  asinList: string[];
 }
 
 const BULLET_POINTS_PROMPT = `# PROMPT OTIMIZADO: BULLET POINTS DE ALTA CONVERSÃO PARA AMAZON
@@ -175,6 +176,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     reviewsData: '',
     isExtractingReviews: false,
     extractionProgress: 0,
+    asinList: [],
   });
 
   const [agentConfig, setAgentConfig] = useState({
@@ -466,7 +468,8 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       country: 'BR',
       reviewsData: '',
       isExtractingReviews: false,
-      extractionProgress: 0
+      extractionProgress: 0,
+      asinList: []
     });
     toast({
       title: "✅ Campos limpos",
@@ -475,21 +478,11 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
   }, [toast, updateState]);
 
   const extractAmazonReviews = useCallback(async () => {
-    if (!state.asin.trim()) {
+    if (state.asinList.length === 0) {
       toast({
         variant: "destructive",
-        title: "❌ ASIN obrigatório",
-        description: "Informe o ASIN do produto para extrair reviews",
-      });
-      return;
-    }
-
-    // Validar formato do ASIN
-    if (!/^[A-Z0-9]{10}$/.test(state.asin.trim())) {
-      toast({
-        variant: "destructive",
-        title: "❌ ASIN inválido",
-        description: "ASIN deve ter 10 caracteres alfanuméricos",
+        title: "❌ ASINs obrigatórios",
+        description: "Adicione pelo menos um ASIN para extrair reviews",
       });
       return;
     }
@@ -497,50 +490,66 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     updateState({ isExtractingReviews: true, extractionProgress: 0 });
 
     try {
-      const reviewsData = [];
-      const maxPages = 3; // Extrair 3 páginas
+      const allReviewsData = [];
+      const totalAsins = state.asinList.length;
+      const maxPagesPerAsin = 2; // 2 páginas por ASIN para múltiplos ASINs
       
-      for (let page = 1; page <= maxPages; page++) {
-        updateState({ extractionProgress: (page / maxPages) * 100 });
+      for (let asinIndex = 0; asinIndex < state.asinList.length; asinIndex++) {
+        const currentAsin = state.asinList[asinIndex];
         
-        const response = await fetch('/api/amazon-reviews/extract', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          },
-          body: JSON.stringify({
-            asin: state.asin.trim(),
-            page: page,
-            country: state.country,
-            sort_by: 'MOST_RECENT'
-          })
-        });
+        // Atualizar progresso baseado no ASIN atual
+        const baseProgress = (asinIndex / totalAsins) * 100;
+        updateState({ extractionProgress: baseProgress });
+        
+        for (let page = 1; page <= maxPagesPerAsin; page++) {
+          const pageProgress = baseProgress + ((page / maxPagesPerAsin) * (100 / totalAsins));
+          updateState({ extractionProgress: pageProgress });
+          
+          const response = await fetch('/api/amazon-reviews/extract', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            },
+            body: JSON.stringify({
+              asin: currentAsin,
+              page: page,
+              country: state.country,
+              sort_by: 'MOST_RECENT'
+            })
+          });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `Erro na página ${page}`);
-        }
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.warn(`Erro ao extrair reviews do ASIN ${currentAsin}, página ${page}:`, errorData.message);
+            continue; // Continuar com próxima página/ASIN em caso de erro
+          }
 
-        const data = await response.json();
-        
-        if (data.success && data.reviews && data.reviews.length > 0) {
-          reviewsData.push(...data.reviews);
-        }
-        
-        // Pequena pausa entre requests
-        if (page < maxPages) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const data = await response.json();
+          
+          if (data.success && data.reviews && data.reviews.length > 0) {
+            // Adicionar informação do ASIN às reviews
+            const reviewsWithAsin = data.reviews.map((review: any) => ({
+              ...review,
+              source_asin: currentAsin
+            }));
+            allReviewsData.push(...reviewsWithAsin);
+          }
+          
+          // Pequena pausa entre requests
+          if (page < maxPagesPerAsin || asinIndex < state.asinList.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
         }
       }
 
-      if (reviewsData.length === 0) {
-        throw new Error('Nenhuma avaliação encontrada para este ASIN');
+      if (allReviewsData.length === 0) {
+        throw new Error('Nenhuma avaliação encontrada para os ASINs informados');
       }
 
-      // Formatar reviews em texto
-      const formattedReviews = reviewsData.map((review, index) => 
-        `Avaliação ${index + 1}:
+      // Formatar reviews em texto com informação do ASIN
+      const formattedReviews = allReviewsData.map((review, index) => 
+        `Avaliação ${index + 1} (ASIN: ${review.source_asin}):
 Título: ${review.review_title || 'Sem título'}
 Nota: ${review.review_star_rating || 'Sem nota'}
 Comentário: ${review.review_comment || 'Sem comentário'}
@@ -555,7 +564,7 @@ Comentário: ${review.review_comment || 'Sem comentário'}
 
       toast({
         title: "✅ Reviews extraídas!",
-        description: `${reviewsData.length} avaliações extraídas com sucesso`,
+        description: `${allReviewsData.length} avaliações de ${totalAsins} ASINs extraídas com sucesso`,
       });
 
     } catch (error) {
@@ -566,7 +575,7 @@ Comentário: ${review.review_comment || 'Sem comentário'}
         description: error instanceof Error ? error.message : "Erro desconhecido",
       });
     }
-  }, [state.asin, state.country, toast, updateState]);
+  }, [state.asinList, state.country, toast, updateState]);
 
   return {
     state,

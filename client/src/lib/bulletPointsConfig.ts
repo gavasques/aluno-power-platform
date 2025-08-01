@@ -16,7 +16,8 @@ export const BULLET_POINTS_CONFIG = {
     country: 5,
     reviewsData: 10000,
     isExtractingReviews: 0,
-    extractionProgress: 0
+    extractionProgress: 0,
+    asinList: 0
   }
 } as const;
 

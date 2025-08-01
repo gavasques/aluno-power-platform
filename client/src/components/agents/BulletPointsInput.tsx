@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { Wand2, Download, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Wand2, Download, Loader2, X, Plus } from 'lucide-react';
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useToast } from '@/hooks/use-toast';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
@@ -25,11 +26,16 @@ interface ProductFormData {
   reviewsData: string;
   isExtractingReviews: boolean;
   extractionProgress: number;
+  asinList: string[];
+}
+
+interface OnChangeFunction {
+  (field: keyof ProductFormData, value: string | string[]): void;
 }
 
 interface BulletPointsInputProps {
   formData: ProductFormData;
-  onChange: (field: keyof ProductFormData, value: string) => void;
+  onChange: OnChangeFunction;
   onGenerate: () => void;
   onClear: () => void;
   onExtractReviews: () => void;
@@ -48,6 +54,29 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
   maxChars,
   warningThreshold
 }) => {
+  const handleAddAsin = () => {
+    if (formData.asin.trim() && !/^[A-Z0-9]{10}$/.test(formData.asin.trim())) {
+      return; // ASIN inválido
+    }
+    
+    if (formData.asin.trim() && !formData.asinList.includes(formData.asin.trim())) {
+      const newAsinList = [...formData.asinList, formData.asin.trim()];
+      onChange('asinList', newAsinList);
+      onChange('asin', '');
+    }
+  };
+
+  const handleRemoveAsin = (asinToRemove: string) => {
+    const newAsinList = formData.asinList.filter(asin => asin !== asinToRemove);
+    onChange('asinList', newAsinList);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddAsin();
+    }
+  };
   const { toast } = useToast();
   const charCount = formData.textInput.length;
 
@@ -251,14 +280,43 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
                   <Label htmlFor="asin" className="text-sm font-medium text-gray-700 mb-1 block">
                     ASIN do Produto
                   </Label>
-                  <Input
-                    id="asin"
-                    value={formData.asin}
-                    onChange={(e) => onChange('asin', e.target.value.toUpperCase())}
-                    placeholder="Ex: B08N5WRWNW"
-                    maxLength={10}
-                    className="font-mono"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="asin"
+                      value={formData.asin}
+                      onChange={(e) => onChange('asin', e.target.value.toUpperCase())}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Ex: B08N5WRWNW"
+                      maxLength={10}
+                      className="font-mono flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddAsin}
+                      disabled={!formData.asin.trim() || !/^[A-Z0-9]{10}$/.test(formData.asin.trim()) || formData.asinList.includes(formData.asin.trim())}
+                      variant="outline"
+                      size="sm"
+                      className="px-3"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {formData.asinList.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.asinList.map((asin) => (
+                        <Badge key={asin} variant="secondary" className="flex items-center gap-1">
+                          {asin}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAsin(asin)}
+                            className="ml-1 hover:text-red-600"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="country" className="text-sm font-medium text-gray-700 mb-1 block">
@@ -289,7 +347,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
               <div className="flex gap-3 mb-4">
                 <Button
                   onClick={onExtractReviews}
-                  disabled={formData.isExtractingReviews || !formData.asin.trim()}
+                  disabled={formData.isExtractingReviews || formData.asinList.length === 0}
                   variant="outline"
                   className="flex items-center gap-2"
                 >
@@ -298,7 +356,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
                   ) : (
                     <Download className="h-4 w-4" />
                   )}
-                  {formData.isExtractingReviews ? 'Extraindo...' : 'Extrair Avaliações'}
+                  {formData.isExtractingReviews ? 'Extraindo...' : `Extrair Avaliações${formData.asinList.length > 0 ? ` (${formData.asinList.length} ASINs)` : ''}`}
                 </Button>
               </div>
 
