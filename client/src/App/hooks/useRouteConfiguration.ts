@@ -138,12 +138,12 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/', component: lazyComponents.UserDashboard, isProtected: true },
     ],
     
-    // Authentication Routes (Public)
+    // Authentication Routes (Public - No Layout)
     AUTH_ROUTES: [
-      { path: '/login', component: lazyComponents.LoginNew, isProtected: false },
-      { path: '/forgot-password', component: lazyComponents.ForgotPassword, isProtected: false },
-      { path: '/reset-password', component: lazyComponents.ResetPassword, isProtected: false },
-      { path: '/phone-verification', component: lazyComponents.PhoneVerification, isProtected: false }
+      { path: '/login', component: lazyComponents.LoginNew, isProtected: false, layout: 'none' },
+      { path: '/forgot-password', component: lazyComponents.ForgotPassword, isProtected: false, layout: 'none' },
+      { path: '/reset-password', component: lazyComponents.ResetPassword, isProtected: false, layout: 'none' },
+      { path: '/phone-verification', component: lazyComponents.PhoneVerification, isProtected: false, layout: 'none' }
     ],
     
     // Admin Routes (Protected + Admin Layout)
