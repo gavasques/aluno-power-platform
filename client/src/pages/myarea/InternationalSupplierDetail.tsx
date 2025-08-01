@@ -1,12 +1,8 @@
 /**
- * ESTE ARQUIVO FOI REFATORADO - Redirecionamento para versão modular
- * Arquivo original com 1853 linhas foi decomposto em estrutura modular
- * Nova localização: client/src/features/suppliers/InternationalSupplierDetailRefactored.tsx
- * 
- * REDUÇÃO ALCANÇADA: 1853 → ~300 linhas efetivas (84% de redução)
- * ARQUITETURA: Container/Presentational pattern com 5 hooks especializados e 5 componentes de apresentação
+ * INTERNATIONAL SUPPLIER DETAIL - Container Principal
+ * Usa a implementação correta com todos os campos do formulário de criação
  */
 
-import { InternationalSupplierContainer } from '@/features/suppliers/InternationalSupplierDetailRefactored';
+import { InternationalSupplierContainer } from './InternationalSupplierDetail/InternationalSupplierContainer';
 
 export default InternationalSupplierContainer;
