@@ -7,6 +7,10 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 **Communication Style**: Simple, everyday language (user is non-technical)
 
 ## Recent Changes (August 1, 2025)
+- **Bullet Points Download Feature**: Added TXT file download functionality
+  - Added download button with timestamp naming: bullet_points_YYYYMMDD_HHMMSS.txt
+  - Users can now save generated bullet points locally for external use
+  - Clean file export with proper UTF-8 encoding for international characters
 - **Bullet Points Interface Reorganization**: Field order optimized for better user experience
   - Reorganized form layout: Product basics → Product details textarea → Customer reviews (optional)
   - Improved workflow: users fill essential product info first, then detailed description, then optional review analysis
