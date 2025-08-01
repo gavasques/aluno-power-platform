@@ -63,6 +63,7 @@ const PackingListGenerator = () => {
     address: '',
     city: '',
     country: '',
+    phone: '',
     cnpj: ''
   });
 
@@ -71,6 +72,7 @@ const PackingListGenerator = () => {
     address: '',
     city: '',
     country: '',
+    phone: '',
     cnpj: ''
   });
 
@@ -201,6 +203,16 @@ const PackingListGenerator = () => {
 
   // Função para salvar documento
   const saveDocument = async () => {
+    // Validar campo obrigatório
+    if (!document.poNumber?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "PO (Processo) é obrigatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSaving(true);
     
     const documentData = {
@@ -290,6 +302,7 @@ const PackingListGenerator = () => {
       address: '456 Import Street',
       city: 'Miami',
       country: 'USA',
+      phone: '+1 305 123-4567',
       cnpj: '12.345.678/0001-90'
     });
     setOrderedBy({
@@ -297,6 +310,7 @@ const PackingListGenerator = () => {
       address: 'Av. Paulista, 1000',
       city: 'São Paulo',
       country: 'Brazil',
+      phone: '+55 11 9999-8888',
       cnpj: '98.765.432/0001-10'
     });
     setDocument({
@@ -370,6 +384,66 @@ const PackingListGenerator = () => {
     });
   };
 
+  // Função auxiliar para adicionar campos não vazios no PDF
+  const addNonEmptyField = (doc: jsPDF, text: string, x: number, y: number): number => {
+    if (text && text.trim()) {
+      doc.text(text, x, y);
+      return y + 4; // Retorna próxima linha
+    }
+    return y; // Não incrementa se vazio
+  };
+
+  // Função para renderizar exporter info no PDF
+  const renderExporterInfo = (doc: jsPDF, leftMargin: number, currentY: number) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    
+    let yPos = currentY;
+    yPos = addNonEmptyField(doc, exporter.name || 'XXX BUSINESS LTDA', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, exporter.address || 'Room 2234-9,21/F,CC Wu Building, 499-308 Benny Road, Ling Long, Hong Kong', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, exporter.email ? `E-mail: ${exporter.email}` : '', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, exporter.phone ? `Phone: ${exporter.phone}` : '', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, exporter.fax ? `Fax: ${exporter.fax}` : '', leftMargin + 2, yPos);
+    
+    return yPos;
+  };
+
+  // Função para renderizar consignee info no PDF
+  const renderConsigneeInfo = (doc: jsPDF, leftMargin: number, currentY: number) => {
+    doc.setFont('helvetica', 'normal');
+    let yPos = currentY;
+    
+    yPos = addNonEmptyField(doc, consignee.name || 'XX COMERCIO LTDA', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, consignee.address || 'Rua X, numero Y, Bairro U', leftMargin + 2, yPos);
+    
+    const cityState = `${consignee.city || 'São José'} - ${consignee.state || 'SC'}`;
+    yPos = addNonEmptyField(doc, cityState, leftMargin + 2, yPos);
+    
+    yPos = addNonEmptyField(doc, consignee.cep ? `CEP: ${consignee.cep}` : '', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, consignee.phone ? `Phone: ${consignee.phone}` : '', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, consignee.cnpj ? `CNPJ: ${consignee.cnpj}` : '', leftMargin + 2, yPos);
+    
+    return yPos;
+  };
+
+  // Função para renderizar ordered by info no PDF
+  const renderOrderedByInfo = (doc: jsPDF, leftMargin: number, currentY: number) => {
+    doc.setFont('helvetica', 'normal');
+    let yPos = currentY;
+    
+    yPos = addNonEmptyField(doc, orderedBy.name || consignee.name || 'XX COMERCIO LTDA', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, orderedBy.address || consignee.address || 'Rua X, numero Y, Bairro U', leftMargin + 2, yPos);
+    
+    const cityState = `${orderedBy.city || consignee.city || 'São José'} - ${orderedBy.state || consignee.state || 'SC'}`;
+    yPos = addNonEmptyField(doc, cityState, leftMargin + 2, yPos);
+    
+    yPos = addNonEmptyField(doc, (orderedBy.cep || consignee.cep) ? `CEP: ${orderedBy.cep || consignee.cep}` : '', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, (orderedBy.phone || consignee.phone) ? `Phone: ${orderedBy.phone || consignee.phone}` : '', leftMargin + 2, yPos);
+    yPos = addNonEmptyField(doc, (orderedBy.cnpj || consignee.cnpj) ? `CNPJ: ${orderedBy.cnpj || consignee.cnpj}` : '', leftMargin + 2, yPos);
+    
+    return yPos;
+  };
+
   // Gerar Packing List PDF
   const generatePackingList = () => {
     setIsGeneratingPDF(true);
@@ -387,17 +461,7 @@ const PackingListGenerator = () => {
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       doc.text("Exporter's Name", leftMargin + 2, 16);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.text(exporter.name || 'XXX BUSINESS LTDA', leftMargin + 2, 22);
-      doc.text(exporter.address || 'Room 2234-9,21/F,CC Wu Building, 499-308 Benny Road, Ling Long, Hong Kong', leftMargin + 2, 26);
-      doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, leftMargin + 2, 30);
-      doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, leftMargin + 2, 34);
-      
-      // Adicionar Fax se existir
-      if (exporter.fax) {
-        doc.text(`Fax: ${exporter.fax}`, leftMargin + 2, 38);
-      }
+      renderExporterInfo(doc, leftMargin, 22);
       
       // Título PACKING LIST
       doc.setFontSize(14);
@@ -413,23 +477,13 @@ const PackingListGenerator = () => {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.text('SOLD TO / SHIP TO:', leftMargin + 2, 56);
-      doc.setFont('helvetica', 'normal');
-      doc.text(consignee.name || 'XX COMERCIO LTDA', leftMargin + 2, 62);
-      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', leftMargin + 2, 66);
-      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, leftMargin + 2, 70);
-      doc.text(`CEP: ${consignee.cep || '88106-115'}`, leftMargin + 2, 74);
-      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, leftMargin + 2, 78);
+      renderConsigneeInfo(doc, leftMargin, 62);
       
       // ORDERED BY
       const middleX = leftMargin + (pageWidth - 20) / 2 + 7;
       doc.setFont('helvetica', 'bold');
       doc.text('ORDERED BY:', middleX, 56);
-      doc.setFont('helvetica', 'normal');
-      doc.text(orderedBy.name || consignee.name || 'XX COMERCIO LTDA', middleX, 62);
-      doc.text(orderedBy.address || consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
-      doc.text(`${orderedBy.city || consignee.city || 'São José'} - ${orderedBy.state || consignee.state || 'SC'}`, middleX, 70);
-      doc.text(`CEP: ${orderedBy.cep || consignee.cep || '88106-115'}`, middleX, 74);
-      doc.text(`CNPJ: ${orderedBy.cnpj || consignee.cnpj || 'XXXXXX'}`, middleX, 78);
+      renderOrderedByInfo(doc, middleX - 2, 62);
       
       // Informações do documento (lado direito)
       doc.setLineWidth(0.5);
@@ -663,17 +717,7 @@ const PackingListGenerator = () => {
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       doc.text("Exporter's Name", leftMargin + 2, 16);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.text(exporter.name || 'XXX BUSINESS LTDA', leftMargin + 2, 22);
-      doc.text(exporter.address || 'Room 2234-9,21/F,CC Wu Building, 499-308 Benny Road, Ling Long, Hong Kong', leftMargin + 2, 26);
-      doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, leftMargin + 2, 30);
-      doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, leftMargin + 2, 34);
-      
-      // Adicionar Fax se existir
-      if (exporter.fax) {
-        doc.text(`Fax: ${exporter.fax}`, leftMargin + 2, 38);
-      }
+      renderExporterInfo(doc, leftMargin, 22);
       
       // Título COMMERCIAL INVOICE
       doc.setFontSize(14);
@@ -689,23 +733,13 @@ const PackingListGenerator = () => {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.text('SOLD TO / SHIP TO:', leftMargin + 2, 56);
-      doc.setFont('helvetica', 'normal');
-      doc.text(consignee.name || 'XX COMERCIO LTDA', leftMargin + 2, 62);
-      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', leftMargin + 2, 66);
-      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, leftMargin + 2, 70);
-      doc.text(`CEP: ${consignee.cep || '88106-115'}`, leftMargin + 2, 74);
-      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, leftMargin + 2, 78);
+      renderConsigneeInfo(doc, leftMargin, 62);
       
       // ORDERED BY
       const middleX = leftMargin + (pageWidth - 20) / 2 + 7;
       doc.setFont('helvetica', 'bold');
       doc.text('ORDERED BY:', middleX, 56);
-      doc.setFont('helvetica', 'normal');
-      doc.text(orderedBy.name || consignee.name || 'XX COMERCIO LTDA', middleX, 62);
-      doc.text(orderedBy.address || consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
-      doc.text(`${orderedBy.city || consignee.city || 'São José'} - ${orderedBy.state || consignee.state || 'SC'}`, middleX, 70);
-      doc.text(`CEP: ${orderedBy.cep || consignee.cep || '88106-115'}`, middleX, 74);
-      doc.text(`CNPJ: ${orderedBy.cnpj || consignee.cnpj || 'XXXXXX'}`, middleX, 78);
+      renderOrderedByInfo(doc, middleX - 2, 62);
       
       // Informações do documento
       doc.setLineWidth(0.5);
@@ -1035,14 +1069,23 @@ const PackingListGenerator = () => {
                 placeholder="Endereço completo"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="consignee-country">País</Label>
+                <Label htmlFor="consignee-country">País (Country)</Label>
                 <Input 
                   id="consignee-country"
                   value={consignee.country}
                   onChange={(e) => setConsignee({...consignee, country: e.target.value})}
                   placeholder="País"
+                />
+              </div>
+              <div>
+                <Label htmlFor="consignee-phone">Telefone (Phone)</Label>
+                <Input 
+                  id="consignee-phone"
+                  value={consignee.phone}
+                  onChange={(e) => setConsignee({...consignee, phone: e.target.value})}
+                  placeholder="Telefone"
                 />
               </div>
               <div>
@@ -1097,7 +1140,7 @@ const PackingListGenerator = () => {
                 placeholder="Endereço completo"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="ordered-by-country">País (Country)</Label>
                 <Input 
@@ -1105,6 +1148,15 @@ const PackingListGenerator = () => {
                   value={orderedBy.country}
                   onChange={(e) => setOrderedBy({...orderedBy, country: e.target.value})}
                   placeholder="País"
+                />
+              </div>
+              <div>
+                <Label htmlFor="ordered-by-phone">Telefone (Phone)</Label>
+                <Input 
+                  id="ordered-by-phone"
+                  value={orderedBy.phone}
+                  onChange={(e) => setOrderedBy({...orderedBy, phone: e.target.value})}
+                  placeholder="Telefone"
                 />
               </div>
               <div>
@@ -1142,7 +1194,7 @@ const PackingListGenerator = () => {
               />
             </div>
             <div>
-              <Label htmlFor="doc-pl-number">Número PL *</Label>
+              <Label htmlFor="doc-pl-number">Número PL</Label>
               <Input 
                 id="doc-pl-number"
                 value={document.packingListNumber}
@@ -1151,12 +1203,13 @@ const PackingListGenerator = () => {
               />
             </div>
             <div>
-              <Label htmlFor="doc-po-number">Número PO</Label>
+              <Label htmlFor="doc-po-number">PO (Processo) *</Label>
               <Input 
                 id="doc-po-number"
                 value={document.poNumber}
                 onChange={(e) => setDocument({...document, poNumber: e.target.value})}
                 placeholder="PO-2025-001"
+                required
               />
             </div>
             <div>

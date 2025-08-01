@@ -7,6 +7,14 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 **Communication Style**: Simple, everyday language (user is non-technical)
 
 ## Recent Changes (August 1, 2025)
+- **Packing List & Commercial Invoice System Enhancement**: Major improvements to import documentation system
+  - **Phone Fields Added**: Phone fields added to both "Sold To/Ship To" and "Ordered By" sections with bilingual labels
+  - **PDF Field Optimization**: Implemented smart field hiding - empty/unfilled fields are automatically excluded from PDF output
+  - **PO Field Updates**: Changed "Número PO" to "PO (Processo)" with mandatory validation, made "Número PL" optional
+  - **Bilingual Interface**: Complete bilingual system with Portuguese form labels and English PDF labels for international compliance
+  - **Ordered By Separation**: Full separation of "Ordered By" from "Sold To/Ship To" with independent data fields and PDF sections
+  - **Enhanced PDF Functions**: Refactored PDF generation with modular rendering functions for cleaner, dynamic field display
+  - **Database Schema Update**: Added orderedByData field to schema with backward compatibility for existing documents
 - **Amazon Customer Service Webhook Migration**: Migrated from AI providers to webhook system
   - Updated backend to use webhook: https://n8n.guivasques.app/webhook-test/amazon-cs-email-helper
   - Replaced Anthropic Claude integration with n8n webhook processing

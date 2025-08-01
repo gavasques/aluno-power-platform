@@ -41,6 +41,7 @@ export interface ConsigneeInfo {
   address: string;
   city: string;
   country: string;
+  phone?: string;
   cnpj: string;
   state?: string;
   cep?: string;
@@ -51,6 +52,7 @@ export interface OrderedByInfo {
   address: string;
   city: string;
   country: string;
+  phone?: string;
   cnpj: string;
   state?: string;
   cep?: string;
