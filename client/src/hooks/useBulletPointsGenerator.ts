@@ -6,6 +6,28 @@ import type { Agent } from '@shared/schema';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
 import { logger } from '@/utils/logger';
 
+// Mapeamento de códigos de país para API Amazon
+const mapCountryCodeForAmazon = (countryCode: string): string => {
+  const mapping: Record<string, string> = {
+    'GB': 'UK', // Reino Unido
+    'AE': 'AE', // Emirados Árabes
+    'SA': 'SA', // Arábia Saudita
+    'EG': 'EG', // Egito
+    'TR': 'TR', // Turquia
+    'SE': 'SE', // Suécia
+    'PL': 'PL', // Polônia
+    'BE': 'BE', // Bélgica
+    'CL': 'CL', // Chile
+    'NL': 'NL', // Holanda
+    'AU': 'AU', // Austrália
+    'JP': 'JP', // Japão
+    'SG': 'SG', // Singapura
+    'IN': 'IN', // Índia
+  };
+  
+  return mapping[countryCode] || countryCode;
+};
+
 interface UseBulletPointsGeneratorProps {
   agent?: Agent;
 }
@@ -29,7 +51,7 @@ interface GenerationState {
   reviewsData: string;
   isExtractingReviews: boolean;
   extractionProgress: number;
-  asinList: string[];
+  asinList: Array<{asin: string; country: string}>;
 }
 
 const BULLET_POINTS_PROMPT = `# PROMPT OTIMIZADO: BULLET POINTS DE ALTA CONVERSÃO PARA AMAZON
@@ -495,11 +517,15 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       const maxPagesPerAsin = 2; // 2 páginas por ASIN para múltiplos ASINs
       
       for (let asinIndex = 0; asinIndex < state.asinList.length; asinIndex++) {
-        const currentAsin = state.asinList[asinIndex];
+        const asinData = state.asinList[asinIndex];
+        const currentAsin = asinData.asin;
+        const currentCountry = asinData.country;
         
         // Atualizar progresso baseado no ASIN atual
         const baseProgress = (asinIndex / totalAsins) * 100;
         updateState({ extractionProgress: baseProgress });
+        
+        console.log(`🔍 [BULLET_POINTS] Extraindo reviews - ASIN: ${currentAsin}, País: ${currentCountry}`);
         
         for (let page = 1; page <= maxPagesPerAsin; page++) {
           const pageProgress = baseProgress + ((page / maxPagesPerAsin) * (100 / totalAsins));
@@ -514,24 +540,25 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
             body: JSON.stringify({
               asin: currentAsin,
               page: page,
-              country: state.country,
+              country: mapCountryCodeForAmazon(currentCountry),
               sort_by: 'MOST_RECENT'
             })
           });
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            console.warn(`Erro ao extrair reviews do ASIN ${currentAsin}, página ${page}:`, errorData.message);
+            console.warn(`Erro ao extrair reviews do ASIN ${currentAsin} (${currentCountry}), página ${page}:`, errorData.message);
             continue; // Continuar com próxima página/ASIN em caso de erro
           }
 
           const data = await response.json();
           
           if (data.success && data.reviews && data.reviews.length > 0) {
-            // Adicionar informação do ASIN às reviews
+            // Adicionar informação do ASIN e país às reviews
             const reviewsWithAsin = data.reviews.map((review: any) => ({
               ...review,
-              source_asin: currentAsin
+              source_asin: currentAsin,
+              source_country: currentCountry
             }));
             allReviewsData.push(...reviewsWithAsin);
           }
@@ -547,9 +574,9 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         throw new Error('Nenhuma avaliação encontrada para os ASINs informados');
       }
 
-      // Formatar reviews em texto com informação do ASIN
+      // Formatar reviews em texto com informação do ASIN e país
       const formattedReviews = allReviewsData.map((review, index) => 
-        `Avaliação ${index + 1} (ASIN: ${review.source_asin}):
+        `Avaliação ${index + 1} (ASIN: ${review.source_asin} - ${review.source_country}):
 Título: ${review.review_title || 'Sem título'}
 Nota: ${review.review_star_rating || 'Sem nota'}
 Comentário: ${review.review_comment || 'Sem comentário'}
@@ -575,7 +602,7 @@ Comentário: ${review.review_comment || 'Sem comentário'}
         description: error instanceof Error ? error.message : "Erro desconhecido",
       });
     }
-  }, [state.asinList, state.country, toast, updateState]);
+  }, [state.asinList, toast, updateState]);
 
   return {
     state,

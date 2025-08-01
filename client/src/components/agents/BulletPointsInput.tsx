@@ -26,11 +26,11 @@ interface ProductFormData {
   reviewsData: string;
   isExtractingReviews: boolean;
   extractionProgress: number;
-  asinList: string[];
+  asinList: Array<{asin: string; country: string}>;
 }
 
 interface OnChangeFunction {
-  (field: keyof ProductFormData, value: string | string[]): void;
+  (field: keyof ProductFormData, value: string | Array<{asin: string; country: string}>): void;
 }
 
 interface BulletPointsInputProps {
@@ -59,15 +59,18 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
       return; // ASIN inválido
     }
     
-    if (formData.asin.trim() && !formData.asinList.includes(formData.asin.trim())) {
-      const newAsinList = [...formData.asinList, formData.asin.trim()];
+    if (formData.asin.trim() && !formData.asinList.some(item => item.asin === formData.asin.trim())) {
+      const newAsinList = [...formData.asinList, { 
+        asin: formData.asin.trim(), 
+        country: formData.country 
+      }];
       onChange('asinList', newAsinList);
       onChange('asin', '');
     }
   };
 
   const handleRemoveAsin = (asinToRemove: string) => {
-    const newAsinList = formData.asinList.filter(asin => asin !== asinToRemove);
+    const newAsinList = formData.asinList.filter(item => item.asin !== asinToRemove);
     onChange('asinList', newAsinList);
   };
 
@@ -293,7 +296,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
                     <Button
                       type="button"
                       onClick={handleAddAsin}
-                      disabled={!formData.asin.trim() || !/^[A-Z0-9]{10}$/.test(formData.asin.trim()) || formData.asinList.includes(formData.asin.trim())}
+                      disabled={!formData.asin.trim() || !/^[A-Z0-9]{10}$/.test(formData.asin.trim()) || formData.asinList.some(item => item.asin === formData.asin.trim())}
                       variant="outline"
                       size="sm"
                       className="px-3"
@@ -303,12 +306,12 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
                   </div>
                   {formData.asinList.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {formData.asinList.map((asin) => (
-                        <Badge key={asin} variant="secondary" className="flex items-center gap-1">
-                          {asin}
+                      {formData.asinList.map((item) => (
+                        <Badge key={item.asin} variant="secondary" className="flex items-center gap-1">
+                          {item.asin} ({item.country})
                           <button
                             type="button"
-                            onClick={() => handleRemoveAsin(asin)}
+                            onClick={() => handleRemoveAsin(item.asin)}
                             className="ml-1 hover:text-red-600"
                           >
                             <X className="h-3 w-3" />
