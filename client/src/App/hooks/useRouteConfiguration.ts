@@ -205,6 +205,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
     AGENT_ROUTES: [
       { path: '/agentes', component: lazyComponents.AgentsPage, isProtected: true },
       { path: '/agentes/:id', component: lazyComponents.AgentProcessorPage, isProtected: true },
+      { path: '/agentes/bullet-points-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
       { path: '/agents/html-description-generator', component: lazyComponents.HtmlDescriptionAgent, isProtected: true },
       { path: '/agents/bullet-point-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
       { path: '/agents/bullet-points-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
