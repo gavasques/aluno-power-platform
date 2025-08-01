@@ -2116,11 +2116,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const webhookResult = await webhookResponse.json();
       const processingTime = Date.now() - startTime;
-      const responseText = webhookResult.response || webhookResult.email_response || '';
+      const responseText = webhookResult.response || webhookResult.email_response || webhookResult.output || '';
 
       console.log('🎯 [CUSTOMER_SERVICE] Webhook response received:', { 
         responseLength: responseText.length,
-        processingTime: `${processingTime}ms` 
+        processingTime: `${processingTime}ms`,
+        webhookResult: JSON.stringify(webhookResult, null, 2)
       });
 
       // Fixed values for webhook processing
@@ -2173,9 +2174,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log usage for tracking (existing)
       try {
-        const { v4: uuidv4 } = await import('uuid');
+        const crypto = await import('crypto');
+        const usageId = crypto.randomUUID();
+        
         await storage.createAgentUsage({
-          id: uuidv4(),
+          id: usageId,
           agentId: 'amazon-customer-service',
           userId: user.id.toString(),
           userName: user.name || user.username,
@@ -2186,6 +2189,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           processingTimeMs: processingTime,
           status: 'success'
         });
+        
+        console.log(`✅ [CUSTOMER_SERVICE] Usage logged with ID: ${usageId}`);
       } catch (logError) {
         console.error('❌ [CUSTOMER_SERVICE] Error logging usage:', logError);
       }
