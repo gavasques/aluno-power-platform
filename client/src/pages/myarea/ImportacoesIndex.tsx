@@ -58,16 +58,7 @@ const importacaoItems: ImportacaoItem[] = [
     isAvailable: true,
     isNew: true,
   },
-  {
-    id: "gerador-po-proforma",
-    title: "Gerador de PO, Proforma Invoice",
-    description: "Gere Purchase Orders e Proforma Invoices profissionais para seus fornecedores",
-    href: "/importacoes/gerador-po-proforma",
-    icon: FileText,
-    category: "Documentos",
-    isAvailable: false, // Será implementado em breve
-    isNew: true,
-  },
+
   {
     id: "gestao-fornecedores",
     title: "CRM de Fornecedores",
