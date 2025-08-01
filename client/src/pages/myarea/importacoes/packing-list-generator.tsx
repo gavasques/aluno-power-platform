@@ -29,7 +29,7 @@ import {
   mockPackingListData 
 } from "@/types/packingList";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const PackingListGenerator = () => {
   const { toast } = useToast();
@@ -323,7 +323,7 @@ const PackingListGenerator = () => {
       ]);
       
       // Criar tabela
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: 105,
         head: [[
           'Numbers',
