@@ -359,18 +359,38 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       const data = await response.json();
       const duration = Date.now() - startTime;
 
-      // Extrair os bullet points gerados do webhook
+      // Processar resposta do webhook para extrair bullet points formatados
       let responseText = '';
-      if (data.bulletPoints) {
+      
+      // Tentar extrair de diferentes estruturas de resposta
+      if (data.bullet_points) {
+        responseText = data.bullet_points;
+      } else if (data.bulletPoints) {
         responseText = data.bulletPoints;
       } else if (data.response) {
-        responseText = data.response;
+        // Se response é uma string JSON, tentar fazer parse
+        try {
+          const parsed = JSON.parse(data.response);
+          responseText = parsed.bullet_points || parsed.bulletPoints || data.response;
+        } catch {
+          responseText = data.response;
+        }
       } else if (data.content) {
         responseText = data.content;
       } else if (data.message) {
         responseText = data.message;
       } else {
         responseText = JSON.stringify(data);
+      }
+
+      // Limpar formatação e caracteres de escape
+      if (typeof responseText === 'string') {
+        responseText = responseText
+          .replace(/\\n/g, '\n')           // Converter \n para quebras de linha reais
+          .replace(/\\"/g, '"')           // Converter \" para aspas normais
+          .replace(/&#x5C;n/g, '\n')      // Converter entidades HTML para quebras de linha
+          .replace(/&#x5C;/g, '\\')       // Converter outras entidades de barra
+          .trim();                        // Remover espaços extras
       }
 
       logger.debug('🎯 [BULLET_POINTS] Structured data sent to webhook:', {
