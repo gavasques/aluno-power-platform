@@ -12,10 +12,14 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - Removed technical configuration display (Model, Temperature, Max Tokens, Cost) from user interface
   - Updated field label from "Informações" to "Informações do produto" with enhanced placeholder text
   - **Amazon Reviews Integration**: Added optional Amazon reviews extraction functionality
-    - ASIN input field with country selection (12 countries supported)
-    - Extracts up to 3 pages of reviews with visual progress indicator
+    - Multiple ASIN support with individual country selection per ASIN
+    - Tag-based interface showing "ASIN (Country)" for each added product
+    - Robust extraction system that processes ALL ASINs even if some fail
+    - Intelligent error handling with maximum 3 consecutive errors per ASIN
+    - Extracts up to 2 pages per ASIN with visual progress indicator
     - Reviews data automatically integrated into JSON structure sent to webhook
     - Structured data format: `informacoes_basicas` + `avaliacoes_clientes` in JSON
+    - Country mapping function ensures correct API calls for each marketplace
   - Enhanced logging and debug information for webhook data structure
   - Maintained compatibility with existing webhook API while expanding capabilities
 - **Previous Changes (January 31, 2025)**:

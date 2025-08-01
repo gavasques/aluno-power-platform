@@ -527,47 +527,77 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         
         console.log(`🔍 [BULLET_POINTS] Extraindo reviews - ASIN: ${currentAsin}, País: ${currentCountry}`);
         
+        let asinReviewCount = 0;
+        let consecutiveErrors = 0;
+        const maxConsecutiveErrors = 3; // Máximo de erros consecutivos antes de pular ASIN
+        
         for (let page = 1; page <= maxPagesPerAsin; page++) {
           const pageProgress = baseProgress + ((page / maxPagesPerAsin) * (100 / totalAsins));
           updateState({ extractionProgress: pageProgress });
           
-          const response = await fetch('/api/amazon-reviews/extract', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-            },
-            body: JSON.stringify({
-              asin: currentAsin,
-              page: page,
-              country: mapCountryCodeForAmazon(currentCountry),
-              sort_by: 'MOST_RECENT'
-            })
-          });
+          try {
+            const response = await fetch('/api/amazon-reviews/extract', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+              },
+              body: JSON.stringify({
+                asin: currentAsin,
+                page: page,
+                country: mapCountryCodeForAmazon(currentCountry),
+                sort_by: 'MOST_RECENT'
+              })
+            });
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.warn(`Erro ao extrair reviews do ASIN ${currentAsin} (${currentCountry}), página ${page}:`, errorData.message);
-            continue; // Continuar com próxima página/ASIN em caso de erro
-          }
+            if (!response.ok) {
+              consecutiveErrors++;
+              const errorData = await response.json().catch(() => ({}));
+              console.warn(`⚠️ [BULLET_POINTS] Erro página ${page} - ASIN ${currentAsin} (${currentCountry}):`, errorData.message || response.statusText);
+              
+              // Se muitos erros consecutivos, pular para próximo ASIN
+              if (consecutiveErrors >= maxConsecutiveErrors) {
+                console.warn(`⚠️ [BULLET_POINTS] Pulando ASIN ${currentAsin} após ${consecutiveErrors} erros consecutivos`);
+                break;
+              }
+              continue;
+            }
 
-          const data = await response.json();
-          
-          if (data.success && data.reviews && data.reviews.length > 0) {
-            // Adicionar informação do ASIN e país às reviews
-            const reviewsWithAsin = data.reviews.map((review: any) => ({
-              ...review,
-              source_asin: currentAsin,
-              source_country: currentCountry
-            }));
-            allReviewsData.push(...reviewsWithAsin);
+            const data = await response.json();
+            
+            if (data.success && data.reviews && data.reviews.length > 0) {
+              consecutiveErrors = 0; // Reset contador de erros em caso de sucesso
+              
+              // Adicionar informação do ASIN e país às reviews
+              const reviewsWithAsin = data.reviews.map((review: any) => ({
+                ...review,
+                source_asin: currentAsin,
+                source_country: currentCountry
+              }));
+              allReviewsData.push(...reviewsWithAsin);
+              asinReviewCount += reviewsWithAsin.length;
+              
+              console.log(`✅ [BULLET_POINTS] ${reviewsWithAsin.length} reviews extraídas - ASIN: ${currentAsin}, Página: ${page}`);
+            } else {
+              console.log(`ℹ️ [BULLET_POINTS] Página ${page} vazia - ASIN: ${currentAsin}`);
+            }
+            
+          } catch (error) {
+            consecutiveErrors++;
+            console.warn(`❌ [BULLET_POINTS] Erro de rede página ${page} - ASIN ${currentAsin}:`, error);
+            
+            // Se muitos erros consecutivos, pular para próximo ASIN
+            if (consecutiveErrors >= maxConsecutiveErrors) {
+              console.warn(`⚠️ [BULLET_POINTS] Pulando ASIN ${currentAsin} após ${consecutiveErrors} erros consecutivos`);
+              break;
+            }
           }
           
           // Pequena pausa entre requests
-          if (page < maxPagesPerAsin || asinIndex < state.asinList.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 800));
-          }
+          await new Promise(resolve => setTimeout(resolve, 800));
         }
+        
+        console.log(`📊 [BULLET_POINTS] Total extraído ASIN ${currentAsin}: ${asinReviewCount} reviews`);
       }
 
       if (allReviewsData.length === 0) {
@@ -589,9 +619,12 @@ Comentário: ${review.review_comment || 'Sem comentário'}
         extractionProgress: 100
       });
 
+      // Contar ASINs que retornaram reviews
+      const asinsWithReviews = [...new Set(allReviewsData.map(review => review.source_asin))].length;
+      
       toast({
-        title: "✅ Reviews extraídas!",
-        description: `${allReviewsData.length} avaliações de ${totalAsins} ASINs extraídas com sucesso`,
+        title: "✅ Extração concluída!",
+        description: `${allReviewsData.length} avaliações extraídas de ${asinsWithReviews}/${totalAsins} ASINs`,
       });
 
     } catch (error) {
