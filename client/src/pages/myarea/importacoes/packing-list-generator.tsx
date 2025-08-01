@@ -28,6 +28,8 @@ import {
   PackingListData,
   mockPackingListData 
 } from "@/types/packingList";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const PackingListGenerator = () => {
   const { toast } = useToast();
@@ -219,14 +221,10 @@ const PackingListGenerator = () => {
   };
 
   // Gerar PDF
-  const generatePDF = async () => {
+  const generatePDF = () => {
     setIsGeneratingPDF(true);
     
     try {
-      // Importar jsPDF dinamicamente
-      const { default: jsPDF } = await import('jspdf');
-      await import('jspdf-autotable');
-      
       const doc = new jsPDF('landscape', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height;
@@ -436,9 +434,10 @@ const PackingListGenerator = () => {
       
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
       toast({
         title: "Erro ao gerar PDF",
-        description: "Ocorreu um erro ao gerar o documento PDF.",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o documento PDF.",
         variant: "destructive",
       });
     } finally {
