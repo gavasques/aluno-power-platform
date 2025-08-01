@@ -301,48 +301,34 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         .replace('{{PRODUCT_INFO}}', state.textInput || 'Não informado')
         .replace('{{REVIEWS_DATA}}', state.reviewsData || '');
 
-      // Preparar dados estruturados combinados para o webhook
-      const combinedProductInfo = {
-        informacoes_basicas: {
-          nome_produto: state.productName || 'Não informado',
-          marca: state.brand || 'Não informado',
-          publico_alvo: state.targetAudience || 'Não informado',
-          garantia: state.warranty || 'Não informado',
-          palavras_chave: state.keywords || 'Não informado',
-          diferencial_unico: state.uniqueDifferential || 'Não informado',
-          materiais: state.materials || 'Não informado',
-          informacoes_detalhadas: state.textInput || 'Não informado'
-        },
-        avaliacoes_clientes: state.reviewsData ? {
+      // Criar objeto apenas com campos preenchidos
+      const informacoes_basicas: any = {};
+      
+      if (state.productName?.trim()) informacoes_basicas.nome_produto = state.productName.trim();
+      if (state.brand?.trim()) informacoes_basicas.marca = state.brand.trim();
+      if (state.targetAudience?.trim()) informacoes_basicas.publico_alvo = state.targetAudience.trim();
+      if (state.warranty?.trim()) informacoes_basicas.garantia = state.warranty.trim();
+      if (state.keywords?.trim()) informacoes_basicas.palavras_chave = state.keywords.trim();
+      if (state.uniqueDifferential?.trim()) informacoes_basicas.diferencial_unico = state.uniqueDifferential.trim();
+      if (state.materials?.trim()) informacoes_basicas.materiais = state.materials.trim();
+      if (state.textInput?.trim()) informacoes_basicas.informacoes_detalhadas = state.textInput.trim();
+
+      // Preparar dados estruturados apenas com campos preenchidos
+      const combinedProductInfo: any = {
+        informacoes_basicas
+      };
+
+      // Adicionar avaliações apenas se existirem
+      if (state.reviewsData?.trim()) {
+        combinedProductInfo.avaliacoes_clientes = {
           dados_disponiveis: true,
           total_avaliacoes: state.reviewsData.split('---').length - 1,
           conteudo: state.reviewsData
-        } : {
-          dados_disponiveis: false,
-          total_avaliacoes: 0,
-          conteudo: 'Nenhuma avaliação disponível'
-        }
-      };
+        };
+      }
 
       const webhookData = {
-        productName: state.productName || 'Não informado',
-        brand: state.brand || 'Não informado',
-        targetAudience: state.targetAudience || 'Não informado',
-        warranty: state.warranty || 'Não informado',
-        keywords: state.keywords || 'Não informado',
-        uniqueDifferential: state.uniqueDifferential || 'Não informado',
-        materials: state.materials || 'Não informado',
-        productInfo: JSON.stringify(combinedProductInfo, null, 2),
-        reviewsData: state.reviewsData || '',
-        config: {
-          provider: currentConfig.provider,
-          model: currentConfig.model,
-          temperature: currentConfig.temperature,
-          maxTokens: currentConfig.maxTokens
-        },
-        prompt: prompt,
-        userId: user?.id,
-        timestamp: new Date().toISOString()
+        productInfo: JSON.stringify(combinedProductInfo, null, 2)
       };
 
       const response = await fetch('https://n8n.guivasques.app/webhook-test/gerar-bullet-points', {

@@ -20,6 +20,12 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
     - Reviews data automatically integrated into JSON structure sent to webhook
     - Structured data format: `informacoes_basicas` + `avaliacoes_clientes` in JSON
     - Country mapping function ensures correct API calls for each marketplace
+  - **Webhook Payload Optimization**: Fixed API response parsing and cleaned webhook data
+    - Corrected review extraction from `data.data.reviews` structure
+    - Optimized payload to send only filled form fields and extracted reviews
+    - Removed technical metadata (config, timestamps, userId) from webhook
+    - Streamlined JSON structure for cleaner n8n processing
+  - Removed duplicate AgentProcessorPage.tsx causing interface conflicts
   - Enhanced logging and debug information for webhook data structure
   - Maintained compatibility with existing webhook API while expanding capabilities
 - **Previous Changes (January 31, 2025)**:
