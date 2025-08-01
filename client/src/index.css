@@ -98,6 +98,25 @@
     overflow-x: hidden;
   }
 
+  /* Remove any unwanted pseudo-elements or decorative backgrounds */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  /* Ensure no floating or absolutely positioned elements interfere */
+  .dashboard-content {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+  }
+
+  /* Remove any potential SVG overlays or decorative elements */
+  svg.decorative-overlay,
+  .background-decoration,
+  .floating-decoration {
+    display: none !important;
+  }
+
   @media (min-width: 1024px) {
     .login-card-responsive {
       max-width: 28rem; /* 448px */

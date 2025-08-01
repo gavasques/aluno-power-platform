@@ -171,7 +171,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <div className="w-full max-w-7xl mx-auto px-4 py-6">
+      <div className="w-full max-w-7xl mx-auto px-4 py-6 dashboard-content">
         
         {/* Header Section */}
         <div className="mb-6">
