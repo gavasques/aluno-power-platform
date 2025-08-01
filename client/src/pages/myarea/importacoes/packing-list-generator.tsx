@@ -348,16 +348,16 @@ const PackingListGenerator = () => {
           fontStyle: 'bold'
         },
         columnStyles: {
-          0: { halign: 'center', cellWidth: 15 },
-          1: { cellWidth: 20 },
-          2: { cellWidth: 25 },
-          3: { halign: 'right', cellWidth: 20 },
-          4: { halign: 'right', cellWidth: 20 },
-          5: { halign: 'right', cellWidth: 20 },
-          6: { cellWidth: 80 },
-          7: { halign: 'center', cellWidth: 20 },
-          8: { halign: 'center', cellWidth: 15 },
-          9: { halign: 'center', cellWidth: 15 }
+          0: { halign: 'center', cellWidth: 12 },
+          1: { cellWidth: 18 },
+          2: { cellWidth: 22 },
+          3: { halign: 'right', cellWidth: 18 },
+          4: { halign: 'right', cellWidth: 18 },
+          5: { halign: 'right', cellWidth: 16 },
+          6: { cellWidth: 75 },
+          7: { halign: 'center', cellWidth: 16 },
+          8: { halign: 'center', cellWidth: 14 },
+          9: { halign: 'center', cellWidth: 14 }
         },
         alternateRowStyles: {
           fillColor: [245, 245, 245]
