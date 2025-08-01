@@ -309,7 +309,7 @@ export default function InternationalSupplierForm() {
               </div>
             </div>
 
-            {/* E-mail em linha separada */}
+            {/* E-mail e Website */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
@@ -321,10 +321,7 @@ export default function InternationalSupplierForm() {
                   placeholder="email@empresa.com"
                 />
               </div>
-            </div>
 
-            {/* Website e Categoria */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="website">Website</Label>
                 <Input
@@ -334,7 +331,10 @@ export default function InternationalSupplierForm() {
                   placeholder="https://www.empresa.com"
                 />
               </div>
+            </div>
 
+            {/* Categoria e Status */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="categoryId">Categoria</Label>
                 <select
@@ -354,20 +354,19 @@ export default function InternationalSupplierForm() {
                   ))}
                 </select>
               </div>
-            </div>
 
-            {/* Status */}
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                value={formData.status}
-                onChange={(e) => handleInputChange('status', e.target.value as 'ativo' | 'inativo')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
-              </select>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                  id="status"
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value as 'ativo' | 'inativo')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                </select>
+              </div>
             </div>
 
             {/* Descrição */}
