@@ -21,8 +21,10 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       <UserBreadcrumbs />
-      <main className="flex-1">
-        {children}
+      <main className="flex-1 w-full">
+        <div className="w-full">
+          {children}
+        </div>
       </main>
       <Footer variant="internal" />
     </div>

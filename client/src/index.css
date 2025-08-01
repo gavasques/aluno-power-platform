@@ -73,6 +73,31 @@
     max-width: 20rem; /* 320px */
   }
 
+  /* Ensure full width containers */
+  .container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .dashboard-container {
+    width: 100%;
+    max-width: 80rem; /* 1280px */
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Remove unwanted margins and paddings */
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   @media (min-width: 1024px) {
     .login-card-responsive {
       max-width: 28rem; /* 448px */

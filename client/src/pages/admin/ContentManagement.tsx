@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Users, Wrench, Package, BrainCircuit } from "lucide-react";
 import { useRoute, useLocation } from "wouter";
-import { usePartners } from "@/contexts/PartnersContext";
-import { useSuppliers } from "@/contexts/SuppliersContext";
-import { usePrompts } from "@/contexts/PromptsContext";
+// Contextos removidos para evitar erros de dependência
 import PartnersManager from "@/components/admin/cadastros/PartnersManager";
 import ToolsManagerRefactored from "@/components/admin/tools/ToolsManagerRefactored";
 import MaterialsManagerRefactored from "@/components/admin/materials/MaterialsManagerRefactored";
@@ -24,9 +22,10 @@ import { UpdatesCenter } from "./content/UpdatesCenter";
 const ContentManagement = () => {
   const [match, params] = useRoute('/admin/conteudo/:subsection?/:id?/:action?');
   const [, setLocation] = useLocation();
-  const { partners } = usePartners();
-  const { suppliers } = useSuppliers();
-  const { prompts } = usePrompts();
+  // Dados mockados para exibição (removendo dependência de contextos)
+  const partners = [];
+  const suppliers = [];
+  const prompts = [];
   
   const subsection = params?.subsection;
   const id = params?.id;

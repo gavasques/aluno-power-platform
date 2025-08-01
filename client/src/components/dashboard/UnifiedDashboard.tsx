@@ -112,7 +112,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   if (isLoading && variant === 'full') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-        <div className="container mx-auto px-4 py-4">
+        <div className="w-full max-w-7xl mx-auto px-4 py-6">
           <div className="animate-pulse space-y-4">
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
@@ -153,7 +153,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   if (!userSummary && variant === 'full') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-        <div className="container mx-auto px-4 py-4">
+        <div className="w-full max-w-7xl mx-auto px-4 py-6">
           <Card className="max-w-md mx-auto">
             <CardContent className="p-6 text-center">
               <AlertTriangle className="h-8 w-8 text-red-600 mx-auto mb-4" />
@@ -171,7 +171,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <div className="container mx-auto px-4 py-4">
+      <div className="w-full max-w-7xl mx-auto px-4 py-6">
         
         {/* Header Section */}
         <div className="mb-6">
