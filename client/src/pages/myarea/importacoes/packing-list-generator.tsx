@@ -376,6 +376,58 @@ const PackingListGenerator = () => {
           if (data.cell.text[0] && data.column.index === 0 && data.cell.text[0] !== 'TOTAL' && data.cell.text[0] !== '') {
             data.cell.styles.fillColor = [174, 214, 241];
           }
+        },
+        didDrawCell: function(data: any) {
+          // Implementar células mescladas visualmente - simular Excel
+          const cellsToMerge = [0, 3, 4, 5, 7]; // Numbers, Total net weight, Total gross weight, Total volume, Number of cartons
+          
+          if (cellsToMerge.includes(data.column.index) && data.row.index < tableData.length - 1) {
+            const currentRowData = tableData[data.row.index];
+            const isEmptyCell = !currentRowData[data.column.index] || currentRowData[data.column.index] === '';
+            
+            if (isEmptyCell) {
+              // Obter informações da célula
+              const cellY = data.cell.y;
+              const cellX = data.cell.x;
+              const cellWidth = data.cell.width;
+              const cellHeight = data.cell.height;
+              
+              // Determinar cor de fundo baseada no padrão zebrado
+              const bgColor = data.row.index % 2 === 0 ? [255, 255, 255] : [245, 245, 245];
+              
+              // Preencher a célula com a cor de fundo (remove qualquer conteúdo)
+              doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+              doc.rect(cellX, cellY, cellWidth, cellHeight, 'F');
+              
+              // Remover borda superior desenhando linha na cor de fundo
+              doc.setDrawColor(bgColor[0], bgColor[1], bgColor[2]);
+              doc.setLineWidth(0.8);
+              doc.line(cellX, cellY, cellX + cellWidth, cellY);
+              
+              // Desenhar bordas laterais sutis
+              doc.setDrawColor(220, 220, 220);
+              doc.setLineWidth(0.2);
+              doc.line(cellX, cellY, cellX, cellY + cellHeight); // Esquerda
+              doc.line(cellX + cellWidth, cellY, cellX + cellWidth, cellY + cellHeight); // Direita
+              
+              // Desenhar borda inferior sutil
+              doc.setDrawColor(220, 220, 220);
+              doc.line(cellX, cellY + cellHeight, cellX + cellWidth, cellY + cellHeight);
+            } else {
+              // Para células com conteúdo, adiciona uma borda mais destacada
+              if (data.column.index === 0 && currentRowData[data.column.index] !== 'TOTAL') {
+                // Destacar células de número da caixa
+                const cellY = data.cell.y;
+                const cellX = data.cell.x;
+                const cellWidth = data.cell.width;
+                const cellHeight = data.cell.height;
+                
+                doc.setDrawColor(52, 152, 219);
+                doc.setLineWidth(1.5);
+                doc.rect(cellX, cellY, cellWidth, cellHeight, 'S');
+              }
+            }
+          }
         }
       });
       
