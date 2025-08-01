@@ -13,11 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'wouter';
 import { Helmet } from 'react-helmet-async';
-import { Footer } from '@/components/layout/Footer';
-import { ForgotPasswordCodeForm } from '@/components/auth/ForgotPasswordCodeForm';
+import { useAuth } from '@/hooks/useAuth';
 
 // Import components
-import { FeatureCard } from '../FeatureCard/FeatureCard';
 import { RegisterModal } from '../RegisterModal/RegisterModal';
 import { ForgotPasswordModal } from '../ForgotPasswordModal/ForgotPasswordModal';
 
@@ -25,9 +23,7 @@ import { ForgotPasswordModal } from '../ForgotPasswordModal/ForgotPasswordModal'
 import { 
   LoginFormProps, 
   RegisterModalProps, 
-  ModalStates,
-  FeatureCardData,
-  FEATURE_COLORS 
+  ModalStates
 } from '../../types';
 
 import logoPath from '@assets/Asset 14-8_1752953662731.png';
@@ -48,46 +44,27 @@ export const LoginFormPresentation = ({
   registerProps,
   modalProps
 }: LoginFormPresentationProps) => {
+  
+  // ===== AUTHENTICATION CHECK =====
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  
+  // Se o usuário já está logado, não mostra elementos internos
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Você já está logado!</h2>
+          <Link href="/dashboard">
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              Ir para Dashboard
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-  // ===== FEATURES DATA =====
-  const features: FeatureCardData[] = [
-    {
-      icon: <Users className="h-6 w-6 text-white" />,
-      title: "Gestão de Fornecedores",
-      description: "Gerencie seus fornecedores internacionais com facilidade e mantenha todas as informações organizadas em um só lugar.",
-      color: FEATURE_COLORS.BLUE
-    },
-    {
-      icon: <BarChart3 className="h-6 w-6 text-white" />,
-      title: "Análise de Dados",
-      description: "Dashboards intuitivos e relatórios detalhados para tomada de decisões estratégicas baseadas em dados reais.",
-      color: FEATURE_COLORS.GREEN
-    },
-    {
-      icon: <Zap className="h-6 w-6 text-white" />,
-      title: "Automação Inteligente",
-      description: "Automatize processos repetitivos e otimize seu tempo com nossa tecnologia de ponta.",
-      color: FEATURE_COLORS.PURPLE
-    },
-    {
-      icon: <ShoppingBag className="h-6 w-6 text-white" />,
-      title: "E-commerce Integrado",
-      description: "Conecte facilmente suas lojas online e gerencie produtos, pedidos e estoque de forma centralizada.",
-      color: FEATURE_COLORS.ORANGE
-    },
-    {
-      icon: <TrendingUp className="h-6 w-6 text-white" />,
-      title: "Crescimento Sustentável",
-      description: "Ferramentas avançadas para escalar seu negócio de forma inteligente e sustentável.",
-      color: FEATURE_COLORS.INDIGO
-    },
-    {
-      icon: <Shield className="h-6 w-6 text-white" />,
-      title: "Segurança Empresarial",
-      description: "Proteja seus dados com nossa infraestrutura segura e conforme com padrões internacionais.",
-      color: FEATURE_COLORS.RED
-    }
-  ];
+
 
   return (
     <>
@@ -106,51 +83,29 @@ export const LoginFormPresentation = ({
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
         
-        {/* Header - Hidden on mobile to avoid duplication */}
-        <header className="hidden md:block bg-white border-b border-gray-200 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link href="/">
-                <div className="flex items-center gap-3">
-                  <img src={logoPath} alt="Logo" className="h-8 w-auto" />
-                  <span className="text-xl font-bold text-gray-900">Guilherme Vasques</span>
-                </div>
-              </Link>
-              
-              <nav className="flex items-center gap-6">
-                <Link href="/recursos" className="text-gray-600 hover:text-gray-900 font-medium">Recursos</Link>
-                <Link href="/precos" className="text-gray-600 hover:text-gray-900 font-medium">Preços</Link>
-                <Link href="/contato" className="text-gray-600 hover:text-gray-900 font-medium">Contato</Link>
-              </nav>
-            </div>
-          </div>
-        </header>
-
-        {/* Mobile Header - Simple logo only */}
-        <div className="md:hidden bg-white border-b border-gray-200 py-4">
+        {/* Simple Public Header */}
+        <div className="bg-white border-b border-gray-200 py-4">
           <div className="max-w-7xl mx-auto px-4 text-center">
-            <Link href="/">
-              <div className="flex items-center justify-center gap-3">
-                <img src={logoPath} alt="Logo" className="h-8 w-auto" />
-                <span className="text-xl font-bold text-gray-900">Guilherme Vasques</span>
-              </div>
-            </Link>
+            <div className="flex items-center justify-center gap-3">
+              <img src={logoPath} alt="Logo" className="h-8 w-auto" />
+              <span className="text-xl font-bold text-gray-900">Plataforma de E-commerce</span>
+            </div>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
-            {/* Hero Section */}
+            {/* Hero Section - Public Version */}
             <div className="space-y-8">
               <div>
                 <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                  Transforme seu 
-                  <span className="text-blue-600"> E-commerce</span> com 
-                  <span className="text-green-600"> Inteligência</span>
+                  Acesse sua
+                  <span className="text-blue-600"> Plataforma</span> de
+                  <span className="text-green-600"> E-commerce</span>
                 </h1>
                 <p className="text-xl text-gray-600 mt-6 leading-relaxed">
-                  Plataforma completa para gestão de fornecedores, análise de dados e automação de processos com IA avançada.
+                  Entre na sua conta para acessar suas ferramentas de gestão e análise.
                 </p>
               </div>
 
@@ -161,15 +116,7 @@ export const LoginFormPresentation = ({
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
                 >
                   <UserPlus className="h-5 w-5 mr-2" />
-                  Criar Conta Gratuita
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="px-8 py-3"
-                >
-                  <Crown className="h-5 w-5 mr-2" />
-                  Conhecer Planos
+                  Criar Conta
                 </Button>
               </div>
             </div>
@@ -280,26 +227,22 @@ export const LoginFormPresentation = ({
             </div>
           </div>
 
-          {/* Features Section */}
-          <div className="mt-20">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Por que escolher nossa plataforma?
-              </h2>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                Descubra as ferramentas que vão revolucionar a gestão do seu e-commerce
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((feature, index) => (
-                <FeatureCard key={index} {...feature} />
-              ))}
-            </div>
+          {/* Simple Footer for Public Page */}
+          <div className="mt-16 text-center">
+            <p className="text-gray-600">
+              Precisa de ajuda? Entre em contato conosco.
+            </p>
           </div>
         </div>
 
-        <Footer />
+        {/* Simple Footer */}
+        <footer className="bg-gray-50 border-t border-gray-200 py-8">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <p className="text-gray-600">
+              © 2025 Plataforma de E-commerce. Todos os direitos reservados.
+            </p>
+          </div>
+        </footer>
       </div>
 
       {/* Modals */}
