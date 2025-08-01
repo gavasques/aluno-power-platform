@@ -23,6 +23,12 @@ interface GenerationState {
   isGenerating: boolean;
   generatedBulletPoints: string;
   showReplaceDialog: boolean;
+  // Amazon Reviews fields
+  asin: string;
+  country: string;
+  reviewsData: string;
+  isExtractingReviews: boolean;
+  extractionProgress: number;
 }
 
 const BULLET_POINTS_PROMPT = `# PROMPT OTIMIZADO: BULLET POINTS DE ALTA CONVERSÃO PARA AMAZON
@@ -146,7 +152,8 @@ Garantia = {{WARRANTY}}
 Palavras chave = {{KEYWORDS}}
 Diferencial Unico = {{UNIQUE_DIFFERENTIAL}}
 Materiais = {{MATERIALS}}
-Informações do Produto = {{PRODUCT_INFO}}`;
+Informações do Produto = {{PRODUCT_INFO}}
+Avaliações dos Clientes = {{REVIEWS_DATA}}`;
 
 export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProps) => {
   const [state, setState] = useState<GenerationState>({
@@ -162,6 +169,12 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     isGenerating: false,
     generatedBulletPoints: '',
     showReplaceDialog: false,
+    // Amazon Reviews fields
+    asin: '',
+    country: 'BR',
+    reviewsData: '',
+    isExtractingReviews: false,
+    extractionProgress: 0,
   });
 
   const [agentConfig, setAgentConfig] = useState({
@@ -250,7 +263,8 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         .replace('{{KEYWORDS}}', state.keywords || 'Não informado')
         .replace('{{UNIQUE_DIFFERENTIAL}}', state.uniqueDifferential || 'Não informado')
         .replace('{{MATERIALS}}', state.materials || 'Não informado')
-        .replace('{{PRODUCT_INFO}}', state.textInput || 'Não informado');
+        .replace('{{PRODUCT_INFO}}', state.textInput || 'Não informado')
+        .replace('{{REVIEWS_DATA}}', state.reviewsData || '');
 
       // Preparar dados estruturados para o webhook
       const webhookData = {
@@ -262,6 +276,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         uniqueDifferential: state.uniqueDifferential || 'Não informado',
         materials: state.materials || 'Não informado',
         productInfo: state.textInput || 'Não informado',
+        reviewsData: state.reviewsData || '',
         config: {
           provider: currentConfig.provider,
           model: currentConfig.model,
@@ -316,6 +331,10 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
       await logAIGeneration({
         featureCode: FEATURE_CODE,
+        provider: 'webhook',
+        model: 'n8n-bullet-points',
+        prompt: prompt,
+        response: responseText,
         inputTokens: estimatedInputTokens,
         outputTokens: estimatedOutputTokens,
         totalTokens: estimatedInputTokens + estimatedOutputTokens,
@@ -394,11 +413,117 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       textInput: '',
       targetAudience: '',
       keywords: '',
+      uniqueDifferential: '',
+      materials: '',
+      warranty: '',
       bulletPointsOutput: '',
       generatedBulletPoints: '',
-      showReplaceDialog: false
+      showReplaceDialog: false,
+      asin: '',
+      country: 'BR',
+      reviewsData: '',
+      isExtractingReviews: false,
+      extractionProgress: 0
     });
-  }, [updateState]);
+    toast({
+      title: "✅ Campos limpos",
+      description: "Todos os campos foram limpos com sucesso",
+    });
+  }, [toast, updateState]);
+
+  const extractAmazonReviews = useCallback(async () => {
+    if (!state.asin.trim()) {
+      toast({
+        variant: "destructive",
+        title: "❌ ASIN obrigatório",
+        description: "Informe o ASIN do produto para extrair reviews",
+      });
+      return;
+    }
+
+    // Validar formato do ASIN
+    if (!/^[A-Z0-9]{10}$/.test(state.asin.trim())) {
+      toast({
+        variant: "destructive",
+        title: "❌ ASIN inválido",
+        description: "ASIN deve ter 10 caracteres alfanuméricos",
+      });
+      return;
+    }
+
+    updateState({ isExtractingReviews: true, extractionProgress: 0 });
+
+    try {
+      const reviewsData = [];
+      const maxPages = 3; // Extrair 3 páginas
+      
+      for (let page = 1; page <= maxPages; page++) {
+        updateState({ extractionProgress: (page / maxPages) * 100 });
+        
+        const response = await fetch('/api/amazon-reviews/extract', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          },
+          body: JSON.stringify({
+            asin: state.asin.trim(),
+            page: page,
+            country: state.country,
+            sort_by: 'MOST_RECENT'
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Erro na página ${page}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.success && data.reviews && data.reviews.length > 0) {
+          reviewsData.push(...data.reviews);
+        }
+        
+        // Pequena pausa entre requests
+        if (page < maxPages) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      if (reviewsData.length === 0) {
+        throw new Error('Nenhuma avaliação encontrada para este ASIN');
+      }
+
+      // Formatar reviews em texto
+      const formattedReviews = reviewsData.map((review, index) => 
+        `Avaliação ${index + 1}:
+Título: ${review.review_title || 'Sem título'}
+Nota: ${review.review_star_rating || 'Sem nota'}
+Comentário: ${review.review_comment || 'Sem comentário'}
+---`
+      ).join('\n\n');
+
+      updateState({ 
+        reviewsData: formattedReviews,
+        isExtractingReviews: false,
+        extractionProgress: 100
+      });
+
+      toast({
+        title: "✅ Reviews extraídas!",
+        description: `${reviewsData.length} avaliações extraídas com sucesso`,
+      });
+
+    } catch (error) {
+      updateState({ isExtractingReviews: false, extractionProgress: 0 });
+      toast({
+        variant: "destructive",
+        title: "❌ Erro na extração",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+      });
+    }
+  }, [state.asin, state.country, toast, updateState]);
 
   return {
     state,
@@ -409,6 +534,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     copyBulletPoints,
     handleReplace,
     handleKeepBoth,
-    handleClearAll
+    handleClearAll,
+    extractAmazonReviews
   };
 };

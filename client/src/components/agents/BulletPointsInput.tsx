@@ -3,7 +3,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Wand2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import { Wand2, Download, Loader2 } from 'lucide-react';
 import { LoadingSpinner, ButtonLoader } from "@/components/common/LoadingSpinner";
 import { useToast } from '@/hooks/use-toast';
 import { BULLET_POINTS_CONFIG } from '@/lib/bulletPointsConfig';
@@ -17,6 +20,11 @@ interface ProductFormData {
   uniqueDifferential: string;
   materials: string;
   warranty: string;
+  asin: string;
+  country: string;
+  reviewsData: string;
+  isExtractingReviews: boolean;
+  extractionProgress: number;
 }
 
 interface BulletPointsInputProps {
@@ -24,6 +32,7 @@ interface BulletPointsInputProps {
   onChange: (field: keyof ProductFormData, value: string) => void;
   onGenerate: () => void;
   onClear: () => void;
+  onExtractReviews: () => void;
   isGenerating: boolean;
   maxChars: number;
   warningThreshold: number;
@@ -34,6 +43,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
   onChange,
   onGenerate,
   onClear,
+  onExtractReviews,
   isGenerating,
   maxChars,
   warningThreshold
@@ -225,6 +235,101 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
             </div>
           </div>
 
+          {/* Avaliações de Clientes Amazon - Opcional */}
+          <div className="space-y-4">
+            <Separator />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Avaliações de Clientes (Opcional)
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Extraia avaliações da Amazon para criar bullet points mais persuasivos baseados em feedback real dos clientes.
+              </p>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                <div className="lg:col-span-2">
+                  <Label htmlFor="asin" className="text-sm font-medium text-gray-700 mb-1 block">
+                    ASIN do Produto
+                  </Label>
+                  <Input
+                    id="asin"
+                    value={formData.asin}
+                    onChange={(e) => onChange('asin', e.target.value.toUpperCase())}
+                    placeholder="Ex: B08N5WRWNW"
+                    maxLength={10}
+                    className="font-mono"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="country" className="text-sm font-medium text-gray-700 mb-1 block">
+                    País
+                  </Label>
+                  <Select value={formData.country} onValueChange={(value) => onChange('country', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BR">Brasil</SelectItem>
+                      <SelectItem value="US">Estados Unidos</SelectItem>
+                      <SelectItem value="CA">Canadá</SelectItem>
+                      <SelectItem value="MX">México</SelectItem>
+                      <SelectItem value="UK">Reino Unido</SelectItem>
+                      <SelectItem value="DE">Alemanha</SelectItem>
+                      <SelectItem value="FR">França</SelectItem>
+                      <SelectItem value="IT">Itália</SelectItem>
+                      <SelectItem value="ES">Espanha</SelectItem>
+                      <SelectItem value="AU">Austrália</SelectItem>
+                      <SelectItem value="JP">Japão</SelectItem>
+                      <SelectItem value="IN">Índia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mb-4">
+                <Button
+                  onClick={onExtractReviews}
+                  disabled={formData.isExtractingReviews || !formData.asin.trim()}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  {formData.isExtractingReviews ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {formData.isExtractingReviews ? 'Extraindo...' : 'Extrair Avaliações'}
+                </Button>
+              </div>
+
+              {formData.isExtractingReviews && (
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">Progresso da extração</span>
+                    <span className="text-sm font-medium">{Math.round(formData.extractionProgress)}%</span>
+                  </div>
+                  <Progress value={formData.extractionProgress} className="h-2" />
+                </div>
+              )}
+
+              {formData.reviewsData && (
+                <div>
+                  <Label htmlFor="reviewsData" className="text-sm font-medium text-gray-700 mb-1 block">
+                    Avaliações Extraídas ({formData.reviewsData.split('---').length - 1} avaliações)
+                  </Label>
+                  <Textarea
+                    id="reviewsData"
+                    value={formData.reviewsData}
+                    onChange={(e) => onChange('reviewsData', e.target.value)}
+                    placeholder="Avaliações dos clientes serão exibidas aqui..."
+                    className="h-32 text-sm"
+                  />
+                </div>
+              )}
+            </div>
+            <Separator />
+          </div>
+
           {/* Informações do Produto - Obrigatório */}
           <div className="flex-1 flex flex-col">
             <div className="flex justify-between items-center mb-2">
@@ -240,7 +345,7 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
               id="productInfo"
               value={formData.textInput}
               onChange={handleTextInputChange}
-              placeholder="Descreva as características, benefícios e informações técnicas do seu produto. Inclua materiais, dimensões, funcionalidades e qualquer diferencial competitivo..."
+              placeholder="Insira aqui o máximo de informações que tiver do produto. Descreva características, benefícios, especificações técnicas, materiais, dimensões, funcionalidades e qualquer diferencial competitivo..."
               className="flex-1 resize-none text-sm"
             />
           </div>

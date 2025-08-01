@@ -11,7 +11,12 @@ export const BULLET_POINTS_CONFIG = {
     keywords: 150,
     uniqueDifferential: 100,
     materials: 120,
-    textInput: 2000
+    textInput: 2000,
+    asin: 10,
+    country: 5,
+    reviewsData: 10000,
+    isExtractingReviews: 0,
+    extractionProgress: 0
   }
 } as const;
 

@@ -27,7 +27,8 @@ const BulletPointsAgent: React.FC = () => {
     copyBulletPoints,
     handleReplace,
     handleKeepBoth,
-    handleClearAll
+    handleClearAll,
+    extractAmazonReviews
   } = useBulletPointsGenerator({ agent });
 
   useEffect(() => {
@@ -63,11 +64,7 @@ const BulletPointsAgent: React.FC = () => {
               </div>
             </div>
             
-            {/* Custo do Agente */}
-            <AgentCostDisplay 
-              featureCode="agents.bullet_points"
-              description="Custo por uso da IA:"
-            />
+
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6 min-h-[calc(100vh-280px)]">
@@ -80,11 +77,17 @@ const BulletPointsAgent: React.FC = () => {
                 keywords: state.keywords,
                 uniqueDifferential: state.uniqueDifferential,
                 materials: state.materials,
-                warranty: state.warranty
+                warranty: state.warranty,
+                asin: state.asin,
+                country: state.country,
+                reviewsData: state.reviewsData,
+                isExtractingReviews: state.isExtractingReviews,
+                extractionProgress: state.extractionProgress
               }}
               onChange={(field, value) => updateState({ [field]: value })}
               onGenerate={generateWithAI}
               onClear={handleClearAll}
+              onExtractReviews={extractAmazonReviews}
               isGenerating={state.isGenerating}
               maxChars={BULLET_POINTS_CONFIG.MAX_CHARS}
               warningThreshold={BULLET_POINTS_CONFIG.WARNING_THRESHOLD}
