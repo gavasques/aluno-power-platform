@@ -49,6 +49,16 @@ const importacaoItems: ImportacaoItem[] = [
     isNew: true,
   },
   {
+    id: "documentos-salvos",
+    title: "Documentos Salvos",
+    description: "Visualize, edite e gerencie seus Packing Lists e Commercial Invoices salvos",
+    href: "/minha-area/importacoes/documentos-salvos",
+    icon: FileText,
+    category: "Documentos",
+    isAvailable: true,
+    isNew: true,
+  },
+  {
     id: "gerador-po-proforma",
     title: "Gerador de PO, Proforma Invoice",
     description: "Gere Purchase Orders e Proforma Invoices profissionais para seus fornecedores",

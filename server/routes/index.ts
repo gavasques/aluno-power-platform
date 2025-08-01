@@ -41,7 +41,7 @@ import webhookProxyRoutes from './webhookProxy';
  * Register all modular routes
  * DRY Principle: Single place to register all routes
  */
-export function registerModularRoutes(app: Express): void {
+export async function registerModularRoutes(app: Express): Promise<void> {
   // Supplier routes - PHASE 2: SOLID/DRY/KISS Implementation
   app.use('/api/suppliers', supplierRoutes);
   
@@ -115,6 +115,10 @@ export function registerModularRoutes(app: Express): void {
   
   // Webhook Proxy Routes - n8n Integration
   app.use('/api/webhook-proxy', webhookProxyRoutes);
+  
+  // Packing List Documents Routes
+  const packingListDocumentsRoutes = await import('./packingListDocuments');
+  app.use('/api/packing-list-documents', packingListDocumentsRoutes.default);
   
   // Future modular routes will be added here:
   // app.use('/api/agents', agentRoutes);

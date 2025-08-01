@@ -16,7 +16,9 @@ import {
   AlertCircle,
   FileText,
   Calculator,
-  Upload
+  Upload,
+  Save,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -30,9 +32,19 @@ import {
 } from "@/types/packingList";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import type { PackingListDocument } from "@shared/schema";
 
 const PackingListGenerator = () => {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
+  
+  // Obter documentId da URL se existir
+  const urlParams = new URLSearchParams(window.location.search);
+  const documentId = urlParams.get('documentId');
+  const [isSaving, setIsSaving] = useState(false);
   
   // Estados do formulário
   const [exporter, setExporter] = useState<ExporterInfo>({
@@ -70,6 +82,59 @@ const PackingListGenerator = () => {
   const [boxGroups, setBoxGroups] = useState<BoxGroup[]>([]);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
+  // Query para carregar documento existente
+  const { data: savedDocument, isLoading: isLoadingDocument } = useQuery({
+    queryKey: [`/api/packing-list-documents/${documentId}`],
+    enabled: !!documentId,
+  });
+
+  // Mutation para salvar documento
+  const saveMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const url = documentId 
+        ? `/api/packing-list-documents/${documentId}`
+        : '/api/packing-list-documents';
+      
+      const method = documentId ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao salvar documento');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: documentId ? "Documento atualizado!" : "Documento salvo!",
+        description: "Suas alterações foram salvas com sucesso.",
+      });
+      
+      // Se criando novo documento, navegar para a URL com documentId
+      if (!documentId && data.data?.id) {
+        window.history.replaceState({}, '', `?documentId=${data.data.id}`);
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/packing-list-documents"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao salvar documento",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Formulário para novo item
   const [newItem, setNewItem] = useState<Partial<PackingListItem>>({
     ref: '',
@@ -83,6 +148,69 @@ const PackingListGenerator = () => {
     piecesPerCarton: 0,
     boxNumber: ''
   });
+
+  // Carregar dados do documento quando disponível
+  useEffect(() => {
+    if (savedDocument?.data) {
+      const doc = savedDocument.data;
+      
+      // Carregar informações do exportador
+      if (doc.exporterInfo) {
+        setExporter(doc.exporterInfo);
+      }
+      
+      // Carregar informações do consignee
+      if (doc.consigneeInfo) {
+        setConsignee(doc.consigneeInfo);
+      }
+      
+      // Carregar informações do documento
+      setDocument({
+        issueDate: doc.issueDate,
+        packingListNumber: doc.plNumber || '',
+        poNumber: doc.poNumber || '',
+        piNumber: doc.ciNumber || '',
+        countryOfOrigin: doc.countryOfOrigin || 'Brazil',
+        countryOfAcquisition: doc.countryOfAcquisition || 'Brazil',
+        countryOfProcedure: doc.countryOfProcedure || 'Brazil',
+        portOfShipment: doc.portOfShipment || '',
+        portOfDischarge: doc.portOfDischarge || '',
+        manufacturerInfo: doc.manufacturerInfo || ''
+      });
+      
+      // Carregar itens
+      if (doc.items && Array.isArray(doc.items)) {
+        setItems(doc.items);
+      }
+    }
+  }, [savedDocument]);
+
+  // Função para salvar documento
+  const saveDocument = async () => {
+    setIsSaving(true);
+    
+    const documentData = {
+      importNumber: document.packingListNumber.split('/')[0] || '',
+      importYear: parseInt(document.packingListNumber.split('/')[1] || new Date().getFullYear().toString()),
+      poNumber: document.poNumber,
+      plNumber: document.packingListNumber,
+      ciNumber: document.piNumber,
+      issueDate: document.issueDate,
+      exporterInfo: exporter,
+      consigneeInfo: consignee,
+      items: items,
+      manufacturerInfo: document.manufacturerInfo,
+      portOfShipment: document.portOfShipment,
+      portOfDischarge: document.portOfDischarge,
+      countryOfOrigin: document.countryOfOrigin,
+      countryOfAcquisition: document.countryOfAcquisition,
+      countryOfProcedure: document.countryOfProcedure,
+      status: items.length > 0 ? 'completed' : 'draft'
+    };
+    
+    await saveMutation.mutateAsync(documentData);
+    setIsSaving(false);
+  };
 
   // Função para calcular grupos por caixa
   const calculateBoxGroups = (itemsList: PackingListItem[]): BoxGroup[] => {
@@ -220,58 +348,87 @@ const PackingListGenerator = () => {
     });
   };
 
-  // Gerar PDF
-  const generatePDF = () => {
+  // Gerar Packing List PDF
+  const generatePackingList = () => {
     setIsGeneratingPDF(true);
     
     try {
-      const doc = new jsPDF('landscape', 'mm', 'a4');
+      const doc = new jsPDF('portrait', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.width;
-      const pageHeight = doc.internal.pageSize.height;
+      const leftMargin = 10;
+      const rightMargin = pageWidth - 10;
       
-      // Cabeçalho
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PACKING LIST', pageWidth / 2, 20, { align: 'center' });
+      // Cabeçalho - Caixa do Exportador
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, 10, pageWidth - 20, 25);
       
-      // Informações do exportador (esquerda)
-      doc.setFontSize(10);
+      doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text('EXPORTER:', 15, 35);
+      doc.text("Exporter's Name", leftMargin + 2, 16);
       doc.setFont('helvetica', 'normal');
-      doc.text(exporter.name, 15, 42);
-      doc.text(exporter.address, 15, 47);
-      doc.text(`${exporter.city}, ${exporter.country}`, 15, 52);
-      doc.text(`Phone: ${exporter.phone}`, 15, 57);
-      doc.text(`Mobile: ${exporter.mobile}`, 15, 62);
+      doc.setFontSize(9);
+      doc.text(exporter.name || 'XXX BUSINESS LTDA', leftMargin + 2, 22);
+      doc.text(exporter.address || 'Room 2234-9,21/F,CC Wu Building, 499-308 Benny Road, Ling Long, Hong Kong', leftMargin + 2, 26);
+      doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, leftMargin + 2, 30);
+      doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, leftMargin + 2, 34);
       
-      // Informações do destinatário (direita)
+      // Título PACKING LIST
+      doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text('CONSIGNEE:', pageWidth - 100, 35);
-      doc.setFont('helvetica', 'normal');
-      doc.text(consignee.name, pageWidth - 100, 42);
-      doc.text(consignee.address, pageWidth - 100, 47);
-      doc.text(`${consignee.city}, ${consignee.country}`, pageWidth - 100, 52);
-      doc.text(`CNPJ: ${consignee.cnpj}`, pageWidth - 100, 57);
+      doc.text('PACKING LIST', pageWidth / 2, 45, { align: 'center' });
       
-      // Informações do documento
+      // Informações SOLD TO / SHIP TO e ORDERED BY
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, 50, (pageWidth - 20) / 2 - 5, 35);
+      doc.rect(leftMargin + (pageWidth - 20) / 2 + 5, 50, (pageWidth - 20) / 2 - 5, 35);
+      
+      // SOLD TO / SHIP TO
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text('DOCUMENT INFO:', 15, 75);
+      doc.text('SOLD TO / SHIP TO:', leftMargin + 2, 56);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Packing List No: ${document.packingListNumber}`, 15, 82);
-      doc.text(`P.O. No: ${document.poNumber}`, 15, 87);
-      doc.text(`P.I. No: ${document.piNumber}`, 15, 92);
-      doc.text(`Issue Date: ${document.issueDate}`, pageWidth - 100, 82);
-      doc.text(`Port of Shipment: ${document.portOfShipment}`, pageWidth - 100, 87);
-      doc.text(`Port of Discharge: ${document.portOfDischarge}`, pageWidth - 100, 92);
+      doc.text(consignee.name || 'XX COMERCIO LTDA', leftMargin + 2, 62);
+      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', leftMargin + 2, 66);
+      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, leftMargin + 2, 70);
+      doc.text(`CEP: ${consignee.cep || '88106-115'}`, leftMargin + 2, 74);
+      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, leftMargin + 2, 78);
       
-      // Preparar dados da tabela com agrupamento
+      // ORDERED BY
+      const middleX = leftMargin + (pageWidth - 20) / 2 + 7;
+      doc.setFont('helvetica', 'bold');
+      doc.text('ORDERED BY:', middleX, 56);
+      doc.setFont('helvetica', 'normal');
+      doc.text(consignee.name || 'XX COMERCIO LTDA', middleX, 62);
+      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
+      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, middleX, 70);
+      doc.text(`CEP: ${consignee.cep || '88106-115'}`, middleX, 74);
+      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, middleX, 78);
+      
+      // Informações do documento (lado direito)
+      doc.setLineWidth(0.5);
+      doc.rect(rightMargin - 60, 50, 60, 35);
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Date of Issue', rightMargin - 58, 56);
+      doc.text('Packing List Number', rightMargin - 58, 62);
+      doc.text('PO', rightMargin - 58, 68);
+      doc.text('CI', rightMargin - 58, 74);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(document.issueDate || '10/09/2022', rightMargin - 20, 56, { align: 'right' });
+      doc.text(document.packingListNumber || 'PR-150822-001', rightMargin - 20, 62, { align: 'right' });
+      doc.text(document.poNumber || '9211/22', rightMargin - 20, 68, { align: 'right' });
+      doc.text(document.piNumber || 'PR-150822-001', rightMargin - 20, 74, { align: 'right' });
+      
+      // Preparar dados da tabela
       const tableData: any[] = [];
+      let currentY = 95; // Posição Y inicial da tabela
       
+      // Configurar dados para a tabela
       boxGroups.forEach(group => {
         group.items.forEach((item, index) => {
           if (index === 0) {
-            // Primeira linha do grupo - mostra o número da caixa e totais
             const boxNumber = group.boxNumber === 'S/N' ? 'S/N' : group.boxNumber;
             tableData.push([
               boxNumber,
@@ -286,16 +443,15 @@ const PackingListGenerator = () => {
               item.piecesPerCarton.toString()
             ]);
           } else {
-            // Linhas subsequentes - células mescladas (vazias)
             tableData.push([
-              '', // Numbers (merged)
+              '',
               item.ref,
               item.eanCode,
-              '', // Total net weight (merged)
-              '', // Total gross weight (merged)
-              '', // Total volume (merged)
+              '',
+              '',
+              '',
               item.description,
-              '', // Number of cartons (merged)
+              '',
               item.orderQty.toString(),
               item.piecesPerCarton.toString()
             ]);
@@ -303,110 +459,150 @@ const PackingListGenerator = () => {
         });
       });
       
-      // Linha de totais
+      // Calcular totais
       const grandTotalNet = boxGroups.reduce((sum, group) => sum + group.totalNetWeight, 0);
       const grandTotalGross = boxGroups.reduce((sum, group) => sum + group.totalGrossWeight, 0);
       const grandTotalVolume = boxGroups.reduce((sum, group) => sum + group.totalVolume, 0);
       const grandTotalCartons = boxGroups.reduce((sum, group) => sum + group.totalCartons, 0);
       const grandTotalQty = boxGroups.reduce((sum, group) => sum + group.totalQty, 0);
       
+      // Adicionar linha de totais
       tableData.push([
-        'TOTAL',
-        '',
-        '',
+        'S/N',
+        'TES',
+        '7854585',
         grandTotalNet.toFixed(2),
         grandTotalGross.toFixed(2),
-        grandTotalVolume.toFixed(3),
-        '',
+        grandTotalVolume.toFixed(1),
+        'Cofee',
         grandTotalCartons.toString(),
         grandTotalQty.toString(),
-        ''
+        '1'
       ]);
       
-      // Criar tabela
+      // Criar tabela com layout específico
       autoTable(doc, {
-        startY: 105,
+        startY: 90,
         head: [[
           'Numbers',
           'REF',
           'EAN CODE',
-          'Total net weight (KG)',
-          'Total Gross weight (KG)',
+          'Total net\nweight (KG)',
+          'Total Gross\nweight (KG)',
           'Total Volume (m³)',
           'Goods Description',
-          'Number of Cartons',
+          'Number of\nCartons',
           'Order Qty',
           'Pieces per Carton'
         ]],
         body: tableData,
         styles: {
-          fontSize: 8,
-          cellPadding: 3,
+          fontSize: 7,
+          cellPadding: 1.5,
+          lineWidth: 0.1,
+          lineColor: [0, 0, 0],
+          textColor: [0, 0, 0]
+        },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
           lineWidth: 0.5,
           lineColor: [0, 0, 0]
         },
-        headStyles: {
-          fillColor: [200, 200, 200],
-          textColor: 0,
-          fontStyle: 'bold',
-          halign: 'center',
-          valign: 'middle'
-        },
         columnStyles: {
           0: { halign: 'center', cellWidth: 15 },
-          1: { halign: 'center', cellWidth: 18 },
-          2: { halign: 'center', cellWidth: 22 },
-          3: { halign: 'right', cellWidth: 18 },
-          4: { halign: 'right', cellWidth: 18 },
-          5: { halign: 'right', cellWidth: 16 },
-          6: { cellWidth: 70 },
-          7: { halign: 'center', cellWidth: 16 },
-          8: { halign: 'center', cellWidth: 14 },
-          9: { halign: 'center', cellWidth: 14 }
+          1: { halign: 'center', cellWidth: 12 },
+          2: { halign: 'center', cellWidth: 18 },
+          3: { halign: 'center', cellWidth: 16 },
+          4: { halign: 'center', cellWidth: 16 },
+          5: { halign: 'center', cellWidth: 18 },
+          6: { halign: 'left', cellWidth: 'auto' },
+          7: { halign: 'center', cellWidth: 15 },
+          8: { halign: 'center', cellWidth: 15 },
+          9: { halign: 'center', cellWidth: 18 }
+        },
+        bodyStyles: {
+          lineWidth: 0.5,
+          lineColor: [0, 0, 0]
         },
         didParseCell: function(data: any) {
-          // Destacar linha TOTAL
-          if (data.row.index === tableData.length - 1) {
-            data.cell.styles.fontStyle = 'bold';
-            data.cell.styles.fillColor = [220, 220, 220];
-            data.cell.styles.textColor = 0;
-          }
-          
-          // Configurar células mescladas
-          const cellsToMerge = [0, 3, 4, 5, 7]; // Numbers, Total net weight, Total Gross weight, Total Volume, Number of Cartons
+          // Estilo para células mescladas
+          const cellsToMerge = [0, 3, 4, 5, 7];
           if (cellsToMerge.includes(data.column.index) && data.row.index < tableData.length - 1) {
             const currentRowData = tableData[data.row.index];
             const isEmptyCell = !currentRowData[data.column.index] || currentRowData[data.column.index] === '';
             
-            if (isEmptyCell) {
-              // Células vazias (mescladas) - remover borda superior
+            if (isEmptyCell && data.row.index > 0) {
               data.cell.styles.lineWidth = {
                 top: 0,
                 right: 0.5,
-                bottom: 0.5,
+                bottom: 0,
                 left: 0.5
               };
             }
           }
-        }
+        },
+        margin: { left: leftMargin }
       });
       
-      // Rodapé
-      const finalY = (doc as any).lastAutoTable.finalY + 15;
+      // Rodapé - Informações finais
+      const finalY = (doc as any).lastAutoTable.finalY + 10;
+      
+      // We hereby declare that
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, finalY, pageWidth - 20, 35);
+      
+      doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text('DECLARATIONS:', 15, finalY);
+      doc.text('We hereby declare that :', leftMargin + 2, finalY + 6);
+      
       doc.setFont('helvetica', 'normal');
-      doc.text(`Country of Origin: ${document.countryOfOrigin}`, 15, finalY + 7);
-      doc.text(`Country of Acquisition: ${document.countryOfAcquisition}`, 15, finalY + 12);
-      doc.text(`Country of Procedure: ${document.countryOfProcedure}`, 15, finalY + 17);
-      doc.text(`Manufacturer: ${document.manufacturerInfo}`, 15, finalY + 22);
+      doc.text('Qty Container', leftMargin + 2, finalY + 12);
+      doc.text('Country Of Origin', leftMargin + 2, finalY + 17);
+      doc.text('Country Of Acquisition', leftMargin + 2, finalY + 22);
+      doc.text('Country Of Provenance', leftMargin + 2, finalY + 27);
+      doc.text('Port Of Loading', leftMargin + 2, finalY + 32);
+      doc.text('Port Of Discharge', leftMargin + 2, finalY + 37);
+      
+      doc.text(': 1 X 40\' NOR', leftMargin + 45, finalY + 12);
+      doc.text(': China', leftMargin + 45, finalY + 17);
+      doc.text(': Hong Kong', leftMargin + 45, finalY + 22);
+      doc.text(': China', leftMargin + 45, finalY + 27);
+      doc.text(': Shanghai', leftMargin + 45, finalY + 32);
+      doc.text(': Navegantes', leftMargin + 45, finalY + 37);
+      
+      // Informações de peso e volume (lado direito)
+      doc.rect(rightMargin - 60, finalY, 60, 35);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Net Weight', rightMargin - 58, finalY + 10);
+      doc.text('Gross Weight', rightMargin - 58, finalY + 17);
+      doc.text('CBM', rightMargin - 58, finalY + 24);
+      doc.text('CTN´s', rightMargin - 58, finalY + 31);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(`: ${grandTotalNet.toFixed(2)}`, rightMargin - 25, finalY + 10);
+      doc.text(`: ${grandTotalGross.toFixed(2)}`, rightMargin - 25, finalY + 17);
+      doc.text(`: ${grandTotalVolume.toFixed(0)}`, rightMargin - 25, finalY + 24);
+      doc.text(`: ${grandTotalCartons}`, rightMargin - 25, finalY + 31);
+      
+      // Manufacturer info
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, finalY + 40, pageWidth - 20, 10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Manufacturer name and Address', leftMargin + 2, finalY + 45);
+      doc.setFont('helvetica', 'normal');
+      doc.text(document.manufacturerInfo || 'MJUMP SPORTS CO., LTD. NO. 65 WEST HUANCHENG ROAD, JINHU COUNTRY, HUAIAN CITY, JIANGSU, CHINA ZIP CODE:211600', 
+        leftMargin + 55, finalY + 47);
       
       // Salvar PDF
       const fileName = `PL-${document.packingListNumber || 'DRAFT'}-${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
       
       toast({
-        title: "PDF gerado com sucesso!",
+        title: "Packing List gerado com sucesso!",
         description: `Arquivo ${fileName} foi baixado.`,
       });
       
@@ -416,6 +612,241 @@ const PackingListGenerator = () => {
       toast({
         title: "Erro ao gerar PDF",
         description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o documento PDF.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+  
+  // Gerar Commercial Invoice PDF
+  const generateCommercialInvoice = () => {
+    setIsGeneratingPDF(true);
+    
+    try {
+      const doc = new jsPDF('portrait', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.width;
+      const leftMargin = 10;
+      const rightMargin = pageWidth - 10;
+      
+      // Cabeçalho - Caixa do Exportador
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, 10, pageWidth - 20, 25);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Exporter's Name", leftMargin + 2, 16);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text(exporter.name || 'XXX BUSINESS LTDA', leftMargin + 2, 22);
+      doc.text(exporter.address || 'Room 2234-9,21/F,CC Wu Building, 499-308 Benny Road, Ling Long, Hong Kong', leftMargin + 2, 26);
+      doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, leftMargin + 2, 30);
+      doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, leftMargin + 2, 34);
+      
+      // Título COMMERCIAL INVOICE
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('COMMERCIAL INVOICE', pageWidth / 2, 45, { align: 'center' });
+      
+      // Informações SOLD TO / SHIP TO e ORDERED BY
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, 50, (pageWidth - 20) / 2 - 5, 35);
+      doc.rect(leftMargin + (pageWidth - 20) / 2 + 5, 50, (pageWidth - 20) / 2 - 5, 35);
+      
+      // SOLD TO / SHIP TO
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SOLD TO / SHIP TO:', leftMargin + 2, 56);
+      doc.setFont('helvetica', 'normal');
+      doc.text(consignee.name || 'XX COMERCIO LTDA', leftMargin + 2, 62);
+      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', leftMargin + 2, 66);
+      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, leftMargin + 2, 70);
+      doc.text(`CEP: ${consignee.cep || '88106-115'}`, leftMargin + 2, 74);
+      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, leftMargin + 2, 78);
+      
+      // ORDERED BY
+      const middleX = leftMargin + (pageWidth - 20) / 2 + 7;
+      doc.setFont('helvetica', 'bold');
+      doc.text('ORDERED BY:', middleX, 56);
+      doc.setFont('helvetica', 'normal');
+      doc.text(consignee.name || 'XX COMERCIO LTDA', middleX, 62);
+      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
+      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, middleX, 70);
+      doc.text(`CEP: ${consignee.cep || '88106-115'}`, middleX, 74);
+      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, middleX, 78);
+      
+      // Informações do documento
+      doc.setLineWidth(0.5);
+      doc.rect(rightMargin - 60, 50, 60, 40);
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Date of Issue', rightMargin - 58, 56);
+      doc.text('Commercial Invoice', rightMargin - 58, 62);
+      doc.text('Number', rightMargin - 58, 64);
+      doc.text('PO', rightMargin - 58, 70);
+      doc.text('CI', rightMargin - 58, 76);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(document.issueDate || '19/09/2022', rightMargin - 20, 56, { align: 'right' });
+      doc.text(document.packingListNumber || 'PR-010721-001', rightMargin - 20, 64, { align: 'right' });
+      doc.text(document.poNumber || '920921', rightMargin - 20, 70, { align: 'right' });
+      doc.text(document.piNumber || 'PR-010721-001', rightMargin - 20, 76, { align: 'right' });
+      
+      // Adicionar texto "FOR US$"
+      doc.setFont('helvetica', 'bold');
+      doc.text('FOR US$', rightMargin - 58, 84);
+      
+      // Preparar dados da tabela com preços
+      const invoiceData: any[] = [];
+      
+      // Adicionar produtos com preços unitários
+      boxGroups.forEach(group => {
+        group.items.forEach((item, index) => {
+          if (index === 0) {
+            invoiceData.push([
+              item.ref,
+              item.eanCode,
+              item.ncm || '95069100',
+              item.description,
+              group.totalQty.toString(),
+              '$2.00', // Preço unitário exemplo
+              `$${(group.totalQty * 2).toFixed(2)}` // Total
+            ]);
+          }
+        });
+      });
+      
+      // Criar tabela de invoice
+      autoTable(doc, {
+        startY: 95,
+        head: [[
+          'REF',
+          'EAN CODE',
+          'NCM',
+          'Goods Description',
+          'Order Qty',
+          'Unit Price',
+          'Total Price'
+        ]],
+        body: invoiceData,
+        styles: {
+          fontSize: 7,
+          cellPadding: 1.5,
+          lineWidth: 0.5,
+          lineColor: [0, 0, 0],
+          textColor: [0, 0, 0]
+        },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle'
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 20 },
+          1: { halign: 'center', cellWidth: 25 },
+          2: { halign: 'center', cellWidth: 20 },
+          3: { halign: 'left', cellWidth: 'auto' },
+          4: { halign: 'center', cellWidth: 20 },
+          5: { halign: 'center', cellWidth: 20 },
+          6: { halign: 'center', cellWidth: 25 }
+        },
+        margin: { left: leftMargin }
+      });
+      
+      // Adicionar totais e informações adicionais
+      const finalY = (doc as any).lastAutoTable.finalY + 10;
+      const totalAmount = boxGroups.reduce((sum, group) => sum + (group.totalQty * 2), 0);
+      
+      // Calcular totais
+      const grandTotalNet = boxGroups.reduce((sum, group) => sum + group.totalNetWeight, 0);
+      const grandTotalGross = boxGroups.reduce((sum, group) => sum + group.totalGrossWeight, 0);
+      const grandTotalVolume = boxGroups.reduce((sum, group) => sum + group.totalVolume, 0);
+      const grandTotalCartons = boxGroups.reduce((sum, group) => sum + group.totalCartons, 0);
+      
+      // Declarações
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, finalY, pageWidth / 2 - 10, 50);
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('We hereby declare that:', leftMargin + 2, finalY + 6);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text('Payment Terms', leftMargin + 2, finalY + 12);
+      doc.text('Country Of Origin', leftMargin + 2, finalY + 17);
+      doc.text('Country Of Acquisition', leftMargin + 2, finalY + 22);
+      doc.text('Country Of Provenance', leftMargin + 2, finalY + 27);
+      doc.text('Port Of Loading', leftMargin + 2, finalY + 32);
+      doc.text('Port Of Discharge', leftMargin + 2, finalY + 37);
+      doc.text('Ship Date', leftMargin + 2, finalY + 42);
+      doc.text('Country of Containers', leftMargin + 2, finalY + 47);
+      
+      doc.text(': 30% deposit + 70% against BL', leftMargin + 40, finalY + 12);
+      doc.text(': CHINA', leftMargin + 40, finalY + 17);
+      doc.text(': HONG KONG', leftMargin + 40, finalY + 22);
+      doc.text(': CHINA', leftMargin + 40, finalY + 27);
+      doc.text(': NINGBO', leftMargin + 40, finalY + 32);
+      doc.text(': NAVEGANTES', leftMargin + 40, finalY + 37);
+      doc.text(': 20/09/2022', leftMargin + 40, finalY + 42);
+      doc.text(': 1', leftMargin + 40, finalY + 47);
+      
+      // Totais (lado direito)
+      doc.rect(rightMargin - 60, finalY, 60, 30);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Net Weight', rightMargin - 58, finalY + 6);
+      doc.text('Gross Weight', rightMargin - 58, finalY + 12);
+      doc.text('CBM', rightMargin - 58, finalY + 18);
+      doc.text('CTN´s', rightMargin - 58, finalY + 24);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(`: ${grandTotalNet.toFixed(2)}`, rightMargin - 30, finalY + 6);
+      doc.text(`: ${grandTotalGross.toFixed(2)}`, rightMargin - 30, finalY + 12);
+      doc.text(`: ${grandTotalVolume.toFixed(0)}`, rightMargin - 30, finalY + 18);
+      doc.text(`: ${grandTotalCartons}`, rightMargin - 30, finalY + 24);
+      
+      // Informações bancárias e do fabricante
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, finalY + 55, pageWidth / 2 - 10, 20);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Declaim 2010', leftMargin + 2, finalY + 60);
+      doc.text('Ocean Freight', leftMargin + 2, finalY + 67);
+      doc.text(': FOB NINGBO', leftMargin + 25, finalY + 60);
+      doc.text(`: $${(totalAmount * 0.1).toFixed(2)}`, leftMargin + 25, finalY + 67);
+      
+      doc.setLineWidth(0.5);
+      doc.rect(leftMargin, finalY + 80, pageWidth - 20, 15);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Manufacturer's Name", leftMargin + 2, finalY + 85);
+      doc.text("and Address", leftMargin + 2, finalY + 90);
+      doc.setFont('helvetica', 'normal');
+      doc.text(document.manufacturerInfo || 'XX XX INDUSTRY AND TRADE CO, LTD. NO 3 XXI LOAD, XX STREET, X COUNTY, JINHUA CITY, ZHEJIANG, CHINA', 
+        leftMargin + 40, finalY + 87);
+      
+      // Informações bancárias
+      doc.text('Beneficiary Name: X Business Limited', rightMargin - 90, finalY + 40);
+      doc.text('Beneficiary Bank Name: HSBC Hong Kong', rightMargin - 90, finalY + 45);
+      doc.text('Bank Account Number: 34-131232-838', rightMargin - 90, finalY + 50);
+      doc.text('Beneficiary Bank Code: 006', rightMargin - 90, finalY + 55);
+      doc.text('Swift Code: H11GBTTGPDS', rightMargin - 90, finalY + 60);
+      doc.text('Beneficiary Bank Address: HSBC, 1 MANA, Hong Kong', rightMargin - 90, finalY + 65);
+      
+      // Salvar PDF
+      const fileName = `CI-${document.piNumber || 'DRAFT'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      
+      toast({
+        title: "Commercial Invoice gerada com sucesso!",
+        description: `Arquivo ${fileName} foi baixado.`,
+      });
+      
+    } catch (error) {
+      console.error('Erro ao gerar Commercial Invoice:', error);
+      toast({
+        title: "Erro ao gerar Commercial Invoice",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o documento.",
         variant: "destructive",
       });
     } finally {
@@ -435,9 +866,9 @@ const PackingListGenerator = () => {
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <Package className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Gerador de Packing List</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Gerar Packing List e Commercial Invoice</h1>
         </div>
-        <p className="text-gray-600">Sistema completo para criação de packing lists profissionais com agrupamento por caixa</p>
+        <p className="text-gray-600">Sistema completo para criação de packing lists e commercial invoices profissionais</p>
       </div>
 
       {/* Botão para carregar dados de exemplo */}
@@ -626,12 +1057,12 @@ const PackingListGenerator = () => {
               />
             </div>
             <div>
-              <Label htmlFor="doc-pi-number">Número PI</Label>
+              <Label htmlFor="doc-ci-number">Número CI</Label>
               <Input 
-                id="doc-pi-number"
+                id="doc-ci-number"
                 value={document.piNumber}
                 onChange={(e) => setDocument({...document, piNumber: e.target.value})}
-                placeholder="PI-2025-001"
+                placeholder="CI-2025-001"
               />
             </div>
             <div>
@@ -819,14 +1250,42 @@ const PackingListGenerator = () => {
                   {boxGroups.length} caixas • {items.length} itens • {totalQty.toLocaleString()} peças
                 </CardDescription>
               </div>
-              <Button 
-                onClick={generatePDF}
-                disabled={isGeneratingPDF || items.length === 0}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-              >
-                <Download className="h-4 w-4" />
-                {isGeneratingPDF ? 'Gerando PDF...' : 'Gerar Packing List PDF'}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={saveDocument}
+                  disabled={isSaving || saveMutation.isPending}
+                  className="flex items-center gap-2"
+                  variant="outline"
+                >
+                  {isSaving || saveMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      {documentId ? 'Atualizar' : 'Salvar'}
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={generatePackingList}
+                  disabled={isGeneratingPDF || items.length === 0}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <Download className="h-4 w-4" />
+                  {isGeneratingPDF ? 'Gerando...' : 'Gerar Packing List'}
+                </Button>
+                <Button 
+                  onClick={generateCommercialInvoice}
+                  disabled={isGeneratingPDF || items.length === 0}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                >
+                  <FileText className="h-4 w-4" />
+                  {isGeneratingPDF ? 'Gerando...' : 'Gerar Commercial Invoice'}
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>

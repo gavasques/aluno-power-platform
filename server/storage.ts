@@ -134,6 +134,9 @@ import {
   type InsertSupplierFile,
   type SupplierConversation,
   type InsertSupplierConversation,
+  packingListDocuments,
+  type PackingListDocument,
+  type InsertPackingListDocument,
 
 } from "@shared/schema";
 import { db } from "./db";
@@ -382,6 +385,14 @@ export interface IStorage {
   // Agent Session Files
   createAgentSessionFile(file: InsertAgentSessionFile): Promise<AgentSessionFile>;
   getAgentSessionFiles(sessionId: string): Promise<AgentSessionFile[]>;
+
+  // Packing List Documents
+  getPackingListDocuments(userId: number): Promise<PackingListDocument[]>;
+  getPackingListDocument(id: number): Promise<PackingListDocument | undefined>;
+  createPackingListDocument(document: InsertPackingListDocument): Promise<PackingListDocument>;
+  updatePackingListDocument(id: number, document: Partial<InsertPackingListDocument>): Promise<PackingListDocument>;
+  deletePackingListDocument(id: number): Promise<void>;
+  searchPackingListDocuments(userId: number, query: string): Promise<PackingListDocument[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2665,6 +2676,68 @@ export class DatabaseStorage implements IStorage {
     return prompt || null;
   }
 
+  // Packing List Documents
+  async getPackingListDocuments(userId: number): Promise<PackingListDocument[]> {
+    const documents = await db
+      .select()
+      .from(packingListDocuments)
+      .where(eq(packingListDocuments.userId, userId))
+      .orderBy(desc(packingListDocuments.createdAt));
+    return documents;
+  }
+
+  async getPackingListDocument(id: number): Promise<PackingListDocument | undefined> {
+    const [document] = await db
+      .select()
+      .from(packingListDocuments)
+      .where(eq(packingListDocuments.id, id));
+    return document || undefined;
+  }
+
+  async createPackingListDocument(document: InsertPackingListDocument): Promise<PackingListDocument> {
+    const [created] = await db
+      .insert(packingListDocuments)
+      .values(document)
+      .returning();
+    return created;
+  }
+
+  async updatePackingListDocument(id: number, document: Partial<InsertPackingListDocument>): Promise<PackingListDocument> {
+    const [updated] = await db
+      .update(packingListDocuments)
+      .set({
+        ...document,
+        updatedAt: new Date(),
+      })
+      .where(eq(packingListDocuments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePackingListDocument(id: number): Promise<void> {
+    await db
+      .delete(packingListDocuments)
+      .where(eq(packingListDocuments.id, id));
+  }
+
+  async searchPackingListDocuments(userId: number, query: string): Promise<PackingListDocument[]> {
+    const documents = await db
+      .select()
+      .from(packingListDocuments)
+      .where(
+        and(
+          eq(packingListDocuments.userId, userId),
+          or(
+            ilike(packingListDocuments.importNumber, `%${query}%`),
+            ilike(packingListDocuments.poNumber, `%${query}%`),
+            ilike(packingListDocuments.plNumber, `%${query}%`),
+            ilike(packingListDocuments.ciNumber, `%${query}%`)
+          )
+        )
+      )
+      .orderBy(desc(packingListDocuments.createdAt));
+    return documents;
+  }
 
 
 }

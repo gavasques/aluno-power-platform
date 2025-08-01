@@ -1803,6 +1803,48 @@ export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
   processedIdx: index("stripe_webhook_events_processed_idx").on(table.processed),
 }));
 
+// Packing List Documents
+export const packingListDocuments = pgTable("packing_list_documents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  
+  // Document identification
+  importNumber: text("import_number").notNull(),
+  importYear: text("import_year").notNull(),
+  poNumber: text("po_number").notNull(),
+  plNumber: text("pl_number").notNull(),
+  ciNumber: text("ci_number").notNull(),
+  
+  // Document metadata
+  issueDate: text("issue_date").notNull(),
+  status: text("status").notNull().default("draft"), // draft, completed
+  
+  // Exporter information
+  exporterData: jsonb("exporter_data").notNull(), // {name, address, city, country, phone, mobile, email}
+  
+  // Consignee information
+  consigneeData: jsonb("consignee_data").notNull(), // {name, address, city, state, cep, cnpj}
+  
+  // Document details
+  portOfShipment: text("port_of_shipment"),
+  portOfDischarge: text("port_of_discharge"),
+  countryOfOrigin: text("country_of_origin"),
+  countryOfAcquisition: text("country_of_acquisition"),
+  countryOfProcedure: text("country_of_procedure"),
+  manufacturerInfo: text("manufacturer_info"),
+  
+  // Items data
+  items: jsonb("items").notNull().default([]), // Array of item objects
+  
+  // Creation tracking
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("packing_list_docs_user_idx").on(table.userId),
+  importIdx: index("packing_list_docs_import_idx").on(table.importNumber, table.importYear),
+  statusIdx: index("packing_list_docs_status_idx").on(table.status),
+}));
+
 // Insert schemas for Stripe tables
 export const insertStripeProductSchema = createInsertSchema(stripeProducts).omit({
   createdAt: true,
@@ -3749,3 +3791,20 @@ export const importedProductSuppliersRelations = relations(importedProductSuppli
     references: [suppliers.id],
   }),
 }));
+
+// Packing List Documents Relations
+export const packingListDocumentsRelations = relations(packingListDocuments, ({ one }) => ({
+  user: one(users, {
+    fields: [packingListDocuments.userId],
+    references: [users.id],
+  }),
+}));
+
+// Insert Schemas for Packing List Documents
+export const insertPackingListDocumentSchema = createInsertSchema(packingListDocuments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPackingListDocument = z.infer<typeof insertPackingListDocumentSchema>;
+export type PackingListDocument = typeof packingListDocuments.$inferSelect;

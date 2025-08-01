@@ -111,6 +111,7 @@ const lazyComponents = {
   
   // Packing List Generator
   PackingListGenerator: lazy(() => import('../../pages/myarea/importacoes/packing-list-generator')),
+  DocumentosSalvos: lazy(() => import('../../pages/myarea/importacoes/documentos-salvos')),
   
   // Simulators
   SimuladoresIndex: lazy(() => import('../../pages/SimuladoresIndex')),
@@ -250,6 +251,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       
       // Packing List Generator
       { path: '/minha-area/importacoes/packing-list-generator', component: lazyComponents.PackingListGenerator, isProtected: true },
+      { path: '/minha-area/importacoes/documentos-salvos', component: lazyComponents.DocumentosSalvos, isProtected: true },
       
       // Finanças360
       { path: '/minha-area/financas360', component: lazyComponents.Financas360Index, isProtected: true }
