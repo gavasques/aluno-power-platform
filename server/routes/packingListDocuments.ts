@@ -13,6 +13,10 @@ router.use(requireAuth);
 router.get('/', async (req, res) => {
   try {
     const userId = (req as any).user.id;
+    
+    // Cache headers para melhor performance
+    res.set('Cache-Control', 'private, max-age=300'); // 5 minutos
+    
     const documents = await storage.getPackingListDocuments(userId);
     
     res.json({

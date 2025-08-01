@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { 
@@ -47,17 +47,27 @@ export default function DocumentosSalvos() {
   
   const { hasAccess } = useUser();
 
-  // Buscar documentos
+  // Buscar documentos com cache otimizado
   const { data: documentsResponse, isLoading, error } = useQuery<{data: PackingListDocument[]}>({
     queryKey: ["/api/packing-list-documents"],
-    retry: 2,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
+    refetchOnWindowFocus: false,
   });
 
-  // Buscar documentos com filtro
+  // Buscar documentos com filtro usando debounce
+  const debouncedSearchQuery = useMemo(() => {
+    const handler = setTimeout(() => searchQuery, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   const { data: searchResponse } = useQuery<{data: PackingListDocument[]}>({
     queryKey: ["/api/packing-list-documents/search", searchQuery],
-    enabled: searchQuery.length > 0,
-    retry: 2,
+    enabled: searchQuery.length > 2, // Só busca com 3+ caracteres
+    retry: 1,
+    staleTime: 2 * 60 * 1000, // 2 minutos
+    refetchOnWindowFocus: false,
   });
 
   // Mutation para deletar documento
@@ -88,9 +98,23 @@ export default function DocumentosSalvos() {
     },
   });
 
-  const documents = searchQuery.length > 0 
-    ? searchResponse?.data || [] 
-    : documentsResponse?.data || [];
+  // Filtrar documentos com memoização
+  const documents = useMemo(() => {
+    if (searchQuery.length > 2) {
+      return searchResponse?.data || [];
+    }
+    if (searchQuery.length > 0) {
+      // Filtro local para consultas curtas
+      const allDocs = documentsResponse?.data || [];
+      return allDocs.filter(doc => 
+        doc.importNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.poNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.plNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.ciNumber?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return documentsResponse?.data || [];
+  }, [documentsResponse?.data, searchResponse?.data, searchQuery]);
 
   if (error) {
     return (
@@ -104,10 +128,10 @@ export default function DocumentosSalvos() {
     );
   }
 
-  const handleDelete = (document: PackingListDocument) => {
+  const handleDelete = useCallback((document: PackingListDocument) => {
     setDocumentToDelete(document);
     setDeleteModalOpen(true);
-  };
+  }, []);
 
   const confirmDelete = () => {
     if (documentToDelete) {
@@ -116,11 +140,11 @@ export default function DocumentosSalvos() {
   };
 
   // Função para baixar o PDF do documento
-  const handleDownload = (document: PackingListDocument) => {
+  const handleDownload = useCallback((document: PackingListDocument) => {
     // Por enquanto, redireciona para o gerador com os dados do documento
     // No futuro, pode-se implementar download direto do PDF salvo
     window.location.href = `/minha-area/importacoes/packing-list-generator?documentId=${document.id}`;
-  };
+  }, []);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -177,8 +201,21 @@ export default function DocumentosSalvos() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
+                  <div className="h-12 w-12 bg-muted rounded animate-pulse" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 bg-muted rounded w-1/4 animate-pulse" />
+                    <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+                    <div className="h-3 bg-muted rounded w-1/3 animate-pulse" />
+                  </div>
+                  <div className="flex space-x-2">
+                    <div className="h-8 w-20 bg-muted rounded animate-pulse" />
+                    <div className="h-8 w-16 bg-muted rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : documents.length === 0 ? (
             <div className="text-center py-8">

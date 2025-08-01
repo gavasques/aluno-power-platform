@@ -2679,10 +2679,33 @@ export class DatabaseStorage implements IStorage {
   // Packing List Documents
   async getPackingListDocuments(userId: number): Promise<PackingListDocument[]> {
     const documents = await db
-      .select()
+      .select({
+        id: packingListDocuments.id,
+        userId: packingListDocuments.userId,
+        importNumber: packingListDocuments.importNumber,
+        importYear: packingListDocuments.importYear,
+        poNumber: packingListDocuments.poNumber,
+        plNumber: packingListDocuments.plNumber,
+        ciNumber: packingListDocuments.ciNumber,
+        issueDate: packingListDocuments.issueDate,
+        status: packingListDocuments.status,
+        createdAt: packingListDocuments.createdAt,
+        updatedAt: packingListDocuments.updatedAt,
+        // Campos obrigatórios com valores padrão para tipo
+        exporterData: packingListDocuments.exporterData,
+        consigneeData: packingListDocuments.consigneeData,
+        portOfShipment: packingListDocuments.portOfShipment,
+        portOfDischarge: packingListDocuments.portOfDischarge,
+        countryOfOrigin: packingListDocuments.countryOfOrigin,
+        countryOfAcquisition: packingListDocuments.countryOfAcquisition,
+        countryOfProcedure: packingListDocuments.countryOfProcedure,
+        manufacturerInfo: packingListDocuments.manufacturerInfo,
+        items: packingListDocuments.items,
+      })
       .from(packingListDocuments)
       .where(eq(packingListDocuments.userId, userId))
-      .orderBy(desc(packingListDocuments.createdAt));
+      .orderBy(desc(packingListDocuments.createdAt))
+      .limit(50); // Limite inicial para melhor performance
     return documents;
   }
 
@@ -2722,7 +2745,29 @@ export class DatabaseStorage implements IStorage {
 
   async searchPackingListDocuments(userId: number, query: string): Promise<PackingListDocument[]> {
     const documents = await db
-      .select()
+      .select({
+        id: packingListDocuments.id,
+        userId: packingListDocuments.userId,
+        importNumber: packingListDocuments.importNumber,
+        importYear: packingListDocuments.importYear,
+        poNumber: packingListDocuments.poNumber,
+        plNumber: packingListDocuments.plNumber,
+        ciNumber: packingListDocuments.ciNumber,
+        issueDate: packingListDocuments.issueDate,
+        status: packingListDocuments.status,
+        createdAt: packingListDocuments.createdAt,
+        updatedAt: packingListDocuments.updatedAt,
+        // Campos obrigatórios
+        exporterData: packingListDocuments.exporterData,
+        consigneeData: packingListDocuments.consigneeData,
+        portOfShipment: packingListDocuments.portOfShipment,
+        portOfDischarge: packingListDocuments.portOfDischarge,
+        countryOfOrigin: packingListDocuments.countryOfOrigin,
+        countryOfAcquisition: packingListDocuments.countryOfAcquisition,
+        countryOfProcedure: packingListDocuments.countryOfProcedure,
+        manufacturerInfo: packingListDocuments.manufacturerInfo,
+        items: packingListDocuments.items,
+      })
       .from(packingListDocuments)
       .where(
         and(
@@ -2735,7 +2780,8 @@ export class DatabaseStorage implements IStorage {
           )
         )
       )
-      .orderBy(desc(packingListDocuments.createdAt));
+      .orderBy(desc(packingListDocuments.createdAt))
+      .limit(20); // Limite para busca
     return documents;
   }
 
