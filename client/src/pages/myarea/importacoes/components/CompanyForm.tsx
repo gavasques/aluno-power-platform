@@ -117,12 +117,10 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
       const url = company ? `/api/user-companies/${company.id}` : '/api/user-companies';
       const method = company ? 'PUT' : 'POST';
       
+      // apiRequest will handle JSON serialization automatically
       return apiRequest(url, {
         method,
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: data,
       });
     },
     onSuccess: () => {
