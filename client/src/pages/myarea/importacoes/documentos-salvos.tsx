@@ -133,7 +133,7 @@ export default function DocumentosSalvos() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold">Gestão de Packing Lists</h1>
+            <h1 className="text-2xl font-bold">Gestão de Packing List e Commercial Invoice</h1>
           </div>
           <p className="text-muted-foreground">
             Crie, visualize, edite e gerencie seus Packing Lists e Commercial Invoices

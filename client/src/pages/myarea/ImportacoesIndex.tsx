@@ -40,7 +40,7 @@ const importacaoItems: ImportacaoItem[] = [
   },
   {
     id: "gestao-packing-lists",
-    title: "Gestão de Packing Lists",
+    title: "Gestão de Packing List e Commercial Invoice",
     description: "Crie, visualize, edite e gerencie seus Packing Lists e Commercial Invoices",
     href: "/minha-area/importacoes/documentos-salvos",
     icon: Package,
