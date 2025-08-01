@@ -129,6 +129,133 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
         </h2>
         
         <div className="space-y-4 flex-1 flex flex-col">
+          {/* Avaliações de Clientes Amazon - Opcional */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Avaliações de Clientes (Opcional)
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Extraia avaliações da Amazon para criar bullet points mais persuasivos baseados em feedback real dos clientes.
+              </p>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                <div className="lg:col-span-2">
+                  <Label htmlFor="asin" className="text-sm font-medium text-gray-700 mb-1 block">
+                    ASIN do Produto
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="asin"
+                      value={formData.asin}
+                      onChange={(e) => onChange('asin', e.target.value.toUpperCase())}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Ex: B08N5WRWNW"
+                      maxLength={10}
+                      className="font-mono flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddAsin}
+                      disabled={!formData.asin.trim() || !/^[A-Z0-9]{10}$/.test(formData.asin.trim()) || formData.asinList.some(item => item.asin === formData.asin.trim())}
+                      variant="outline"
+                      size="sm"
+                      className="px-3"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="country" className="text-sm font-medium text-gray-700 mb-1 block">
+                    País
+                  </Label>
+                  <Select value={formData.country} onValueChange={(value) => onChange('country', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BR">Brasil</SelectItem>
+                      <SelectItem value="US">Estados Unidos</SelectItem>
+                      <SelectItem value="CA">Canadá</SelectItem>
+                      <SelectItem value="MX">México</SelectItem>
+                      <SelectItem value="UK">Reino Unido</SelectItem>
+                      <SelectItem value="DE">Alemanha</SelectItem>
+                      <SelectItem value="FR">França</SelectItem>
+                      <SelectItem value="IT">Itália</SelectItem>
+                      <SelectItem value="ES">Espanha</SelectItem>
+                      <SelectItem value="AU">Austrália</SelectItem>
+                      <SelectItem value="JP">Japão</SelectItem>
+                      <SelectItem value="IN">Índia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Lista de ASINs adicionados */}
+              {formData.asinList.length > 0 && (
+                <div className="mb-4">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    ASINs Adicionados
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.asinList.map((item, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-2">
+                        {item.asin} ({item.country})
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:text-red-600"
+                          onClick={() => handleRemoveAsin(item.asin)}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 mb-4">
+                <Button
+                  onClick={onExtractReviews}
+                  disabled={formData.isExtractingReviews || formData.asinList.length === 0}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  {formData.isExtractingReviews ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {formData.isExtractingReviews ? 'Extraindo...' : `Extrair Avaliações${formData.asinList.length > 0 ? ` (${formData.asinList.length} ASINs)` : ''}`}
+                </Button>
+              </div>
+
+              {formData.isExtractingReviews && (
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">Progresso da extração</span>
+                    <span className="text-sm font-medium">{Math.round(formData.extractionProgress)}%</span>
+                  </div>
+                  <Progress value={formData.extractionProgress} className="h-2" />
+                </div>
+              )}
+
+              {formData.reviewsData && (
+                <div>
+                  <Label htmlFor="reviewsData" className="text-sm font-medium text-gray-700 mb-1 block">
+                    Avaliações Extraídas ({formData.reviewsData.split('---').length - 1} avaliações)
+                  </Label>
+                  <Textarea
+                    id="reviewsData"
+                    value={formData.reviewsData}
+                    onChange={(e) => onChange('reviewsData', e.target.value)}
+                    placeholder="Avaliações dos clientes serão exibidas aqui..."
+                    className="h-32 text-sm"
+                  />
+                </div>
+              )}
+            </div>
+            <Separator />
+          </div>
+
           {/* Linha 1: Nome do Produto e Marca */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
