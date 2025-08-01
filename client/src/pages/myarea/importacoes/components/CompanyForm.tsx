@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { UserCompany } from '@shared/schema';
 
 // Schema de validação do formulário
@@ -117,14 +117,32 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
       const url = company ? `/api/user-companies/${company.id}` : '/api/user-companies';
       const method = company ? 'PUT' : 'POST';
       
+      // Debug logging for mutations
+      if (import.meta.env.DEV) {
+        console.log('🔍 [MUTATION] Submitting company data:', { url, method, data });
+      }
+      
       // apiRequest will handle JSON serialization automatically
       return apiRequest(url, {
         method,
         body: data,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Force cache invalidation to ensure UI updates
+      queryClient.invalidateQueries({ queryKey: ['/api/user-companies'] });
+      queryClient.refetchQueries({ queryKey: ['/api/user-companies'] });
+      
+      if (import.meta.env.DEV) {
+        console.log('🔍 [MUTATION] Success, cache invalidated:', data);
+      }
+      
       onSuccess();
+    },
+    onError: (error) => {
+      if (import.meta.env.DEV) {
+        console.error('🔍 [MUTATION] Failed:', error);
+      }
     },
   });
 
