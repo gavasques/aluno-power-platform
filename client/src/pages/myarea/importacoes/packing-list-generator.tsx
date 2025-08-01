@@ -271,21 +271,22 @@ const PackingListGenerator = () => {
       boxGroups.forEach(group => {
         group.items.forEach((item, index) => {
           if (index === 0) {
-            // Primeira linha do grupo - mostra totais
+            // Primeira linha do grupo - mostra o número da caixa e totais
+            const boxNumber = group.boxNumber === 'S/N' ? 'S/N' : group.boxNumber;
             tableData.push([
-              group.boxNumber,
+              boxNumber,
               item.ref,
               item.eanCode,
               group.totalNetWeight.toFixed(2),
               group.totalGrossWeight.toFixed(2),
-              group.totalVolume.toFixed(3),
+              group.totalVolume.toFixed(2),
               item.description,
               group.totalCartons.toString(),
               item.orderQty.toString(),
               item.piecesPerCarton.toString()
             ]);
           } else {
-            // Linhas subsequentes - apenas identificação
+            // Linhas subsequentes - células mescladas (vazias)
             tableData.push([
               '', // Numbers (merged)
               item.ref,
@@ -329,8 +330,8 @@ const PackingListGenerator = () => {
           'Numbers',
           'REF',
           'EAN CODE',
-          'Total net weight (kg)',
-          'Total Gross weight (kg)',
+          'Total net weight (KG)',
+          'Total Gross weight (KG)',
           'Total Volume (m³)',
           'Goods Description',
           'Number of Cartons',
@@ -340,74 +341,51 @@ const PackingListGenerator = () => {
         body: tableData,
         styles: {
           fontSize: 8,
-          cellPadding: 2,
+          cellPadding: 3,
+          lineWidth: 0.5,
+          lineColor: [0, 0, 0]
         },
         headStyles: {
-          fillColor: [41, 128, 185],
-          textColor: 255,
-          fontStyle: 'bold'
+          fillColor: [200, 200, 200],
+          textColor: 0,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle'
         },
         columnStyles: {
-          0: { halign: 'center', cellWidth: 12 },
-          1: { cellWidth: 18 },
-          2: { cellWidth: 22 },
+          0: { halign: 'center', cellWidth: 15 },
+          1: { halign: 'center', cellWidth: 18 },
+          2: { halign: 'center', cellWidth: 22 },
           3: { halign: 'right', cellWidth: 18 },
           4: { halign: 'right', cellWidth: 18 },
           5: { halign: 'right', cellWidth: 16 },
-          6: { cellWidth: 75 },
+          6: { cellWidth: 70 },
           7: { halign: 'center', cellWidth: 16 },
           8: { halign: 'center', cellWidth: 14 },
           9: { halign: 'center', cellWidth: 14 }
-        },
-        alternateRowStyles: {
-          fillColor: [245, 245, 245]
         },
         didParseCell: function(data: any) {
           // Destacar linha TOTAL
           if (data.row.index === tableData.length - 1) {
             data.cell.styles.fontStyle = 'bold';
-            data.cell.styles.fillColor = [52, 152, 219];
-            data.cell.styles.textColor = 255;
+            data.cell.styles.fillColor = [220, 220, 220];
+            data.cell.styles.textColor = 0;
           }
           
-          // Destacar primeira linha de cada grupo
-          if (data.cell.text[0] && data.column.index === 0 && data.cell.text[0] !== 'TOTAL' && data.cell.text[0] !== '') {
-            data.cell.styles.fillColor = [174, 214, 241];
-          }
-          
-          // Configurar células mescladas - remover texto das células vazias
-          const cellsToMerge = [0, 3, 4, 5, 7];
+          // Configurar células mescladas
+          const cellsToMerge = [0, 3, 4, 5, 7]; // Numbers, Total net weight, Total Gross weight, Total Volume, Number of Cartons
           if (cellsToMerge.includes(data.column.index) && data.row.index < tableData.length - 1) {
             const currentRowData = tableData[data.row.index];
             const isEmptyCell = !currentRowData[data.column.index] || currentRowData[data.column.index] === '';
             
             if (isEmptyCell) {
-              // Remover bordas para simular mesclagem
-              data.cell.styles.lineWidth = 0;
-              data.cell.styles.lineColor = [255, 255, 255];
-            }
-          }
-        },
-        willDrawCell: function(data: any) {
-          // Implementar células mescladas visualmente
-          const cellsToMerge = [0, 3, 4, 5, 7];
-          
-          if (cellsToMerge.includes(data.column.index) && data.row.index < tableData.length - 1) {
-            const currentRowData = tableData[data.row.index];
-            const isEmptyCell = !currentRowData[data.column.index] || currentRowData[data.column.index] === '';
-            
-            if (isEmptyCell && data.row.index > 0) {
-              // Encontrar a primeira célula do grupo (com conteúdo)
-              let firstRowIndex = data.row.index - 1;
-              while (firstRowIndex >= 0 && (!tableData[firstRowIndex][data.column.index] || tableData[firstRowIndex][data.column.index] === '')) {
-                firstRowIndex--;
-              }
-              
-              // Se encontrou a primeira célula, não desenhar bordas horizontais
-              if (firstRowIndex >= 0) {
-                data.cell.styles.lineWidth = { top: 0, right: 0.1, bottom: 0.1, left: 0.1 };
-                data.cell.styles.lineColor = [220, 220, 220];
-              }
+              // Células vazias (mescladas) - remover borda superior
+              data.cell.styles.lineWidth = {
+                top: 0,
+                right: 0.5,
+                bottom: 0.5,
+                left: 0.5
+              };
             }
           }
         }
@@ -743,7 +721,7 @@ const PackingListGenerator = () => {
                 id="item-box"
                 value={newItem.boxNumber}
                 onChange={(e) => setNewItem({...newItem, boxNumber: e.target.value})}
-                placeholder="1 ou S/M"
+                placeholder="1, 2, 3... ou S/N"
               />
             </div>
             <div>
