@@ -252,6 +252,17 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       logger.debug('🚀 [BULLET_POINTS] Starting generation with webhook config:', currentConfig);
       setAgentConfig(currentConfig);
 
+      // Log para verificar se há dados de reviews disponíveis
+      if (state.reviewsData) {
+        logger.debug('📊 [BULLET_POINTS] Reviews data available:', {
+          reviewsLength: state.reviewsData.length,
+          totalReviews: state.reviewsData.split('---').length - 1,
+          reviewsPreview: state.reviewsData.substring(0, 200)
+        });
+      } else {
+        logger.debug('📊 [BULLET_POINTS] No reviews data available');
+      }
+
       const startTime = Date.now();
 
       // Substituir as variáveis no prompt com os dados do formulário
@@ -266,7 +277,29 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         .replace('{{PRODUCT_INFO}}', state.textInput || 'Não informado')
         .replace('{{REVIEWS_DATA}}', state.reviewsData || '');
 
-      // Preparar dados estruturados para o webhook
+      // Preparar dados estruturados combinados para o webhook
+      const combinedProductInfo = {
+        informacoes_basicas: {
+          nome_produto: state.productName || 'Não informado',
+          marca: state.brand || 'Não informado',
+          publico_alvo: state.targetAudience || 'Não informado',
+          garantia: state.warranty || 'Não informado',
+          palavras_chave: state.keywords || 'Não informado',
+          diferencial_unico: state.uniqueDifferential || 'Não informado',
+          materiais: state.materials || 'Não informado',
+          informacoes_detalhadas: state.textInput || 'Não informado'
+        },
+        avaliacoes_clientes: state.reviewsData ? {
+          dados_disponiveis: true,
+          total_avaliacoes: state.reviewsData.split('---').length - 1,
+          conteudo: state.reviewsData
+        } : {
+          dados_disponiveis: false,
+          total_avaliacoes: 0,
+          conteudo: 'Nenhuma avaliação disponível'
+        }
+      };
+
       const webhookData = {
         productName: state.productName || 'Não informado',
         brand: state.brand || 'Não informado',
@@ -275,7 +308,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         keywords: state.keywords || 'Não informado',
         uniqueDifferential: state.uniqueDifferential || 'Não informado',
         materials: state.materials || 'Não informado',
-        productInfo: state.textInput || 'Não informado',
+        productInfo: JSON.stringify(combinedProductInfo, null, 2),
         reviewsData: state.reviewsData || '',
         config: {
           provider: currentConfig.provider,
@@ -317,6 +350,16 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       } else {
         responseText = JSON.stringify(data);
       }
+
+      logger.debug('🎯 [BULLET_POINTS] Structured data sent to webhook:', {
+        combinedProductInfo,
+        webhookDataStructure: {
+          hasReviews: !!state.reviewsData,
+          reviewsCount: state.reviewsData ? state.reviewsData.split('---').length - 1 : 0,
+          productInfoType: typeof webhookData.productInfo,
+          productInfoLength: webhookData.productInfo.length
+        }
+      });
 
       logger.debug('🎯 [BULLET_POINTS] Webhook response:', {
         responseLength: responseText.length,
