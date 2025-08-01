@@ -6,15 +6,21 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 ## User Preferences
 **Communication Style**: Simple, everyday language (user is non-technical)
 
-## Recent Changes (January 31, 2025)
-- **Tools Routes Fixed**: Corrected all PRO tool routes from `/tools/` to `/ferramentas/` prefix for consistency
-- **LoadingState Error Fixed**: Resolved import/export issues in states/index.ts that was causing "LoadingState is not defined" errors
-- **Hub Pages Optimized**: Removed PartnersProvider dependency from Partners.tsx to prevent context errors
-- **Agent Pages Layout**: All agent pages now use PermissionGuard without Layout wrapper to prevent header duplication
-- **Route Configuration**: Standardized all 10 tools to use `/ferramentas/` prefix for uniform user experience
-- **Agents Verification**: All 9 AI agents verified working correctly with proper routes and no errors
-- **Minha Área Complete**: All 8 sections of "Minha Área" verified functional (Fornecedores, Produtos Pro, Marcas, Assinaturas, Perfil, Importação/Exportação, Importações, Finanças360)
-- **TypeScript Errors Resolved**: Fixed remaining type issues in ProductsNew.tsx and agent components
+## Recent Changes (August 1, 2025)
+- **Bullet Points Webhook Migration**: Migrated bullet points generator from AI providers to n8n webhook system
+  - URL: https://n8n.guivasques.app/webhook-test/gerar-bullet-points
+  - Structured JSON payload with all form fields and configuration
+  - Maintained logging system with estimated tokens for compatibility
+  - Removed dependency on AI provider configurations
+- **Previous Changes (January 31, 2025)**:
+  - Tools Routes Fixed: Corrected all PRO tool routes from `/tools/` to `/ferramentas/` prefix
+  - LoadingState Error Fixed: Resolved import/export issues in states/index.ts
+  - Hub Pages Optimized: Removed PartnersProvider dependency from Partners.tsx
+  - Agent Pages Layout: All agent pages use PermissionGuard without Layout wrapper
+  - Route Configuration: Standardized all 10 tools to use `/ferramentas/` prefix
+  - Agents Verification: All 9 AI agents verified working correctly
+  - Minha Área Complete: All 8 sections functional
+  - TypeScript Errors Resolved: Fixed remaining type issues
 
 ## System Architecture
 ### Frontend Architecture

@@ -165,10 +165,10 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
   });
 
   const [agentConfig, setAgentConfig] = useState({
-    provider: 'openai',
-    model: 'gpt-4o-mini',
+    provider: 'webhook',
+    model: 'n8n-bullet-points',
     temperature: 0.7,
-    maxTokens: 2000
+    maxTokens: 6000
   });
 
   const { toast } = useToast();
@@ -228,27 +228,16 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
     updateState({ isGenerating: true });
 
     try {
-      // SEMPRE buscar as configurações mais recentes do agente antes de gerar
-      const agentResponse = await fetch('/api/agents/bullet-points-generator', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
-      
-      if (!agentResponse.ok) {
-        throw new Error('Erro ao buscar configurações do agente');
-      }
-      
-      const agentData = await agentResponse.json();
+      // Configuração simplificada para webhook
       const currentConfig = {
-        provider: agentData.provider || 'openai',
-        model: agentData.model || 'gpt-4o-mini',
-        temperature: typeof agentData.temperature === 'string' ? parseFloat(agentData.temperature) : agentData.temperature || 0.7,
-        maxTokens: agentData.maxTokens || 2000
+        provider: 'webhook',
+        model: 'n8n-bullet-points',
+        temperature: 0.7,
+        maxTokens: 6000
       };
 
-      logger.debug('🚀 [BULLET_POINTS] Starting generation with FRESH config:', currentConfig);
-      setAgentConfig(currentConfig); // Atualizar o estado local também
+      logger.debug('🚀 [BULLET_POINTS] Starting generation with webhook config:', currentConfig);
+      setAgentConfig(currentConfig);
 
       const startTime = Date.now();
 
@@ -263,45 +252,74 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         .replace('{{MATERIALS}}', state.materials || 'Não informado')
         .replace('{{PRODUCT_INFO}}', state.textInput || 'Não informado');
 
-      const response = await fetch('/api/ai-providers/test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify({
+      // Preparar dados estruturados para o webhook
+      const webhookData = {
+        productName: state.productName || 'Não informado',
+        brand: state.brand || 'Não informado',
+        targetAudience: state.targetAudience || 'Não informado',
+        warranty: state.warranty || 'Não informado',
+        keywords: state.keywords || 'Não informado',
+        uniqueDifferential: state.uniqueDifferential || 'Não informado',
+        materials: state.materials || 'Não informado',
+        productInfo: state.textInput || 'Não informado',
+        config: {
           provider: currentConfig.provider,
           model: currentConfig.model,
-          prompt: prompt,
-          maxTokens: currentConfig.maxTokens,
-          temperature: currentConfig.temperature
-        })
+          temperature: currentConfig.temperature,
+          maxTokens: currentConfig.maxTokens
+        },
+        prompt: prompt,
+        userId: user?.id,
+        timestamp: new Date().toISOString()
+      };
+
+      const response = await fetch('https://n8n.guivasques.app/webhook-test/gerar-bullet-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(webhookData)
       });
 
       if (!response.ok) {
-        throw new Error('Erro na API da IA');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erro no webhook: ${response.status}`);
       }
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Erro na geração de bullet points');
+      const duration = Date.now() - startTime;
+
+      // Extrair os bullet points gerados do webhook
+      let responseText = '';
+      if (data.bulletPoints) {
+        responseText = data.bulletPoints;
+      } else if (data.response) {
+        responseText = data.response;
+      } else if (data.content) {
+        responseText = data.content;
+      } else if (data.message) {
+        responseText = data.message;
+      } else {
+        responseText = JSON.stringify(data);
       }
 
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-      const responseText = data.response;
+      logger.debug('🎯 [BULLET_POINTS] Webhook response:', {
+        responseLength: responseText.length,
+        responsePreview: responseText.substring(0, 100),
+        webhookData: data
+      });
 
-      // Salvar log da geração com dedução automática de créditos
+      // Log da geração via webhook (simulando tokens para compatibilidade)
+      const estimatedInputTokens = Math.ceil(prompt.length / 4);
+      const estimatedOutputTokens = Math.ceil(responseText.length / 4);
+      const estimatedCost = ((estimatedInputTokens + estimatedOutputTokens) / 1000) * 0.0125;
+
       await logAIGeneration({
         featureCode: FEATURE_CODE,
-        provider: currentConfig.provider,
-        model: currentConfig.model,
-        prompt: prompt,
-        response: responseText,
-        inputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.inputTokens || 0 : 0,
-        outputTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.outputTokens || 0 : 0,
-        totalTokens: data.responseReceived ? JSON.parse(data.responseReceived).usage?.totalTokens || 0 : 0,
-        cost: data.cost || 0,
+        inputTokens: estimatedInputTokens,
+        outputTokens: estimatedOutputTokens,
+        totalTokens: estimatedInputTokens + estimatedOutputTokens,
+        cost: estimatedCost,
         duration: duration
       });
 
@@ -314,7 +332,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         updateState({ bulletPointsOutput: responseText });
         toast({
           title: "✓ Bullet Points Gerados!",
-          description: "Bullet points criados com sucesso usando IA",
+          description: "Bullet points criados com sucesso via webhook",
         });
       }
     } catch (error) {
