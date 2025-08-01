@@ -181,7 +181,6 @@ export default function InternationalSupplierForm() {
           <p className="text-gray-600">Cadastre um novo fornecedor especializado para importações</p>
         </div>
       </div>
-
       {/* Formulário */}
       <form onSubmit={handleSubmit}>
         <Card>
@@ -244,7 +243,7 @@ export default function InternationalSupplierForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="city">Cidade</Label>
+                <Label htmlFor="city">Cidade/Distrito</Label>
                 <Input
                   id="city"
                   value={formData.city}
@@ -411,7 +410,6 @@ export default function InternationalSupplierForm() {
           </Button>
         </div>
       </form>
-
       {/* Aviso Informativo */}
       <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <div className="flex items-start gap-3">
