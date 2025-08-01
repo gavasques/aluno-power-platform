@@ -159,6 +159,12 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   // Get token from localStorage for authenticated requests
   const token = localStorage.getItem('auth_token');
   
+  // Debug logging for authentication issues
+  if (import.meta.env.DEV) {
+    console.log('🔍 [API] Making request to:', url);
+    console.log('🔍 [API] Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+  }
+  
   // Don't set Content-Type for FormData - browser will set it automatically with boundary
   const headers: HeadersInit = {
     ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -187,6 +193,16 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
       error = JSON.parse(errorText);
     } catch {
       error = { message: 'Request failed' };
+    }
+    
+    // Debug logging for failed requests
+    if (import.meta.env.DEV) {
+      console.error('🔍 [API] Request failed:', {
+        url,
+        status: response.status,
+        error: errorText,
+        token: token ? `${token.substring(0, 20)}...` : 'NO TOKEN'
+      });
     }
     
     throw new Error(error.message || error.error || `HTTP ${response.status}`);
