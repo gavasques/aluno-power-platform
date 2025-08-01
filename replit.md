@@ -7,6 +7,10 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 **Communication Style**: Simple, everyday language (user is non-technical)
 
 ## Recent Changes (August 1, 2025)
+- **Bullet Points Interface Reorganization**: Field order optimized for better user experience
+  - Reorganized form layout: Product basics → Product details textarea → Customer reviews (optional)
+  - Improved workflow: users fill essential product info first, then detailed description, then optional review analysis
+  - Maintained all existing functionality while enhancing usability
 - **Bullet Points Webhook Enhancement**: Comprehensive improvements to bullet points generator
   - Migrated from AI providers to secure webhook system (internal URL configured)
   - Removed technical configuration display (Model, Temperature, Max Tokens, Cost) from user interface
