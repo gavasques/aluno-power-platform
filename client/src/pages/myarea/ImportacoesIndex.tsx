@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileText, Building, Users, Calculator, Ship, Package } from "lucide-react";
+import { Search, X, FileText, Building, Users, Calculator, Ship, Package, Tags } from "lucide-react";
 
 interface ImportacaoItem {
   id: string;
@@ -66,6 +66,16 @@ const importacaoItems: ImportacaoItem[] = [
     href: "/minha-area/importacoes/produtos",
     icon: Package,
     category: "Gestão",
+    isAvailable: true,
+    isNew: true,
+  },
+  {
+    id: "gerador-etiquetas",
+    title: "Gerador de Etiquetas",
+    description: "Crie etiquetas profissionais com código de barras EAN-13 para seus produtos importados",
+    href: "/minha-area/importacoes/gerador-etiquetas",
+    icon: Tags,
+    category: "Documentos",
     isAvailable: true,
     isNew: true,
   },
