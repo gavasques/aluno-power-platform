@@ -10,9 +10,11 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 - **Amazon Customer Service Webhook Migration**: Migrated from AI providers to webhook system
   - Updated backend to use webhook: https://n8n.guivasques.app/webhook-test/amazon-cs-email-helper
   - Replaced Anthropic Claude integration with n8n webhook processing
+  - **Payload Optimization**: Only sends client email and user information to webhook (removed prompts and technical data)
   - Enhanced download functionality with timestamp naming: customer_service_YYYYMMDD_HHMMSS.txt
   - Maintained copy and download features for generated email responses
   - Improved logging to track webhook-based generations
+  - Fixed agent_usage table insertion with proper UUID and field mapping
 - **Bullet Points Download Feature**: Added TXT file download functionality
   - Added download button with timestamp naming: bullet_points_YYYYMMDD_HHMMSS.txt
   - Users can now save generated bullet points locally for external use

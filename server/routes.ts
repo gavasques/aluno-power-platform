@@ -2089,15 +2089,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const startTime = Date.now();
 
-      // Prepare data for webhook
+      // Prepare data for webhook - only client email and user info
       const webhookData = {
         email_content: emailContent,
-        user_observations: userObservations,
-        system_prompt: systemPrompt,
-        main_prompt: processedPrompt
+        user_observations: userObservations
       };
 
-      console.log('🎯 [CUSTOMER_SERVICE] Sending data to webhook:', { 
+      console.log('🎯 [CUSTOMER_SERVICE] Sending only client email and user info to webhook:', { 
         emailContentLength: emailContent.length,
         userObservationsLength: userObservations.length 
       });
@@ -2175,15 +2173,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log usage for tracking (existing)
       try {
+        const { v4: uuidv4 } = await import('uuid');
         await storage.createAgentUsage({
+          id: uuidv4(),
           agentId: 'amazon-customer-service',
-          userId: user.id,
+          userId: user.id.toString(),
+          userName: user.name || user.username,
           inputTokens,
           outputTokens,
           totalTokens,
-          cost: totalCost,
-          processingTime,
-          createdAt: new Date()
+          costUsd: totalCost.toString(),
+          processingTimeMs: processingTime,
+          status: 'success'
         });
       } catch (logError) {
         console.error('❌ [CUSTOMER_SERVICE] Error logging usage:', logError);
