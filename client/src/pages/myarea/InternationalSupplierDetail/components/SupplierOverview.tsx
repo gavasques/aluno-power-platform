@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Globe, Mail, Phone, MapPin, Edit, Save, X } from 'lucide-react';
-import type { SupplierOverviewProps } from '../types';
-import { BUSINESS_TYPES, COUNTRIES, CURRENCIES } from '../types';
+import { Building2, Globe, Mail, Phone, MapPin, Edit, Save, X, Fax, Smartphone } from 'lucide-react';
+import type { SupplierOverviewProps, SupplierFormData } from '../types';
 
 /**
  * SUPPLIER OVERVIEW COMPONENT - FASE 4 REFATORAÇÃO
@@ -18,23 +17,44 @@ import { BUSINESS_TYPES, COUNTRIES, CURRENCIES } from '../types';
  */
 export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOverviewProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: supplier?.name || '',
-    email: supplier?.email || '',
-    phone: supplier?.phone || '',
-    whatsapp: supplier?.whatsapp || '',
+  const [formData, setFormData] = useState<SupplierFormData>({
+    corporateName: supplier?.corporateName || '',
+    tradeName: supplier?.tradeName || '',
     country: supplier?.country || '',
+    state: supplier?.state || '',
+    city: supplier?.city || '',
+    postalCode: supplier?.postalCode || '',
     address: supplier?.address || '',
+    phone: supplier?.phone || '',
+    fax: supplier?.fax || '',
+    mobile: supplier?.mobile || '',
+    email: supplier?.email || '',
     website: supplier?.website || '',
-    businessType: supplier?.businessType || '',
-    specialties: supplier?.specialties || [],
-    certifications: supplier?.certifications || [],
-    paymentTerms: supplier?.paymentTerms || '',
-    minimumOrder: supplier?.minimumOrder || 0,
-    leadTime: supplier?.leadTime || '',
-    notes: supplier?.notes || '',
-    isActive: supplier?.isActive ?? true
+    description: supplier?.description || '',
+    status: supplier?.status || 'ativo'
   });
+
+  // Update form data when supplier changes
+  React.useEffect(() => {
+    if (supplier) {
+      setFormData({
+        corporateName: supplier.corporateName || '',
+        tradeName: supplier.tradeName || '',
+        country: supplier.country || '',
+        state: supplier.state || '',
+        city: supplier.city || '',
+        postalCode: supplier.postalCode || '',
+        address: supplier.address || '',
+        phone: supplier.phone || '',
+        fax: supplier.fax || '',
+        mobile: supplier.mobile || '',
+        email: supplier.email || '',
+        website: supplier.website || '',
+        description: supplier.description || '',
+        status: supplier.status || 'ativo'
+      });
+    }
+  }, [supplier]);
 
   const handleSave = async () => {
     try {
@@ -47,21 +67,20 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
 
   const handleCancel = () => {
     setFormData({
-      name: supplier?.name || '',
-      email: supplier?.email || '',
-      phone: supplier?.phone || '',
-      whatsapp: supplier?.whatsapp || '',
+      corporateName: supplier?.corporateName || '',
+      tradeName: supplier?.tradeName || '',
       country: supplier?.country || '',
+      state: supplier?.state || '',
+      city: supplier?.city || '',
+      postalCode: supplier?.postalCode || '',
       address: supplier?.address || '',
+      phone: supplier?.phone || '',
+      fax: supplier?.fax || '',
+      mobile: supplier?.mobile || '',
+      email: supplier?.email || '',
       website: supplier?.website || '',
-      businessType: supplier?.businessType || '',
-      specialties: supplier?.specialties || [],
-      certifications: supplier?.certifications || [],
-      paymentTerms: supplier?.paymentTerms || '',
-      minimumOrder: supplier?.minimumOrder || 0,
-      leadTime: supplier?.leadTime || '',
-      notes: supplier?.notes || '',
-      isActive: supplier?.isActive ?? true
+      description: supplier?.description || '',
+      status: supplier?.status || 'ativo'
     });
     setIsEditing(false);
   };
@@ -126,11 +145,11 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
 
       {/* Status Badge */}
       <div className="flex items-center space-x-2">
-        <Badge className={supplier.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-          {supplier.isActive ? 'Ativo' : 'Inativo'}
+        <Badge className={supplier.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+          {supplier.status === 'ativo' ? 'Ativo' : 'Inativo'}
         </Badge>
-        <Badge variant="outline">{supplier.businessType}</Badge>
         <Badge variant="outline">{supplier.country}</Badge>
+        {supplier.city && <Badge variant="outline">{supplier.city}</Badge>}
       </div>
 
       {/* Main Information */}
@@ -145,65 +164,94 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="name">Nome da Empresa</Label>
+              <Label htmlFor="corporateName">Nome Corporativo</Label>
               {isEditing ? (
                 <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  id="corporateName"
+                  value={formData.corporateName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, corporateName: e.target.value.toUpperCase() }))}
+                  placeholder="Nome oficial da empresa"
                 />
               ) : (
-                <p className="text-sm text-gray-900 mt-1">{supplier.name}</p>
+                <p className="text-sm text-gray-900 mt-1 font-medium">{supplier.corporateName}</p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="businessType">Tipo de Negócio</Label>
+              <Label htmlFor="tradeName">Nome Comercial</Label>
               {isEditing ? (
-                <Select
-                  value={formData.businessType}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, businessType: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BUSINESS_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="tradeName"
+                  value={formData.tradeName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tradeName: e.target.value.toUpperCase() }))}
+                  placeholder="Nome comercial/fantasia"
+                />
               ) : (
-                <p className="text-sm text-gray-900 mt-1">{supplier.businessType}</p>
+                <p className="text-sm text-gray-900 mt-1">{supplier.tradeName || 'Não informado'}</p>
               )}
             </div>
 
-            <div>
-              <Label htmlFor="country">País</Label>
-              {isEditing ? (
-                <Select
-                  value={formData.country}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm text-gray-900 mt-1 flex items-center">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {supplier.country}
-                </p>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="country">País</Label>
+                {isEditing ? (
+                  <Input
+                    id="country"
+                    value={formData.country}
+                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value.toUpperCase() }))}
+                    placeholder="Ex: CHINA, ESTADOS UNIDOS"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-900 mt-1 flex items-center">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {supplier.country}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="state">Estado/Província</Label>
+                {isEditing ? (
+                  <Input
+                    id="state"
+                    value={formData.state}
+                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value.toUpperCase() }))}
+                    placeholder="Ex: GUANGDONG, CALIFORNIA"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-900 mt-1">{supplier.state || 'Não informado'}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="city">Cidade/Distrito</Label>
+                {isEditing ? (
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value.toUpperCase() }))}
+                    placeholder="Ex: SHENZHEN, LOS ANGELES"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-900 mt-1">{supplier.city || 'Não informado'}</p>
+                )}
+              </div>
+              
+              <div>
+                <Label htmlFor="postalCode">CEP/Código Postal</Label>
+                {isEditing ? (
+                  <Input
+                    id="postalCode"
+                    value={formData.postalCode}
+                    onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
+                    placeholder="Ex: 518000"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-900 mt-1">{supplier.postalCode || 'Não informado'}</p>
+                )}
+              </div>
             </div>
 
             <div>
@@ -212,11 +260,12 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
                 <Textarea
                   id="address"
                   value={formData.address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value.toUpperCase() }))}
                   rows={3}
+                  placeholder="Endereço completo"
                 />
               ) : (
-                <p className="text-sm text-gray-900 mt-1">{supplier.address}</p>
+                <p className="text-sm text-gray-900 mt-1">{supplier.address || 'Não informado'}</p>
               )}
             </div>
           </CardContent>
@@ -239,47 +288,67 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="email@empresa.com"
                 />
               ) : (
                 <p className="text-sm text-gray-900 mt-1 flex items-center">
                   <Mail className="w-4 h-4 mr-1" />
-                  {supplier.email}
+                  {supplier.email || 'Não informado'}
                 </p>
               )}
             </div>
 
-            <div>
-              <Label htmlFor="phone">Telefone</Label>
-              {isEditing ? (
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                />
-              ) : (
-                <p className="text-sm text-gray-900 mt-1 flex items-center">
-                  <Phone className="w-4 h-4 mr-1" />
-                  {supplier.phone}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="whatsapp">WhatsApp</Label>
-              {isEditing ? (
-                <Input
-                  id="whatsapp"
-                  value={formData.whatsapp || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
-                />
-              ) : (
-                supplier.whatsapp && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="phone">Telefone</Label>
+                {isEditing ? (
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Ex: +86 755 1234 5678"
+                  />
+                ) : (
                   <p className="text-sm text-gray-900 mt-1 flex items-center">
                     <Phone className="w-4 h-4 mr-1" />
-                    {supplier.whatsapp}
+                    {supplier.phone || 'Não informado'}
                   </p>
-                )
-              )}
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="fax">FAX</Label>
+                {isEditing ? (
+                  <Input
+                    id="fax"
+                    value={formData.fax}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fax: e.target.value }))}
+                    placeholder="Ex: +86 755 1234 5679"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-900 mt-1 flex items-center">
+                    <Fax className="w-4 h-4 mr-1" />
+                    {supplier.fax || 'Não informado'}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="mobile">Mobile</Label>
+                {isEditing ? (
+                  <Input
+                    id="mobile"
+                    value={formData.mobile}
+                    onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
+                    placeholder="Ex: +86 138 0000 0000"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-900 mt-1 flex items-center">
+                    <Smartphone className="w-4 h-4 mr-1" />
+                    {supplier.mobile || 'Não informado'}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div>
@@ -287,13 +356,14 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
               {isEditing ? (
                 <Input
                   id="website"
-                  value={formData.website || ''}
+                  value={formData.website}
                   onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                  placeholder="https://www.empresa.com"
                 />
               ) : (
-                supplier.website && (
-                  <p className="text-sm text-gray-900 mt-1 flex items-center">
-                    <Globe className="w-4 h-4 mr-1" />
+                <p className="text-sm text-gray-900 mt-1 flex items-center">
+                  <Globe className="w-4 h-4 mr-1" />
+                  {supplier.website ? (
                     <a 
                       href={supplier.website} 
                       target="_blank" 
@@ -302,125 +372,56 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
                     >
                       {supplier.website}
                     </a>
-                  </p>
-                )
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Business Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Detalhes Comerciais</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="paymentTerms">Condições de Pagamento</Label>
-              {isEditing ? (
-                <Input
-                  id="paymentTerms"
-                  value={formData.paymentTerms || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, paymentTerms: e.target.value }))}
-                  placeholder="Ex: 30 dias"
-                />
-              ) : (
-                <p className="text-sm text-gray-900 mt-1">{supplier.paymentTerms || 'Não informado'}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="minimumOrder">Pedido Mínimo</Label>
-              {isEditing ? (
-                <Input
-                  id="minimumOrder"
-                  type="number"
-                  value={formData.minimumOrder}
-                  onChange={(e) => setFormData(prev => ({ ...prev, minimumOrder: parseInt(e.target.value) || 0 }))}
-                />
-              ) : (
-                <p className="text-sm text-gray-900 mt-1">
-                  {supplier.minimumOrder ? `${supplier.minimumOrder} unidades` : 'Não informado'}
+                  ) : (
+                    'Não informado'
+                  )}
                 </p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="leadTime">Prazo de Entrega</Label>
+              <Label htmlFor="status">Status</Label>
               {isEditing ? (
-                <Input
-                  id="leadTime"
-                  value={formData.leadTime || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, leadTime: e.target.value }))}
-                  placeholder="Ex: 15-30 dias"
-                />
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'ativo' | 'inativo' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ativo">Ativo</SelectItem>
+                    <SelectItem value="inativo">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
               ) : (
-                <p className="text-sm text-gray-900 mt-1">{supplier.leadTime || 'Não informado'}</p>
+                <p className="text-sm text-gray-900 mt-1">
+                  <Badge className={supplier.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                    {supplier.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                </p>
               )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Specialties and Certifications */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Especialidades</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {supplier.specialties.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {supplier.specialties.map((specialty, index) => (
-                  <Badge key={index} variant="outline">
-                    {specialty}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">Nenhuma especialidade informada</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Certificações</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {supplier.certifications.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {supplier.certifications.map((cert, index) => (
-                  <Badge key={index} variant="outline" className="bg-green-50 text-green-700">
-                    {cert}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">Nenhuma certificação informada</p>
-            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Notes */}
+      {/* Description */}
       <Card>
         <CardHeader>
-          <CardTitle>Observações</CardTitle>
+          <CardTitle>Descrição</CardTitle>
         </CardHeader>
         <CardContent>
           {isEditing ? (
             <Textarea
-              value={formData.notes || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               rows={4}
-              placeholder="Observações sobre o fornecedor..."
+              placeholder="Descrição da empresa, produtos oferecidos, especialidades, etc."
             />
           ) : (
-            <p className="text-sm text-gray-900">
-              {supplier.notes || 'Nenhuma observação registrada'}
+            <p className="text-sm text-gray-900 leading-relaxed">
+              {supplier.description || 'Nenhuma descrição registrada'}
             </p>
           )}
         </CardContent>

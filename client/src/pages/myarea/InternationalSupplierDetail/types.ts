@@ -8,23 +8,28 @@
 
 export interface Supplier {
   id: number;
-  name: string;
-  email: string;
-  phone: string;
-  whatsapp?: string;
+  corporateName: string;
+  tradeName?: string;
   country: string;
-  address: string;
+  state?: string;
+  city?: string;
+  neighborhood?: string;
+  postalCode?: string;
+  address?: string;
+  phone?: string;
+  fax?: string;
+  mobile?: string;
+  email?: string;
   website?: string;
-  businessType: string;
-  specialties: string[];
-  certifications: string[];
-  paymentTerms?: string;
-  minimumOrder?: number;
-  leadTime?: string;
-  notes?: string;
+  description?: string;
+  status: 'ativo' | 'inativo';
+  averageRating?: string;
   createdAt: string;
   updatedAt: string;
-  isActive: boolean;
+  category?: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface Contact {
@@ -113,21 +118,20 @@ export interface Product {
 
 // Form Data Types
 export interface SupplierFormData {
-  name: string;
-  email: string;
-  phone: string;
-  whatsapp?: string;
+  corporateName: string;
+  tradeName?: string;
   country: string;
-  address: string;
+  state?: string;
+  city?: string;
+  postalCode?: string;
+  address?: string;
+  phone?: string;
+  fax?: string;
+  mobile?: string;
+  email?: string;
   website?: string;
-  businessType: string;
-  specialties: string[];
-  certifications: string[];
-  paymentTerms?: string;
-  minimumOrder?: number;
-  leadTime?: string;
-  notes?: string;
-  isActive: boolean;
+  description?: string;
+  status: 'ativo' | 'inativo';
 }
 
 export interface ContactFormData {
