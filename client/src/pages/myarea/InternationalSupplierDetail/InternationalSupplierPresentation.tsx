@@ -100,8 +100,8 @@ export function InternationalSupplierPresentation({
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{supplier.name}</h1>
-            <p className="text-gray-600">{supplier.country} • {supplier.businessType}</p>
+            <h1 className="text-3xl font-bold text-gray-900">{supplier.corporateName}</h1>
+            <p className="text-gray-600">{supplier.country} • {supplier.tradeName || 'Fornecedor Internacional'}</p>
           </div>
         </div>
       </div>

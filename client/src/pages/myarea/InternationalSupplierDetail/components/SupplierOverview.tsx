@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Globe, Mail, Phone, MapPin, Edit, Save, X, Fax, Smartphone } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, Edit, Save, X, FileText, Smartphone } from 'lucide-react';
 import type { SupplierOverviewProps, SupplierFormData } from '../types';
 
 /**
@@ -16,6 +16,7 @@ import type { SupplierOverviewProps, SupplierFormData } from '../types';
  * Responsabilidade única: Exibir e editar dados básicos do fornecedor
  */
 export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOverviewProps) {
+  console.log('🔍 SupplierOverview component loaded with supplier:', supplier);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<SupplierFormData>({
     corporateName: supplier?.corporateName || '',
@@ -327,7 +328,7 @@ export function SupplierOverview({ supplier, isLoading, onUpdate }: SupplierOver
                   />
                 ) : (
                   <p className="text-sm text-gray-900 mt-1 flex items-center">
-                    <Fax className="w-4 h-4 mr-1" />
+                    <FileText className="w-4 h-4 mr-1" />
                     {supplier.fax || 'Não informado'}
                   </p>
                 )}
