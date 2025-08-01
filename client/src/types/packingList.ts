@@ -1,6 +1,7 @@
 // Tipos para o sistema de Packing List
 
-export interface PackingListItem {
+// Item unitário (sistema atual)
+export interface UnitaryItem {
   id: string;
   ref: string;
   eanCode: string;
@@ -14,6 +15,31 @@ export interface PackingListItem {
   orderQty: number; // Calculado automaticamente: cartons × piecesPerCarton
   boxNumber: string; // Campo chave para agrupamento
 }
+
+// Item dentro de uma caixa multi-itens (sem peso/volume individual)
+export interface MultiBoxItem {
+  id: string;
+  ref: string;
+  eanCode: string;
+  ncm: string;
+  description: string;
+  quantity: number; // Quantidade específica deste item
+}
+
+// Container de caixa multi-itens
+export interface MultiBoxContainer {
+  id: string;
+  boxNumber: string;
+  description: string; // ex: "Spare Parts", "Electronics Mix"
+  totalNetWeight: number;
+  totalGrossWeight: number;
+  totalVolume: number;
+  totalPieces: number;
+  items: MultiBoxItem[];
+}
+
+// Compatibilidade com sistema atual
+export interface PackingListItem extends UnitaryItem {}
 
 export interface BoxGroup {
   boxNumber: string;
@@ -76,6 +102,9 @@ export interface PackingListData {
   consignee: ConsigneeInfo;
   orderedBy: OrderedByInfo;
   document: DocumentInfo;
+  unitaryItems: UnitaryItem[]; // Itens unitários (sistema atual)
+  multiBoxContainers: MultiBoxContainer[]; // Caixas multi-itens (novo sistema)
+  // Compatibilidade
   items: PackingListItem[];
 }
 

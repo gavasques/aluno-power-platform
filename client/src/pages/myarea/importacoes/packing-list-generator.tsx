@@ -23,6 +23,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { 
   PackingListItem, 
+  UnitaryItem,
+  MultiBoxItem,
+  MultiBoxContainer,
   BoxGroup, 
   ExporterInfo, 
   ConsigneeInfo, 
@@ -47,6 +50,32 @@ const PackingListGenerator = () => {
   const documentId = urlParams.get('documentId');
   const [isSaving, setIsSaving] = useState(false);
   
+  // Estados do sistema de caixas
+  const [boxType, setBoxType] = useState<'unitary' | 'multi'>('unitary');
+  const [unitaryItems, setUnitaryItems] = useState<UnitaryItem[]>([]);
+  const [multiBoxContainers, setMultiBoxContainers] = useState<MultiBoxContainer[]>([]);
+  
+  // Estados para criação de nova caixa multi-itens
+  const [isCreatingBox, setIsCreatingBox] = useState(false);
+  const [newBoxData, setNewBoxData] = useState({
+    boxNumber: '',
+    description: '',
+    totalNetWeight: 0,
+    totalGrossWeight: 0,
+    totalVolume: 0,
+    totalPieces: 0
+  });
+  
+  // Estados para adicionar item a caixa existente
+  const [selectedBoxId, setSelectedBoxId] = useState<string>('');
+  const [newBoxItem, setNewBoxItem] = useState({
+    ref: '',
+    eanCode: '',
+    ncm: '',
+    description: '',
+    quantity: 0
+  });
+
   // Estados do formulário
   const [exporter, setExporter] = useState<ExporterInfo>({
     name: '',
@@ -159,6 +188,104 @@ const PackingListGenerator = () => {
     piecesPerCarton: 0,
     boxNumber: ''
   });
+
+  // Funções para manipular caixas multi-itens
+  const createMultiBox = () => {
+    if (!newBoxData.boxNumber || !newBoxData.description) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Número da caixa e descrição são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newContainer: MultiBoxContainer = {
+      id: Date.now().toString(),
+      boxNumber: newBoxData.boxNumber,
+      description: newBoxData.description,
+      totalNetWeight: newBoxData.totalNetWeight,
+      totalGrossWeight: newBoxData.totalGrossWeight,
+      totalVolume: newBoxData.totalVolume,
+      totalPieces: newBoxData.totalPieces,
+      items: []
+    };
+
+    setMultiBoxContainers([...multiBoxContainers, newContainer]);
+    setNewBoxData({
+      boxNumber: '',
+      description: '',
+      totalNetWeight: 0,
+      totalGrossWeight: 0,
+      totalVolume: 0,
+      totalPieces: 0
+    });
+    setIsCreatingBox(false);
+    
+    toast({
+      title: "Caixa criada com sucesso!",
+      description: `Caixa ${newContainer.boxNumber} - ${newContainer.description} foi criada.`,
+    });
+  };
+
+  const addItemToBox = (boxId: string) => {
+    if (!newBoxItem.ref || !newBoxItem.description || newBoxItem.quantity <= 0) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "REF, descrição e quantidade são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const item: MultiBoxItem = {
+      id: Date.now().toString(),
+      ref: newBoxItem.ref,
+      eanCode: newBoxItem.eanCode,
+      ncm: newBoxItem.ncm,
+      description: newBoxItem.description,
+      quantity: newBoxItem.quantity
+    };
+
+    setMultiBoxContainers(containers => 
+      containers.map(container => 
+        container.id === boxId 
+          ? { ...container, items: [...container.items, item] }
+          : container
+      )
+    );
+
+    setNewBoxItem({
+      ref: '',
+      eanCode: '',
+      ncm: '',
+      description: '',
+      quantity: 0
+    });
+
+    toast({
+      title: "Item adicionado!",
+      description: `${item.ref} - ${item.description} foi adicionado à caixa.`,
+    });
+  };
+
+  const removeMultiBox = (boxId: string) => {
+    setMultiBoxContainers(containers => containers.filter(c => c.id !== boxId));
+    toast({
+      title: "Caixa removida",
+      description: "Caixa foi removida com sucesso.",
+    });
+  };
+
+  const removeItemFromBox = (boxId: string, itemId: string) => {
+    setMultiBoxContainers(containers =>
+      containers.map(container =>
+        container.id === boxId
+          ? { ...container, items: container.items.filter(item => item.id !== itemId) }
+          : container
+      )
+    );
+  };
 
   // Carregar dados do documento quando disponível
   useEffect(() => {
@@ -444,239 +571,276 @@ const PackingListGenerator = () => {
     return yPos;
   };
 
-  // Gerar Packing List PDF
+  // Gerar Packing List PDF (Novo - Formato Landscape Profissional)
   const generatePackingList = () => {
     setIsGeneratingPDF(true);
     
     try {
-      const doc = new jsPDF('portrait', 'mm', 'a4');
-      const pageWidth = doc.internal.pageSize.width;
-      const leftMargin = 10;
-      const rightMargin = pageWidth - 10;
+      // Criar PDF em formato landscape A4 profissional
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.width; // 297mm
+      const pageHeight = doc.internal.pageSize.height; // 210mm
+      const margin = 10;
       
-      // Cabeçalho - Caixa do Exportador
+      // Cabeçalho moderno do exportador
       doc.setLineWidth(0.5);
-      doc.rect(leftMargin, 10, pageWidth - 20, 25);
+      doc.rect(margin, 10, pageWidth - 2 * margin, 30);
       
-      doc.setFontSize(11);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text("Exporter's Name", leftMargin + 2, 16);
-      renderExporterInfo(doc, leftMargin, 22);
+      doc.text("Exporter's Name", margin + 2, 17);
       
-      // Título PACKING LIST
-      doc.setFontSize(14);
+      // Informações do exportador
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(exporter.name || 'XXX BUSINESS LTDA', margin + 2, 23);
+      doc.text(exporter.address || 'Room 2234-9,21/F,CC Wu Building, 499-308 Benny Road, Ling Long, Hong Kong', margin + 2, 28);
+      doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, margin + 2, 33);
+      doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, margin + 2, 37);
+      
+      // Título PACKING LIST centralizado
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text('PACKING LIST', pageWidth / 2, 45, { align: 'center' });
+      doc.text('PACKING LIST', pageWidth / 2, 55, { align: 'center' });
       
-      // Informações SOLD TO / SHIP TO e ORDERED BY
-      doc.setLineWidth(0.5);
-      doc.rect(leftMargin, 50, (pageWidth - 20) / 2 - 5, 35);
-      doc.rect(leftMargin + (pageWidth - 20) / 2 + 5, 50, (pageWidth - 20) / 2 - 5, 35);
+      // Seções SOLD TO / SHIP TO e ORDERED BY lado a lado
+      const sectionWidth = (pageWidth - 3 * margin) / 2;
       
       // SOLD TO / SHIP TO
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text('SOLD TO / SHIP TO:', leftMargin + 2, 56);
-      renderConsigneeInfo(doc, leftMargin, 62);
-      
-      // ORDERED BY
-      const middleX = leftMargin + (pageWidth - 20) / 2 + 7;
-      doc.setFont('helvetica', 'bold');
-      doc.text('ORDERED BY:', middleX, 56);
-      renderOrderedByInfo(doc, middleX - 2, 62);
-      
-      // Informações do documento (lado direito)
       doc.setLineWidth(0.5);
-      doc.rect(rightMargin - 60, 50, 60, 35);
-      
-      doc.setFontSize(8);
+      doc.rect(margin, 65, sectionWidth, 45);
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text('Date of Issue', rightMargin - 58, 56);
-      doc.text('Packing List Number', rightMargin - 58, 62);
-      doc.text('PO', rightMargin - 58, 68);
-      doc.text('CI', rightMargin - 58, 74);
+      doc.text('SOLD TO / SHIP TO:', margin + 2, 72);
       
       doc.setFont('helvetica', 'normal');
-      doc.text(document.issueDate || '10/09/2022', rightMargin - 20, 56, { align: 'right' });
-      doc.text(document.packingListNumber || 'PR-150822-001', rightMargin - 20, 62, { align: 'right' });
-      doc.text(document.poNumber || '9211/22', rightMargin - 20, 68, { align: 'right' });
-      doc.text(document.piNumber || 'PR-150822-001', rightMargin - 20, 74, { align: 'right' });
+      doc.setFontSize(8);
+      let soldToY = 78;
+      if (consignee.name) {
+        doc.text(consignee.name, margin + 2, soldToY);
+        soldToY += 4;
+      }
+      if (consignee.address) {
+        doc.text(consignee.address, margin + 2, soldToY);
+        soldToY += 4;
+      }
+      if (consignee.city || consignee.state) {
+        doc.text(`${consignee.city || ''} - ${consignee.state || ''}`, margin + 2, soldToY);
+        soldToY += 4;
+      }
+      if (consignee.cep) {
+        doc.text(`CEP: ${consignee.cep}`, margin + 2, soldToY);
+        soldToY += 4;
+      }
+      if (consignee.cnpj) {
+        doc.text(`CNPJ: ${consignee.cnpj}`, margin + 2, soldToY);
+        soldToY += 4;
+      }
+      if (consignee.phone) {
+        doc.text(`Phone: ${consignee.phone}`, margin + 2, soldToY);
+      }
       
-      // Preparar dados da tabela
+      // ORDERED BY
+      const orderedByX = margin + sectionWidth + margin;
+      doc.rect(orderedByX, 65, sectionWidth, 45);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('ORDERED BY:', orderedByX + 2, 72);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      let orderedByY = 78;
+      if (orderedBy.name || consignee.name) {
+        doc.text(orderedBy.name || consignee.name || '', orderedByX + 2, orderedByY);
+        orderedByY += 4;
+      }
+      if (orderedBy.address || consignee.address) {
+        doc.text(orderedBy.address || consignee.address || '', orderedByX + 2, orderedByY);
+        orderedByY += 4;
+      }
+      if (orderedBy.city || orderedBy.state || consignee.city || consignee.state) {
+        doc.text(`${orderedBy.city || consignee.city || ''} - ${orderedBy.state || consignee.state || ''}`, orderedByX + 2, orderedByY);
+        orderedByY += 4;
+      }
+      if (orderedBy.cep || consignee.cep) {
+        doc.text(`CEP: ${orderedBy.cep || consignee.cep || ''}`, orderedByX + 2, orderedByY);
+        orderedByY += 4;
+      }
+      if (orderedBy.cnpj || consignee.cnpj) {
+        doc.text(`CNPJ: ${orderedBy.cnpj || consignee.cnpj || ''}`, orderedByX + 2, orderedByY);
+        orderedByY += 4;
+      }
+      if (orderedBy.phone || consignee.phone) {
+        doc.text(`Phone: ${orderedBy.phone || consignee.phone || ''}`, orderedByX + 2, orderedByY);
+      }
+      
+      // Informações do documento (lado direito)
+      const docInfoX = pageWidth - 80;
+      doc.rect(docInfoX, 65, 70, 45);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text('Date of Issue', docInfoX + 2, 72);
+      doc.text('Packing List Number', docInfoX + 2, 78);
+      doc.text('PO', docInfoX + 2, 84);
+      doc.text('PI', docInfoX + 2, 90);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(document.issueDate || new Date().toLocaleDateString(), docInfoX + 35, 72);
+      doc.text(document.packingListNumber || 'PL-001', docInfoX + 35, 78);
+      doc.text(document.poNumber || 'PO-001', docInfoX + 35, 84);
+      doc.text(document.piNumber || 'PI-001', docInfoX + 35, 90);
+      
+      // Preparar dados da tabela unificada (unitary + multi-boxes)
       const tableData: any[] = [];
-      let currentY = 95; // Posição Y inicial da tabela
       
-      // Configurar dados para a tabela
-      boxGroups.forEach(group => {
-        group.items.forEach((item, index) => {
-          if (index === 0) {
-            const boxNumber = group.boxNumber === 'S/N' ? 'S/N' : group.boxNumber;
+      // Sistema Unitário
+      if (boxType === 'unitary' && boxGroups.length > 0) {
+        boxGroups.forEach((group) => {
+          group.items.forEach((item, itemIndex) => {
             tableData.push([
-              boxNumber,
+              itemIndex === 0 ? group.boxNumber : '',
               item.ref,
               item.eanCode,
-              group.totalNetWeight.toFixed(2),
-              group.totalGrossWeight.toFixed(2),
-              group.totalVolume.toFixed(2),
+              itemIndex === 0 ? group.totalNetWeight.toFixed(2) : '',
+              itemIndex === 0 ? group.totalGrossWeight.toFixed(2) : '',
+              itemIndex === 0 ? group.totalVolume.toFixed(3) : '',
               item.description,
-              group.totalCartons.toString(),
+              itemIndex === 0 ? group.totalCartons.toString() : '',
               item.orderQty.toString(),
               item.piecesPerCarton.toString()
             ]);
-          } else {
-            tableData.push([
-              '',
-              item.ref,
-              item.eanCode,
-              '',
-              '',
-              '',
-              item.description,
-              '',
-              item.orderQty.toString(),
-              item.piecesPerCarton.toString()
-            ]);
-          }
+          });
         });
-      });
+      }
       
-      // Calcular totais
-      const grandTotalNet = boxGroups.reduce((sum, group) => sum + group.totalNetWeight, 0);
-      const grandTotalGross = boxGroups.reduce((sum, group) => sum + group.totalGrossWeight, 0);
-      const grandTotalVolume = boxGroups.reduce((sum, group) => sum + group.totalVolume, 0);
-      const grandTotalCartons = boxGroups.reduce((sum, group) => sum + group.totalCartons, 0);
-      const grandTotalQty = boxGroups.reduce((sum, group) => sum + group.totalQty, 0);
+      // Sistema Multi-Itens
+      if (boxType === 'multi' && multiBoxContainers.length > 0) {
+        multiBoxContainers.forEach((container) => {
+          // Header da caixa
+          tableData.push([
+            container.boxNumber,
+            `BOX: ${container.description}`,
+            '',
+            container.totalNetWeight.toFixed(2),
+            container.totalGrossWeight.toFixed(2),
+            container.totalVolume.toFixed(3),
+            `Container with ${container.totalPieces} pieces`,
+            '1',
+            container.totalPieces.toString(),
+            container.totalPieces.toString()
+          ]);
+          
+          // Itens dentro da caixa
+          container.items.forEach((item) => {
+            tableData.push([
+              '',
+              `  • ${item.ref}`,
+              item.eanCode,
+              '',
+              '',
+              '',
+              `  ${item.description}`,
+              '',
+              item.quantity.toString(),
+              ''
+            ]);
+          });
+        });
+      }
       
-      // Adicionar linha de totais
-      tableData.push([
-        'S/N',
-        'TES',
-        '7854585',
-        grandTotalNet.toFixed(2),
-        grandTotalGross.toFixed(2),
-        grandTotalVolume.toFixed(1),
-        'Cofee',
-        grandTotalCartons.toString(),
-        grandTotalQty.toString(),
-        '1'
-      ]);
-      
-      // Criar tabela com layout específico
+      // Gerar tabela usando autoTable com layout profissional
       (doc as any).autoTable({
-        startY: 90,
+        startY: 120,
         head: [[
           'Numbers',
           'REF',
           'EAN CODE',
-          'Total net\nweight (KG)',
-          'Total Gross\nweight (KG)',
+          'Total net weight (KG)',
+          'Total Gross weight (KG)',
           'Total Volume (m³)',
           'Goods Description',
-          'Number of\nCartons',
+          'Number of Cartons',
           'Order Qty',
           'Pieces per Carton'
         ]],
         body: tableData,
+        theme: 'grid',
         styles: {
           fontSize: 7,
-          cellPadding: 1.5,
-          lineWidth: 0.1,
-          lineColor: [0, 0, 0],
-          textColor: [0, 0, 0]
+          cellPadding: 2,
+          halign: 'center'
         },
         headStyles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontStyle: 'bold',
-          halign: 'center',
-          valign: 'middle',
-          lineWidth: 0.5,
-          lineColor: [0, 0, 0]
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          fontSize: 8,
+          fontStyle: 'bold'
         },
         columnStyles: {
-          0: { halign: 'center', cellWidth: 15 },
-          1: { halign: 'center', cellWidth: 12 },
-          2: { halign: 'center', cellWidth: 18 },
-          3: { halign: 'center', cellWidth: 16 },
-          4: { halign: 'center', cellWidth: 16 },
-          5: { halign: 'center', cellWidth: 18 },
-          6: { halign: 'left', cellWidth: 'auto' },
-          7: { halign: 'center', cellWidth: 15 },
-          8: { halign: 'center', cellWidth: 15 },
-          9: { halign: 'center', cellWidth: 18 }
+          6: { halign: 'left' }, // Descrição alinhada à esquerda
         },
-        bodyStyles: {
-          lineWidth: 0.5,
-          lineColor: [0, 0, 0]
-        },
-        didParseCell: function(data: any) {
-          // Estilo para células mescladas
-          const cellsToMerge = [0, 3, 4, 5, 7];
-          if (cellsToMerge.includes(data.column.index) && data.row.index < tableData.length - 1) {
-            const currentRowData = tableData[data.row.index];
-            const isEmptyCell = !currentRowData[data.column.index] || currentRowData[data.column.index] === '';
-            
-            if (isEmptyCell && data.row.index > 0) {
-              data.cell.styles.lineWidth = {
-                top: 0,
-                right: 0.5,
-                bottom: 0,
-                left: 0.5
-              };
-            }
-          }
-        },
-        margin: { left: leftMargin }
+        margin: { left: margin, right: margin }
       });
       
-      // Rodapé - Informações finais
+      // Informações finais na parte inferior
       const finalY = (doc as any).lastAutoTable.finalY + 10;
       
-      // We hereby declare that
-      doc.setLineWidth(0.5);
-      doc.rect(leftMargin, finalY, pageWidth - 20, 35);
+      // Totais
+      const totalNetWeight = boxType === 'unitary' 
+        ? boxGroups.reduce((sum, group) => sum + group.totalNetWeight, 0)
+        : multiBoxContainers.reduce((sum, container) => sum + container.totalNetWeight, 0);
       
+      const totalGrossWeight = boxType === 'unitary'
+        ? boxGroups.reduce((sum, group) => sum + group.totalGrossWeight, 0)
+        : multiBoxContainers.reduce((sum, container) => sum + container.totalGrossWeight, 0);
+      
+      const totalVolume = boxType === 'unitary'
+        ? boxGroups.reduce((sum, group) => sum + group.totalVolume, 0)
+        : multiBoxContainers.reduce((sum, container) => sum + container.totalVolume, 0);
+      
+      // Caixa de declarações
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text('We hereby declare that :', leftMargin + 2, finalY + 6);
+      doc.text('We hereby declare that:', margin, finalY);
+      
+      // Informações de declaração
+      const declarations = [
+        ['Payment Terms', '30% deposit + 70% against B/L'],
+        ['Country Of Origin', document.countryOfOrigin || 'China'],
+        ['Country Of Acquisition', document.countryOfAcquisition || 'Hong Kong'],
+        ['Country Of Provenance', document.countryOfProcedure || 'China'],
+        ['Port of Loading', document.portOfShipment || 'Shanghai'],
+        ['Port of Discharge', document.portOfDischarge || 'Navegantes'],
+        ['Incoterm 2010', 'FOB NINGBO'],
+        ['Ocean Freight', `$${(totalNetWeight * 0.1).toFixed(2)}`]
+      ];
       
       doc.setFont('helvetica', 'normal');
-      doc.text('Qty Container', leftMargin + 2, finalY + 12);
-      doc.text('Country Of Origin', leftMargin + 2, finalY + 17);
-      doc.text('Country Of Acquisition', leftMargin + 2, finalY + 22);
-      doc.text('Country Of Provenance', leftMargin + 2, finalY + 27);
-      doc.text('Port Of Loading', leftMargin + 2, finalY + 32);
-      doc.text('Port Of Discharge', leftMargin + 2, finalY + 37);
+      declarations.forEach((declaration, index) => {
+        const y = finalY + 10 + (index * 4);
+        doc.text(`${declaration[0]}:`, margin, y);
+        doc.text(declaration[1], margin + 40, y);
+      });
       
-      doc.text(': 1 X 40\' NOR', leftMargin + 45, finalY + 12);
-      doc.text(': China', leftMargin + 45, finalY + 17);
-      doc.text(': Hong Kong', leftMargin + 45, finalY + 22);
-      doc.text(': China', leftMargin + 45, finalY + 27);
-      doc.text(': Shanghai', leftMargin + 45, finalY + 32);
-      doc.text(': Navegantes', leftMargin + 45, finalY + 37);
-      
-      // Informações de peso e volume (lado direito)
-      doc.rect(rightMargin - 60, finalY, 60, 35);
+      // Totais do lado direito
       doc.setFont('helvetica', 'bold');
-      doc.text('Net Weight', rightMargin - 58, finalY + 10);
-      doc.text('Gross Weight', rightMargin - 58, finalY + 17);
-      doc.text('CBM', rightMargin - 58, finalY + 24);
-      doc.text('CTN´s', rightMargin - 58, finalY + 31);
+      doc.text('Net Weight:', pageWidth - 80, finalY + 10);
+      doc.text('Gross Weight:', pageWidth - 80, finalY + 15);
+      doc.text('CBM:', pageWidth - 80, finalY + 20);
+      doc.text(`CTN's:`, pageWidth - 80, finalY + 25);
       
       doc.setFont('helvetica', 'normal');
-      doc.text(`: ${grandTotalNet.toFixed(2)}`, rightMargin - 25, finalY + 10);
-      doc.text(`: ${grandTotalGross.toFixed(2)}`, rightMargin - 25, finalY + 17);
-      doc.text(`: ${grandTotalVolume.toFixed(0)}`, rightMargin - 25, finalY + 24);
-      doc.text(`: ${grandTotalCartons}`, rightMargin - 25, finalY + 31);
+      doc.text(`${totalNetWeight.toFixed(2)}`, pageWidth - 30, finalY + 10);
+      doc.text(`${totalGrossWeight.toFixed(2)}`, pageWidth - 30, finalY + 15);
+      doc.text(`${totalVolume.toFixed(2)}`, pageWidth - 30, finalY + 20);
+      doc.text(`${boxGroups.length || multiBoxContainers.length}`, pageWidth - 30, finalY + 25);
       
-      // Manufacturer info
-      doc.setLineWidth(0.5);
-      doc.rect(leftMargin, finalY + 40, pageWidth - 20, 10);
+      // Informações do fabricante
+      doc.rect(margin, finalY + 35, pageWidth - 2 * margin, 15);
       doc.setFont('helvetica', 'bold');
-      doc.text('Manufacturer name and Address', leftMargin + 2, finalY + 45);
+      doc.text("Manufacturer's Name and Address", margin + 2, finalY + 42);
       doc.setFont('helvetica', 'normal');
-      doc.text(document.manufacturerInfo || 'MJUMP SPORTS CO., LTD. NO. 65 WEST HUANCHENG ROAD, JINHU COUNTRY, HUAIAN CITY, JIANGSU, CHINA ZIP CODE:211600', 
-        leftMargin + 55, finalY + 47);
+      doc.text(document.manufacturerInfo || 'MUJUMP SPORTS CO., LTD. NO. 65 WEST HUANCHENG ROAD, JINHU COUNTRY, HUAIAN CITY, JIANGSU, CHINA ZIP CODE:211600', margin + 2, finalY + 47);
       
       // Salvar PDF
       const fileName = `PL-${document.packingListNumber || 'DRAFT'}-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -689,7 +853,6 @@ const PackingListGenerator = () => {
       
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
       toast({
         title: "Erro ao gerar PDF",
         description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o documento PDF.",
@@ -700,29 +863,37 @@ const PackingListGenerator = () => {
     }
   };
   
-  // Gerar Commercial Invoice PDF
+  // Gerar Commercial Invoice PDF (Novo - Formato Landscape Profissional)
   const generateCommercialInvoice = () => {
     setIsGeneratingPDF(true);
     
     try {
-      const doc = new jsPDF('portrait', 'mm', 'a4');
-      const pageWidth = doc.internal.pageSize.width;
-      const leftMargin = 10;
-      const rightMargin = pageWidth - 10;
+      // Criar PDF em formato landscape A4 profissional
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.width; // 297mm
+      const pageHeight = doc.internal.pageSize.height; // 210mm
+      const margin = 10;
       
-      // Cabeçalho - Caixa do Exportador
+      // Cabeçalho moderno do exportador
       doc.setLineWidth(0.5);
-      doc.rect(leftMargin, 10, pageWidth - 20, 25);
+      doc.rect(margin, 10, pageWidth - 2 * margin, 30);
       
-      doc.setFontSize(11);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text("Exporter's Name", leftMargin + 2, 16);
-      renderExporterInfo(doc, leftMargin, 22);
+      doc.text("Exporter's Name", margin + 2, 17);
       
-      // Título COMMERCIAL INVOICE
-      doc.setFontSize(14);
+      // Informações do exportador
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(exporter.name || 'XXX BUSINESS LTDA', margin + 2, 23);
+      doc.text(exporter.address || 'Room 2234-9,21/F,CC Wu Building, 499-308 Benny Road, Ling Long, Hong Kong', margin + 2, 28);
+      doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, margin + 2, 33);
+      doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, margin + 2, 37);
+      
+      // Título COMMERCIAL INVOICE centralizado
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text('COMMERCIAL INVOICE', pageWidth / 2, 45, { align: 'center' });
+      doc.text('COMMERCIAL INVOICE', pageWidth / 2, 55, { align: 'center' });
       
       // Informações SOLD TO / SHIP TO e ORDERED BY
       doc.setLineWidth(0.5);
@@ -1264,16 +1435,261 @@ const PackingListGenerator = () => {
         </CardContent>
       </Card>
 
-      {/* Formulário para Adicionar Item */}
+      {/* Seleção do Tipo de Caixa */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Adicionar Item ao Packing List
+            <Package className="h-5 w-5" />
+            Sistema de Caixas
           </CardTitle>
-          <CardDescription>Preencha os dados do produto (* campos obrigatórios)</CardDescription>
+          <CardDescription>Escolha entre sistema unitário (atual) ou multi-itens (novo)</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex gap-6 mb-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="radio" 
+                name="boxType" 
+                value="unitary" 
+                checked={boxType === 'unitary'}
+                onChange={(e) => setBoxType(e.target.value as 'unitary' | 'multi')}
+                className="w-4 h-4 text-blue-600" 
+              />
+              <span className="font-medium text-gray-700">📦 Caixa Unitária (Sistema Atual)</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="radio" 
+                name="boxType" 
+                value="multi" 
+                checked={boxType === 'multi'}
+                onChange={(e) => setBoxType(e.target.value as 'unitary' | 'multi')}
+                className="w-4 h-4 text-blue-600" 
+              />
+              <span className="font-medium text-gray-700">📫 Caixa Multi-Itens (Sistema Novo)</span>
+            </label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Seção Caixas Multi-Itens */}
+      {boxType === 'multi' && (
+        <>
+          {/* Caixas Multi-Itens Criadas */}
+          {multiBoxContainers.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Caixas Multi-Itens Criadas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {multiBoxContainers.map((container) => (
+                  <div key={container.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h4 className="font-bold text-blue-800">
+                          Caixa {container.boxNumber} - {container.description}
+                        </h4>
+                        <p className="text-sm text-blue-600">
+                          {container.totalPieces} peças | {container.totalNetWeight}kg líquido | 
+                          {container.totalGrossWeight}kg bruto | {container.totalVolume}m³
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setSelectedBoxId(container.id)}
+                          className="text-xs"
+                        >
+                          + Item
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => removeMultiBox(container.id)}
+                          className="text-xs"
+                        >
+                          Remover
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Itens dentro da caixa */}
+                    <div className="space-y-2">
+                      {container.items.map((item) => (
+                        <div key={item.id} className="bg-white p-3 rounded border border-blue-100 flex justify-between items-center">
+                          <div className="grid grid-cols-5 gap-4 flex-1 text-sm">
+                            <div><strong>REF:</strong> {item.ref}</div>
+                            <div><strong>EAN:</strong> {item.eanCode}</div>
+                            <div><strong>NCM:</strong> {item.ncm}</div>
+                            <div><strong>Descrição:</strong> {item.description}</div>
+                            <div><strong>Qtd:</strong> {item.quantity} pcs</div>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => removeItemFromBox(container.id, item.id)}
+                            className="text-red-500 hover:text-red-700 ml-4"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Formulário para adicionar item na caixa selecionada */}
+                    {selectedBoxId === container.id && (
+                      <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded">
+                        <h5 className="font-medium text-purple-800 mb-3">Adicionar Item à Caixa</h5>
+                        <div className="grid grid-cols-3 gap-3 mb-3">
+                          <Input 
+                            placeholder="REF (Modelo)"
+                            value={newBoxItem.ref}
+                            onChange={(e) => setNewBoxItem({...newBoxItem, ref: e.target.value})}
+                          />
+                          <Input 
+                            placeholder="EAN CODE"
+                            value={newBoxItem.eanCode}
+                            onChange={(e) => setNewBoxItem({...newBoxItem, eanCode: e.target.value})}
+                          />
+                          <Input 
+                            placeholder="NCM"
+                            value={newBoxItem.ncm}
+                            onChange={(e) => setNewBoxItem({...newBoxItem, ncm: e.target.value})}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <Input 
+                            placeholder="Descrição do Produto"
+                            value={newBoxItem.description}
+                            onChange={(e) => setNewBoxItem({...newBoxItem, description: e.target.value})}
+                          />
+                          <Input 
+                            type="number"
+                            placeholder="Quantidade"
+                            value={newBoxItem.quantity}
+                            onChange={(e) => setNewBoxItem({...newBoxItem, quantity: parseInt(e.target.value) || 0})}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button onClick={() => addItemToBox(container.id)} size="sm">
+                            Adicionar Item
+                          </Button>
+                          <Button onClick={() => setSelectedBoxId('')} variant="outline" size="sm">
+                            Cancelar
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Formulário Nova Caixa Multi-Itens */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                {isCreatingBox ? 'Criar Nova Caixa Multi-Itens' : 'Nova Caixa Multi-Itens'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!isCreatingBox ? (
+                <Button onClick={() => setIsCreatingBox(true)} className="w-full">
+                  ➕ Nova Caixa Multi-Itens
+                </Button>
+              ) : (
+                <div className="bg-purple-50 border border-purple-200 p-4 rounded">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <Label>Número da Caixa *</Label>
+                      <Input 
+                        placeholder="ex: 001"
+                        value={newBoxData.boxNumber}
+                        onChange={(e) => setNewBoxData({...newBoxData, boxNumber: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label>Descrição da Caixa *</Label>
+                      <Input 
+                        placeholder="ex: Spare Parts"
+                        value={newBoxData.description}
+                        onChange={(e) => setNewBoxData({...newBoxData, description: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    <div>
+                      <Label>Peso Líquido Total (kg) *</Label>
+                      <Input 
+                        type="number"
+                        placeholder="0.0"
+                        value={newBoxData.totalNetWeight}
+                        onChange={(e) => setNewBoxData({...newBoxData, totalNetWeight: parseFloat(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <Label>Peso Bruto Total (kg) *</Label>
+                      <Input 
+                        type="number"
+                        placeholder="0.0"
+                        value={newBoxData.totalGrossWeight}
+                        onChange={(e) => setNewBoxData({...newBoxData, totalGrossWeight: parseFloat(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <Label>Volume Total (m³) *</Label>
+                      <Input 
+                        type="number"
+                        step="0.001"
+                        placeholder="0.000"
+                        value={newBoxData.totalVolume}
+                        onChange={(e) => setNewBoxData({...newBoxData, totalVolume: parseFloat(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <Label>Total de Peças *</Label>
+                      <Input 
+                        type="number"
+                        placeholder="0"
+                        value={newBoxData.totalPieces}
+                        onChange={(e) => setNewBoxData({...newBoxData, totalPieces: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button onClick={createMultiBox}>
+                      ✅ Criar Caixa
+                    </Button>
+                    <Button onClick={() => setIsCreatingBox(false)} variant="outline">
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {/* Formulário para Adicionar Item Unitário (Sistema Atual) */}
+      {boxType === 'unitary' && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Adicionar Item Unitário
+            </CardTitle>
+            <CardDescription>Preencha os dados do produto (* campos obrigatórios)</CardDescription>
+          </CardHeader>
+          <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
             <div>
               <Label htmlFor="item-ref">REF (Modelo) *</Label>
@@ -1391,9 +1807,10 @@ const PackingListGenerator = () => {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Lista de Itens Agrupados */}
-      {boxGroups.length > 0 && (
+      {(boxGroups.length > 0 || multiBoxContainers.length > 0) && (
         <Card className="mb-6">
           <CardHeader>
             <div className="flex justify-between items-center">
@@ -1427,19 +1844,19 @@ const PackingListGenerator = () => {
                 </Button>
                 <Button 
                   onClick={generatePackingList}
-                  disabled={isGeneratingPDF || items.length === 0}
+                  disabled={isGeneratingPDF || (boxType === 'unitary' ? items.length === 0 : multiBoxContainers.length === 0)}
                   className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
                 >
                   <Download className="h-4 w-4" />
-                  {isGeneratingPDF ? 'Gerando...' : 'Gerar Packing List'}
+                  {isGeneratingPDF ? 'Gerando...' : 'Gerar Packing List (Landscape)'}
                 </Button>
                 <Button 
                   onClick={generateCommercialInvoice}
-                  disabled={isGeneratingPDF || items.length === 0}
+                  disabled={isGeneratingPDF || (boxType === 'unitary' ? items.length === 0 : multiBoxContainers.length === 0)}
                   className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                 >
                   <FileText className="h-4 w-4" />
-                  {isGeneratingPDF ? 'Gerando...' : 'Gerar Commercial Invoice'}
+                  {isGeneratingPDF ? 'Gerando...' : 'Gerar Commercial Invoice (Landscape)'}
                 </Button>
               </div>
             </div>

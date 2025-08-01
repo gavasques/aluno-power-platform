@@ -1836,8 +1836,12 @@ export const packingListDocuments = pgTable("packing_list_documents", {
   countryOfProcedure: text("country_of_procedure"),
   manufacturerInfo: text("manufacturer_info"),
   
-  // Items data
-  items: jsonb("items").notNull().default([]), // Array of item objects
+  // Items data - Sistema dual: unitários + multi-itens
+  unitaryItems: jsonb("unitary_items").notNull().default([]), // Array de itens unitários (sistema atual)
+  multiBoxContainers: jsonb("multi_box_containers").notNull().default([]), // Array de caixas multi-itens (novo sistema)
+  
+  // Compatibilidade com sistema antigo
+  items: jsonb("items").notNull().default([]), // Array of item objects (deprecated, usar unitaryItems)
   
   // Creation tracking
   createdAt: timestamp("created_at").notNull().defaultNow(),
