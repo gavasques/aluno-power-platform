@@ -565,11 +565,14 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
 
             const data = await response.json();
             
-            if (data.success && data.reviews && data.reviews.length > 0) {
+            // A API retorna reviews em data.data.reviews
+            const reviews = data.data?.reviews || data.reviews || [];
+            
+            if (data.success && reviews && reviews.length > 0) {
               consecutiveErrors = 0; // Reset contador de erros em caso de sucesso
               
               // Adicionar informação do ASIN e país às reviews
-              const reviewsWithAsin = data.reviews.map((review: any) => ({
+              const reviewsWithAsin = reviews.map((review: any) => ({
                 ...review,
                 source_asin: currentAsin,
                 source_country: currentCountry
@@ -579,7 +582,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
               
               console.log(`✅ [BULLET_POINTS] ${reviewsWithAsin.length} reviews extraídas - ASIN: ${currentAsin}, Página: ${page}`);
             } else {
-              console.log(`ℹ️ [BULLET_POINTS] Página ${page} vazia - ASIN: ${currentAsin}`);
+              console.log(`ℹ️ [BULLET_POINTS] Página ${page} vazia - ASIN: ${currentAsin}. Data:`, data);
             }
             
           } catch (error) {
