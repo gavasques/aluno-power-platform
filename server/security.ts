@@ -113,8 +113,8 @@ export const sanitizeError = (error: any): { error: string; details?: string } =
   };
 };
 
-// Input sanitization functions
-export const sanitizeInput = (input: string): string => {
+// Input sanitization functions with smart URL preservation
+export const sanitizeInput = (input: string, fieldName?: string): string => {
   if (!input || typeof input !== 'string') {
     return '';
   }
@@ -125,8 +125,17 @@ export const sanitizeInput = (input: string): string => {
   // Remove null bytes
   sanitized = sanitized.replace(/\0/g, '');
   
-  // Escape HTML entities
-  sanitized = validator.escape(sanitized);
+  // For URL fields, don't escape HTML entities but still remove dangerous scripts
+  if (fieldName === 'website' || fieldName === 'url') {
+    // Only remove dangerous scripts for URLs
+    sanitized = sanitized
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+=/gi, '');
+  } else {
+    // For other fields, escape HTML entities
+    sanitized = validator.escape(sanitized);
+  }
   
   // Remove control characters except newline and tab
   sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
@@ -223,17 +232,18 @@ export const sanitizeQueryParams = (req: Request, res: Response, next: NextFunct
   next();
 };
 
-// Middleware to sanitize all body parameters
+// Middleware to sanitize all body parameters with field-aware sanitization
 export const sanitizeBody = (req: Request, res: Response, next: NextFunction) => {
   if (req.body && typeof req.body === 'object') {
     const sanitizeObject = (obj: any): any => {
       const sanitized: any = {};
       for (const [key, value] of Object.entries(obj)) {
         if (typeof value === 'string') {
-          sanitized[key] = sanitizeInput(value);
+          // Pass the field name to enable smart sanitization
+          sanitized[key] = sanitizeInput(value, key);
         } else if (Array.isArray(value)) {
           sanitized[key] = value.map(v => 
-            typeof v === 'string' ? sanitizeInput(v) : 
+            typeof v === 'string' ? sanitizeInput(v, key) : 
             typeof v === 'object' && v !== null ? sanitizeObject(v) : v
           );
         } else if (typeof value === 'object' && value !== null) {
