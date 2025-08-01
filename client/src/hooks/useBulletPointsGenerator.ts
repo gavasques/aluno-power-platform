@@ -276,8 +276,17 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       logger.debug('🚀 [BULLET_POINTS] Starting generation with webhook config:', currentConfig);
       setAgentConfig(currentConfig);
 
-      // Log para verificar se há dados de reviews disponíveis
-      if (state.reviewsData) {
+      // Log detalhado para verificar estado das reviews
+      logger.debug('📊 [BULLET_POINTS] Current state check:', {
+        hasReviewsData: !!state.reviewsData,
+        reviewsDataLength: state.reviewsData?.length || 0,
+        reviewsDataType: typeof state.reviewsData,
+        reviewsDataPreview: state.reviewsData?.substring(0, 100) || 'EMPTY',
+        asinListLength: state.asinList.length,
+        extractionProgress: state.extractionProgress
+      });
+      
+      if (state.reviewsData && state.reviewsData.trim()) {
         logger.debug('📊 [BULLET_POINTS] Reviews data available:', {
           reviewsLength: state.reviewsData.length,
           totalReviews: state.reviewsData.split('---').length - 1,
@@ -313,12 +322,15 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
       if (state.materials?.trim()) informacoes_basicas.materiais = state.materials.trim();
       if (state.textInput?.trim()) informacoes_basicas.informacoes_detalhadas = state.textInput.trim();
 
-      // Preparar dados estruturados apenas com campos preenchidos
-      const combinedProductInfo: any = {
-        informacoes_basicas
-      };
-
-      // Adicionar avaliações apenas se existirem
+      // Preparar dados estruturados com informações primeiro e depois avaliações
+      const combinedProductInfo: any = {};
+      
+      // Sempre incluir informações básicas primeiro
+      if (Object.keys(informacoes_basicas).length > 0) {
+        combinedProductInfo.informacoes_basicas = informacoes_basicas;
+      }
+      
+      // Depois adicionar avaliações se existirem
       if (state.reviewsData?.trim()) {
         combinedProductInfo.avaliacoes_clientes = {
           dados_disponiveis: true,
