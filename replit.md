@@ -8,7 +8,7 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 
 ## Recent Changes (August 1, 2025)
 - **Bullet Points Webhook Enhancement**: Comprehensive improvements to bullet points generator
-  - Migrated from AI providers to n8n webhook system (URL: https://n8n.guivasques.app/webhook-test/gerar-bullet-points)
+  - Migrated from AI providers to secure webhook system (internal URL configured)
   - Removed technical configuration display (Model, Temperature, Max Tokens, Cost) from user interface
   - Updated field label from "Informações" to "Informações do produto" with enhanced placeholder text
   - **Amazon Reviews Integration**: Added optional Amazon reviews extraction functionality

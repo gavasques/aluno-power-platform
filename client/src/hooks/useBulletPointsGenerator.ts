@@ -343,7 +343,7 @@ export const useBulletPointsGenerator = ({ agent }: UseBulletPointsGeneratorProp
         productInfo: JSON.stringify(combinedProductInfo, null, 2)
       };
 
-      const response = await fetch('https://n8n.guivasques.app/webhook-test/gerar-bullet-points', {
+      const response = await fetch('https://webhook.guivasques.app/webhook/gerar-bullet-points', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

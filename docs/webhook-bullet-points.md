@@ -7,7 +7,7 @@ O Gerador de Bullet Points foi migrado de providers de IA para um webhook n8n pe
 
 ### URL do Webhook
 ```
-https://n8n.guivasques.app/webhook-test/gerar-bullet-points
+https://webhook.guivasques.app/webhook/gerar-bullet-points
 ```
 
 ### Método
