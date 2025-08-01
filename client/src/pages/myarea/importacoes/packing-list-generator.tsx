@@ -83,7 +83,7 @@ const PackingListGenerator = () => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // Query para carregar documento existente
-  const { data: savedDocument, isLoading: isLoadingDocument } = useQuery({
+  const { data: savedDocument, isLoading: isLoadingDocument } = useQuery<{data: any}>({
     queryKey: [`/api/packing-list-documents/${documentId}`],
     enabled: !!documentId,
   });

@@ -33,6 +33,7 @@ export interface ExporterInfo {
   phone: string;
   fax: string;
   mobile: string;
+  email?: string;
 }
 
 export interface ConsigneeInfo {
@@ -41,6 +42,8 @@ export interface ConsigneeInfo {
   city: string;
   country: string;
   cnpj: string;
+  state?: string;
+  cep?: string;
 }
 
 export interface DocumentInfo {

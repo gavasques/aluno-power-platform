@@ -37,8 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { queryClient } from "@/lib/queryClient";
-import { usePermissions } from "@/hooks/usePermissions";
-import { PermissionGuard } from "@/components/PermissionGuard";
+import { useUser } from "@/contexts/UserContext";
 import type { PackingListDocument } from "@shared/schema";
 
 export default function DocumentosSalvos() {
@@ -46,16 +45,16 @@ export default function DocumentosSalvos() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<PackingListDocument | null>(null);
   
-  const permissions = usePermissions();
+  const { hasAccess } = useUser();
 
   // Buscar documentos
-  const { data: documentsResponse, isLoading, error } = useQuery({
+  const { data: documentsResponse, isLoading, error } = useQuery<{data: PackingListDocument[]}>({
     queryKey: ["/api/packing-list-documents"],
     retry: 2,
   });
 
   // Buscar documentos com filtro
-  const { data: searchResponse } = useQuery({
+  const { data: searchResponse } = useQuery<{data: PackingListDocument[]}>({
     queryKey: ["/api/packing-list-documents/search", searchQuery],
     enabled: searchQuery.length > 0,
     retry: 2,
@@ -124,8 +123,7 @@ export default function DocumentosSalvos() {
   };
 
   return (
-    <PermissionGuard permissions={permissions}>
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -309,7 +307,6 @@ export default function DocumentosSalvos() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </PermissionGuard>
+    </div>
   );
 }
