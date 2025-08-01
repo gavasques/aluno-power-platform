@@ -7069,5 +7069,69 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     console.error('❌ [PERFORMANCE] Performance routes failed:', error);
   }
 
+  // International Supplier Detail API Routes
+  // Missing routes that the frontend is trying to call
+  app.get('/api/supplier-contacts', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = req.query.supplierId;
+      if (!supplierId) {
+        return res.status(400).json({ error: 'supplierId is required' });
+      }
+      
+      // Return empty array for now - this will be implemented later
+      res.json({ success: true, data: [] });
+    } catch (error) {
+      console.error('Error fetching supplier contacts:', error);
+      res.status(500).json({ error: 'Failed to fetch contacts' });
+    }
+  });
+
+  app.get('/api/international-contracts', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = req.query.supplierId;
+      if (!supplierId) {
+        return res.status(400).json({ error: 'supplierId is required' });
+      }
+      
+      // Return empty array for now - this will be implemented later
+      res.json({ success: true, data: [] });
+    } catch (error) {
+      console.error('Error fetching international contracts:', error);
+      res.status(500).json({ error: 'Failed to fetch contracts' });
+    }
+  });
+
+  app.get('/api/supplier-conversations', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = req.query.supplierId;
+      if (!supplierId) {
+        return res.status(400).json({ error: 'supplierId is required' });
+      }
+      
+      // Return empty array for now - this will be implemented later
+      res.json({ success: true, data: [] });
+    } catch (error) {
+      console.error('Error fetching supplier conversations:', error);
+      res.status(500).json({ error: 'Failed to fetch conversations' });
+    }
+  });
+
+  app.get('/api/supplier-documents', requireAuth, async (req: any, res: any) => {
+    try {
+      const supplierId = req.query.supplierId;
+      if (!supplierId) {
+        return res.status(400).json({ error: 'supplierId is required' });
+      }
+      
+      // Return empty array for now - this will be implemented later
+      res.json({ success: true, data: [] });
+    } catch (error) {
+      console.error('Error fetching supplier documents:', error);
+      res.status(500).json({ error: 'Failed to fetch documents' });
+    }
+  });
+
+  console.log('✅ [INTERNATIONAL_SUPPLIERS] Missing detail API routes added');
+
   return httpServer;
 }
