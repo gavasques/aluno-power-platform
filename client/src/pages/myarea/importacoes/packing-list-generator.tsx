@@ -31,7 +31,7 @@ import {
   mockPackingListData 
 } from "@/types/packingList";
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -481,7 +481,7 @@ const PackingListGenerator = () => {
       ]);
       
       // Criar tabela com layout específico
-      autoTable(doc, {
+      (doc as any).autoTable({
         startY: 90,
         head: [[
           'Numbers',
@@ -718,7 +718,7 @@ const PackingListGenerator = () => {
       });
       
       // Criar tabela de invoice
-      autoTable(doc, {
+      (doc as any).autoTable({
         startY: 95,
         head: [[
           'REF',
