@@ -2071,25 +2071,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const sessionData = global.customerServiceSessions.get(sessionId);
 
-      // Get agent and prompts
-      const agent = await storage.getAgentWithPrompts('amazon-customer-service');
-      if (!agent) {
-        return res.status(404).json({ error: 'Agente não encontrado' });
-      }
-
-      const systemPrompt = agent.prompts.find(p => p.promptType === 'system')?.content || '';
-      const mainPrompt = agent.prompts.find(p => p.promptType === 'main')?.content || '';
-
-      // Replace placeholders with actual content
-      const processedPrompt = mainPrompt
-        .replace('[EMAIL_CONTENT]', emailContent)
-        .replace('[USER_OBSERVATIONS]', userObservations);
-
-      console.log('🔗 [CUSTOMER_SERVICE] Processing with webhook instead of AI provider');
+      console.log('🔗 [CUSTOMER_SERVICE] Processing with webhook - sending only client data');
 
       const startTime = Date.now();
 
-      // Prepare data for webhook - only client email and user info
+      // Prepare data for webhook - ONLY client email and user info (no prompts!)
       const webhookData = {
         email_content: emailContent,
         user_observations: userObservations
@@ -2149,13 +2135,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save to AI Generation Logs with AUTOMATIC CREDIT DEDUCTION
       try {
-        const fullPrompt = `${systemPrompt}\n\n${processedPrompt}`;
+        const inputData = `Email: ${emailContent}\nObservações: ${userObservations}`;
         
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
           'agents.customer_service', // Feature code para dedução de créditos
-          fullPrompt,
+          inputData,
           responseText,
           'webhook',
           'n8n-customer-service',
