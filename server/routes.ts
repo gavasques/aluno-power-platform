@@ -2085,36 +2085,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .replace('[EMAIL_CONTENT]', emailContent)
         .replace('[USER_OBSERVATIONS]', userObservations);
 
-      console.log('🤖 [CUSTOMER_SERVICE] Processing with Anthropic Claude:', agent.model);
-
-      // Call Anthropic API
-      const anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
-      });
+      console.log('🔗 [CUSTOMER_SERVICE] Processing with webhook instead of AI provider');
 
       const startTime = Date.now();
 
-      const response = await anthropic.messages.create({
-        model: agent.model || 'claude-sonnet-4-20250514',
-        max_tokens: parseInt(String(agent.maxTokens)) || 4000,
-        temperature: parseFloat(String(agent.temperature)) || 0.7,
-        messages: [
-          {
-            role: 'user',
-            content: `${systemPrompt}\n\n${processedPrompt}`,
-          },
-        ],
+      // Prepare data for webhook
+      const webhookData = {
+        email_content: emailContent,
+        user_observations: userObservations,
+        system_prompt: systemPrompt,
+        main_prompt: processedPrompt
+      };
+
+      console.log('🎯 [CUSTOMER_SERVICE] Sending data to webhook:', { 
+        emailContentLength: emailContent.length,
+        userObservationsLength: userObservations.length 
       });
 
-      const processingTime = Date.now() - startTime;
-      const responseText = response.content[0]?.text || '';
+      // Call webhook instead of AI provider
+      const webhookUrl = 'https://n8n.guivasques.app/webhook-test/amazon-cs-email-helper';
+      const webhookResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      });
 
-      // Calculate usage and cost
-      const inputTokens = response.usage?.input_tokens || 0;
-      const outputTokens = response.usage?.output_tokens || 0;
-      const totalTokens = inputTokens + outputTokens;
-      const costPer1k = agent.costPer1kTokens || 0.015;
-      const totalCost = (totalTokens / 1000) * costPer1k;
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook error: ${webhookResponse.status} ${webhookResponse.statusText}`);
+      }
+
+      const webhookResult = await webhookResponse.json();
+      const processingTime = Date.now() - startTime;
+      const responseText = webhookResult.response || webhookResult.email_response || '';
+
+      console.log('🎯 [CUSTOMER_SERVICE] Webhook response received:', { 
+        responseLength: responseText.length,
+        processingTime: `${processingTime}ms` 
+      });
+
+      // Fixed values for webhook processing
+      const inputTokens = 0;
+      const outputTokens = 0;
+      const totalTokens = 0;
+      const totalCost = 0;
 
       // Update session with results
       sessionData.status = 'completed';
@@ -2143,8 +2158,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'agents.customer_service', // Feature code para dedução de créditos
           fullPrompt,
           responseText,
-          'anthropic',
-          agent.model || 'claude-sonnet-4-20250514',
+          'webhook',
+          'n8n-customer-service',
           inputTokens,
           outputTokens,
           totalTokens,
@@ -2153,7 +2168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           processingTime
         );
         
-        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: ${agent.model}, Cost: $${totalCost.toFixed(6)}, Tokens: ${totalTokens}`);
+        console.log(`💾 [AI_LOG] Saved generation log - User: ${user.id}, Model: n8n-customer-service, Cost: $${totalCost.toFixed(6)}, Characters: ${responseText.length}`);
       } catch (logError) {
         console.error('❌ [AI_LOG] Error saving generation log:', logError);
       }

@@ -90,13 +90,25 @@ const AmazonCustomerServiceResult = () => {
   const downloadResponse = () => {
     if (!sessionData?.result_data?.response) return;
 
+    // Criar nome do arquivo com timestamp
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    const filename = `customer_service_${year}${month}${day}_${hours}${minutes}${seconds}.txt`;
+
     const element = document.createElement("a");
-    const file = new Blob([sessionData.result_data.response], { type: 'text/plain' });
+    const file = new Blob([sessionData.result_data.response], { type: 'text/plain;charset=utf-8' });
     element.href = URL.createObjectURL(file);
-    element.download = `resposta-cliente-${sessionId}.txt`;
+    element.download = filename;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+    URL.revokeObjectURL(element.href);
   };
 
   if (isLoading) {
