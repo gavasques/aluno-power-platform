@@ -106,8 +106,8 @@ export const LoginFormPresentation = ({
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
         
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        {/* Header - Hidden on mobile to avoid duplication */}
+        <header className="hidden md:block bg-white border-b border-gray-200 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/">
@@ -117,7 +117,7 @@ export const LoginFormPresentation = ({
                 </div>
               </Link>
               
-              <nav className="hidden md:flex items-center gap-6">
+              <nav className="flex items-center gap-6">
                 <Link href="/recursos" className="text-gray-600 hover:text-gray-900 font-medium">Recursos</Link>
                 <Link href="/precos" className="text-gray-600 hover:text-gray-900 font-medium">Preços</Link>
                 <Link href="/contato" className="text-gray-600 hover:text-gray-900 font-medium">Contato</Link>
@@ -125,6 +125,18 @@ export const LoginFormPresentation = ({
             </div>
           </div>
         </header>
+
+        {/* Mobile Header - Simple logo only */}
+        <div className="md:hidden bg-white border-b border-gray-200 py-4">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <Link href="/">
+              <div className="flex items-center justify-center gap-3">
+                <img src={logoPath} alt="Logo" className="h-8 w-auto" />
+                <span className="text-xl font-bold text-gray-900">Guilherme Vasques</span>
+              </div>
+            </Link>
+          </div>
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
