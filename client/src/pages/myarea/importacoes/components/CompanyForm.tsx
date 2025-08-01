@@ -86,6 +86,9 @@ const ESTADOS = [
 ];
 
 export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) {
+  // Função para converter para maiúsculo (exceto observações)
+  const toUpperCase = (value: string) => value.toUpperCase();
+
   const form = useForm<CompanyFormData>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
@@ -96,7 +99,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
       postalCode: company?.postalCode || '',
       city: company?.city || '',
       state: company?.state || '',
-      country: company?.country || 'Brasil',
+      country: company?.country || 'BRASIL',
       email: company?.email || '',
       website: company?.website || '',
       phone: company?.phone || '',
@@ -141,7 +144,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[80vh] overflow-y-auto pr-2">
         {/* Informações Básicas */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -156,7 +159,11 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 <FormItem>
                   <FormLabel>Razão Social *</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: João Silva ME" />
+                    <Input 
+                      {...field} 
+                      placeholder="EX: JOÃO SILVA ME" 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +177,11 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 <FormItem>
                   <FormLabel>Nome Fantasia *</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: Silva Importações" />
+                    <Input 
+                      {...field} 
+                      placeholder="EX: SILVA IMPORTAÇÕES" 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -213,7 +224,11 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
               <FormItem>
                 <FormLabel>Endereço</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ex: Rua das Flores, 123" />
+                  <Input 
+                    {...field} 
+                    placeholder="EX: RUA DAS FLORES, 123" 
+                    onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -228,7 +243,11 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 <FormItem>
                   <FormLabel>Bairro</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: Centro" />
+                    <Input 
+                      {...field} 
+                      placeholder="EX: CENTRO" 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -258,7 +277,11 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 <FormItem>
                   <FormLabel>Cidade</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: São Paulo" />
+                    <Input 
+                      {...field} 
+                      placeholder="EX: SÃO PAULO" 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -297,7 +320,10 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 <FormItem>
                   <FormLabel>País</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input 
+                      {...field} 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -401,7 +427,11 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 <FormItem>
                   <FormLabel>Inscrição Estadual</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: 123.456.789.012" />
+                    <Input 
+                      {...field} 
+                      placeholder="EX: 123.456.789.012" 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -415,7 +445,11 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 <FormItem>
                   <FormLabel>Inscrição Municipal</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: 123456789" />
+                    <Input 
+                      {...field} 
+                      placeholder="EX: 123456789" 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -450,18 +484,20 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-4 pt-4 border-t">
+        <div className="flex justify-end gap-4 pt-4 border-t bg-white dark:bg-gray-800 sticky bottom-0 z-10 mt-6">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={mutation.isPending}
+            className="min-w-[100px]"
           >
             Cancelar
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending}
+            className="min-w-[140px]"
           >
             {mutation.isPending 
               ? 'Salvando...' 
