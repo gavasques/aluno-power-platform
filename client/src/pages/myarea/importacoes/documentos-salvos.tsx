@@ -133,17 +133,17 @@ export default function DocumentosSalvos() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <h1 className="text-2xl font-bold">Documentos Salvos</h1>
+              <h1 className="text-2xl font-bold">Gestão de Packing Lists</h1>
             </div>
             <p className="text-muted-foreground">
-              Gerencie seus Packing Lists e Commercial Invoices salvos
+              Crie, visualize, edite e gerencie seus Packing Lists e Commercial Invoices
             </p>
           </div>
           
           <Link href="/minha-area/importacoes/packing-list-generator">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Novo Documento
+              Criar Packing List
             </Button>
           </Link>
         </div>
@@ -172,7 +172,7 @@ export default function DocumentosSalvos() {
         {/* Lista de Documentos */}
         <Card>
           <CardHeader>
-            <CardTitle>Documentos</CardTitle>
+            <CardTitle>Packing Lists Salvos</CardTitle>
             <CardDescription>
               {documents.length} documento{documents.length !== 1 ? "s" : ""} encontrado{documents.length !== 1 ? "s" : ""}
             </CardDescription>
@@ -192,7 +192,7 @@ export default function DocumentosSalvos() {
                   <Link href="/minha-area/importacoes/packing-list-generator">
                     <Button>
                       <Plus className="mr-2 h-4 w-4" />
-                      Criar Primeiro Documento
+                      Criar Primeiro Packing List
                     </Button>
                   </Link>
                 )}
