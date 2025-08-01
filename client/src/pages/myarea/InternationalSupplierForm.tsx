@@ -78,9 +78,17 @@ export default function InternationalSupplierForm() {
   }, [token]);
 
   const handleInputChange = (field: keyof SupplierFormData, value: string | number) => {
+    // Campos que devem ser convertidos para maiúsculo
+    const uppercaseFields = ['corporateName', 'tradeName', 'country', 'state', 'city', 'address'];
+    
+    let processedValue = value;
+    if (typeof value === 'string' && uppercaseFields.includes(field)) {
+      processedValue = value.toUpperCase();
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: processedValue
     }));
   };
 
