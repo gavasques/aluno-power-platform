@@ -70,7 +70,6 @@ const lazyComponents = {
   
   // Agents
   AgentsPage: lazy(() => import('../../pages/agents')),
-  AgentProcessorPage: lazy(() => import('../../pages/AgentProcessorPage')),
   HtmlDescriptionAgent: lazy(() => import('../../pages/agents/HtmlDescriptionAgent')),
   BulletPointsAgent: lazy(() => import('../../pages/agents/BulletPointsAgent')),
   AmazonProductPhotography: lazy(() => import('../../pages/agents/amazon-product-photography')),
@@ -204,7 +203,6 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
     // Agent Routes (Protected)
     AGENT_ROUTES: [
       { path: '/agentes', component: lazyComponents.AgentsPage, isProtected: true },
-      { path: '/agentes/:id', component: lazyComponents.AgentProcessorPage, isProtected: true },
       { path: '/agentes/bullet-points-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
       { path: '/agents/html-description-generator', component: lazyComponents.HtmlDescriptionAgent, isProtected: true },
       { path: '/agents/bullet-point-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
