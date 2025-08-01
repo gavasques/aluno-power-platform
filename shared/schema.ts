@@ -1820,10 +1820,13 @@ export const packingListDocuments = pgTable("packing_list_documents", {
   status: text("status").notNull().default("draft"), // draft, completed
   
   // Exporter information
-  exporterData: jsonb("exporter_data").notNull(), // {name, address, city, country, phone, mobile, email}
+  exporterData: jsonb("exporter_data").notNull(), // {name, address, city, country, phone, mobile, fax, email}
   
-  // Consignee information
+  // Consignee information (Sold To / Ship To)
   consigneeData: jsonb("consignee_data").notNull(), // {name, address, city, state, cep, cnpj}
+  
+  // Ordered By information
+  orderedByData: jsonb("ordered_by_data").notNull(), // {name, address, city, state, cep, cnpj}
   
   // Document details
   portOfShipment: text("port_of_shipment"),

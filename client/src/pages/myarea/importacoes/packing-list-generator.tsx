@@ -26,6 +26,7 @@ import {
   BoxGroup, 
   ExporterInfo, 
   ConsigneeInfo, 
+  OrderedByInfo,
   DocumentInfo, 
   PackingListData,
   mockPackingListData 
@@ -58,6 +59,14 @@ const PackingListGenerator = () => {
   });
 
   const [consignee, setConsignee] = useState<ConsigneeInfo>({
+    name: '',
+    address: '',
+    city: '',
+    country: '',
+    cnpj: ''
+  });
+
+  const [orderedBy, setOrderedBy] = useState<OrderedByInfo>({
     name: '',
     address: '',
     city: '',
@@ -155,13 +164,18 @@ const PackingListGenerator = () => {
       const doc = savedDocument.data;
       
       // Carregar informações do exportador
-      if (doc.exporterInfo) {
-        setExporter(doc.exporterInfo);
+      if (doc.exporterData || doc.exporterInfo) {
+        setExporter(doc.exporterData || doc.exporterInfo);
       }
       
       // Carregar informações do consignee
-      if (doc.consigneeInfo) {
-        setConsignee(doc.consigneeInfo);
+      if (doc.consigneeData || doc.consigneeInfo) {
+        setConsignee(doc.consigneeData || doc.consigneeInfo);
+      }
+      
+      // Carregar informações do orderedBy
+      if (doc.orderedByData) {
+        setOrderedBy(doc.orderedByData);
       }
       
       // Carregar informações do documento
@@ -196,8 +210,9 @@ const PackingListGenerator = () => {
       plNumber: document.packingListNumber,
       ciNumber: document.piNumber,
       issueDate: document.issueDate,
-      exporterInfo: exporter,
-      consigneeInfo: consignee,
+      exporterData: exporter,
+      consigneeData: consignee,
+      orderedByData: orderedBy,
       items: items,
       manufacturerInfo: document.manufacturerInfo,
       portOfShipment: document.portOfShipment,
@@ -276,6 +291,13 @@ const PackingListGenerator = () => {
       city: 'Miami',
       country: 'USA',
       cnpj: '12.345.678/0001-90'
+    });
+    setOrderedBy({
+      name: 'BRASIL TRADING LTDA',
+      address: 'Av. Paulista, 1000',
+      city: 'São Paulo',
+      country: 'Brazil',
+      cnpj: '98.765.432/0001-10'
     });
     setDocument({
       ...document,
@@ -372,6 +394,11 @@ const PackingListGenerator = () => {
       doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, leftMargin + 2, 30);
       doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, leftMargin + 2, 34);
       
+      // Adicionar Fax se existir
+      if (exporter.fax) {
+        doc.text(`Fax: ${exporter.fax}`, leftMargin + 2, 38);
+      }
+      
       // Título PACKING LIST
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
@@ -398,11 +425,11 @@ const PackingListGenerator = () => {
       doc.setFont('helvetica', 'bold');
       doc.text('ORDERED BY:', middleX, 56);
       doc.setFont('helvetica', 'normal');
-      doc.text(consignee.name || 'XX COMERCIO LTDA', middleX, 62);
-      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
-      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, middleX, 70);
-      doc.text(`CEP: ${consignee.cep || '88106-115'}`, middleX, 74);
-      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, middleX, 78);
+      doc.text(orderedBy.name || consignee.name || 'XX COMERCIO LTDA', middleX, 62);
+      doc.text(orderedBy.address || consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
+      doc.text(`${orderedBy.city || consignee.city || 'São José'} - ${orderedBy.state || consignee.state || 'SC'}`, middleX, 70);
+      doc.text(`CEP: ${orderedBy.cep || consignee.cep || '88106-115'}`, middleX, 74);
+      doc.text(`CNPJ: ${orderedBy.cnpj || consignee.cnpj || 'XXXXXX'}`, middleX, 78);
       
       // Informações do documento (lado direito)
       doc.setLineWidth(0.5);
@@ -643,6 +670,11 @@ const PackingListGenerator = () => {
       doc.text(`E-mail: ${exporter.email || 'cana@cana.com'}`, leftMargin + 2, 30);
       doc.text(`Phone: ${exporter.phone || '+87 5622254521'}`, leftMargin + 2, 34);
       
+      // Adicionar Fax se existir
+      if (exporter.fax) {
+        doc.text(`Fax: ${exporter.fax}`, leftMargin + 2, 38);
+      }
+      
       // Título COMMERCIAL INVOICE
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
@@ -669,11 +701,11 @@ const PackingListGenerator = () => {
       doc.setFont('helvetica', 'bold');
       doc.text('ORDERED BY:', middleX, 56);
       doc.setFont('helvetica', 'normal');
-      doc.text(consignee.name || 'XX COMERCIO LTDA', middleX, 62);
-      doc.text(consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
-      doc.text(`${consignee.city || 'São José'} - ${consignee.state || 'SC'}`, middleX, 70);
-      doc.text(`CEP: ${consignee.cep || '88106-115'}`, middleX, 74);
-      doc.text(`CNPJ: ${consignee.cnpj || 'XXXXXX'}`, middleX, 78);
+      doc.text(orderedBy.name || consignee.name || 'XX COMERCIO LTDA', middleX, 62);
+      doc.text(orderedBy.address || consignee.address || 'Rua X, numero Y, Bairro U', middleX, 66);
+      doc.text(`${orderedBy.city || consignee.city || 'São José'} - ${orderedBy.state || consignee.state || 'SC'}`, middleX, 70);
+      doc.text(`CEP: ${orderedBy.cep || consignee.cep || '88106-115'}`, middleX, 74);
+      doc.text(`CNPJ: ${orderedBy.cnpj || consignee.cnpj || 'XXXXXX'}`, middleX, 78);
       
       // Informações do documento
       doc.setLineWidth(0.5);
@@ -923,9 +955,9 @@ const PackingListGenerator = () => {
                 placeholder="Endereço completo"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <Label htmlFor="exporter-country">País</Label>
+                <Label htmlFor="exporter-country">País (Country)</Label>
                 <Input 
                   id="exporter-country"
                   value={exporter.country}
@@ -934,7 +966,7 @@ const PackingListGenerator = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="exporter-phone">Telefone</Label>
+                <Label htmlFor="exporter-phone">Telefone (Phone)</Label>
                 <Input 
                   id="exporter-phone"
                   value={exporter.phone}
@@ -943,7 +975,16 @@ const PackingListGenerator = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="exporter-mobile">Celular</Label>
+                <Label htmlFor="exporter-fax">Fax</Label>
+                <Input 
+                  id="exporter-fax"
+                  value={exporter.fax}
+                  onChange={(e) => setExporter({...exporter, fax: e.target.value})}
+                  placeholder="Fax"
+                />
+              </div>
+              <div>
+                <Label htmlFor="exporter-mobile">Celular (Mobile)</Label>
                 <Input 
                   id="exporter-mobile"
                   value={exporter.mobile}
@@ -955,14 +996,14 @@ const PackingListGenerator = () => {
           </CardContent>
         </Card>
 
-        {/* Informações do Destinatário */}
+        {/* Informações do Destinatário (Sold To / Ship To) */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Informações do Destinatário
+              Informações do Destinatário (Sold To / Ship To)
             </CardTitle>
-            <CardDescription>Dados da empresa importadora</CardDescription>
+            <CardDescription>Dados da empresa para onde a mercadoria será enviada</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1010,6 +1051,68 @@ const PackingListGenerator = () => {
                   id="consignee-cnpj"
                   value={consignee.cnpj}
                   onChange={(e) => setConsignee({...consignee, cnpj: e.target.value})}
+                  placeholder="CNPJ da empresa"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Informações de Ordered By */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Informações do Comprador (Ordered By)
+            </CardTitle>
+            <CardDescription>Dados da empresa que fez o pedido (pode ser diferente do destinatário)</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="ordered-by-name">Nome da Empresa *</Label>
+                <Input 
+                  id="ordered-by-name"
+                  value={orderedBy.name}
+                  onChange={(e) => setOrderedBy({...orderedBy, name: e.target.value})}
+                  placeholder="Nome da empresa compradora"
+                />
+              </div>
+              <div>
+                <Label htmlFor="ordered-by-city">Cidade (City)</Label>
+                <Input 
+                  id="ordered-by-city"
+                  value={orderedBy.city}
+                  onChange={(e) => setOrderedBy({...orderedBy, city: e.target.value})}
+                  placeholder="Cidade"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="ordered-by-address">Endereço (Address)</Label>
+              <Input 
+                id="ordered-by-address"
+                value={orderedBy.address}
+                onChange={(e) => setOrderedBy({...orderedBy, address: e.target.value})}
+                placeholder="Endereço completo"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="ordered-by-country">País (Country)</Label>
+                <Input 
+                  id="ordered-by-country"
+                  value={orderedBy.country}
+                  onChange={(e) => setOrderedBy({...orderedBy, country: e.target.value})}
+                  placeholder="País"
+                />
+              </div>
+              <div>
+                <Label htmlFor="ordered-by-cnpj">CNPJ</Label>
+                <Input 
+                  id="ordered-by-cnpj"
+                  value={orderedBy.cnpj}
+                  onChange={(e) => setOrderedBy({...orderedBy, cnpj: e.target.value})}
                   placeholder="CNPJ da empresa"
                 />
               </div>

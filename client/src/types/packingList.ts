@@ -46,6 +46,16 @@ export interface ConsigneeInfo {
   cep?: string;
 }
 
+export interface OrderedByInfo {
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  cnpj: string;
+  state?: string;
+  cep?: string;
+}
+
 export interface DocumentInfo {
   issueDate: string;
   packingListNumber: string;
@@ -62,6 +72,7 @@ export interface DocumentInfo {
 export interface PackingListData {
   exporter: ExporterInfo;
   consignee: ConsigneeInfo;
+  orderedBy: OrderedByInfo;
   document: DocumentInfo;
   items: PackingListItem[];
 }
