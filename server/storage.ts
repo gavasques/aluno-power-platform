@@ -47,6 +47,7 @@ import {
   supportTicketMessages,
   supportTicketFiles,
   supportCategories,
+  userCompanies,
   type User, 
   type InsertUser,
   type Supplier,
@@ -137,6 +138,8 @@ import {
   packingListDocuments,
   type PackingListDocument,
   type InsertPackingListDocument,
+  type UserCompany,
+  type InsertUserCompany,
 
 } from "@shared/schema";
 import { db } from "./db";
@@ -393,6 +396,14 @@ export interface IStorage {
   updatePackingListDocument(id: number, document: Partial<InsertPackingListDocument>): Promise<PackingListDocument>;
   deletePackingListDocument(id: number): Promise<void>;
   searchPackingListDocuments(userId: number, query: string): Promise<PackingListDocument[]>;
+
+  // User Companies
+  getUserCompanies(userId: number): Promise<UserCompany[]>;
+  getUserCompany(id: number): Promise<UserCompany | undefined>;
+  createUserCompany(company: InsertUserCompany): Promise<UserCompany>;
+  updateUserCompany(id: number, company: Partial<InsertUserCompany>): Promise<UserCompany>;
+  deleteUserCompany(id: number): Promise<void>;
+  searchUserCompanies(userId: number, query: string): Promise<UserCompany[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2783,6 +2794,76 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(packingListDocuments.createdAt))
       .limit(20); // Limite para busca
     return documents;
+  }
+
+  // User Companies - Minhas Empresas
+  async getUserCompanies(userId: number): Promise<UserCompany[]> {
+    return await db
+      .select()
+      .from(userCompanies)
+      .where(and(eq(userCompanies.userId, userId), eq(userCompanies.isActive, true)))
+      .orderBy(desc(userCompanies.createdAt));
+  }
+
+  async getUserCompany(id: number): Promise<UserCompany | undefined> {
+    const [company] = await db
+      .select()
+      .from(userCompanies)
+      .where(eq(userCompanies.id, id));
+    return company || undefined;
+  }
+
+  async createUserCompany(company: InsertUserCompany): Promise<UserCompany> {
+    const [created] = await db
+      .insert(userCompanies)
+      .values({
+        ...company,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateUserCompany(id: number, company: Partial<InsertUserCompany>): Promise<UserCompany> {
+    const [updated] = await db
+      .update(userCompanies)
+      .set({
+        ...company,
+        updatedAt: new Date(),
+      })
+      .where(eq(userCompanies.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteUserCompany(id: number): Promise<void> {
+    await db
+      .update(userCompanies)
+      .set({
+        isActive: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(userCompanies.id, id));
+  }
+
+  async searchUserCompanies(userId: number, query: string): Promise<UserCompany[]> {
+    return await db
+      .select()
+      .from(userCompanies)
+      .where(
+        and(
+          eq(userCompanies.userId, userId),
+          eq(userCompanies.isActive, true),
+          or(
+            ilike(userCompanies.corporateName, `%${query}%`),
+            ilike(userCompanies.tradeName, `%${query}%`),
+            ilike(userCompanies.email, `%${query}%`)
+          )
+        )
+      )
+      .orderBy(desc(userCompanies.createdAt))
+      .limit(20);
   }
 
 

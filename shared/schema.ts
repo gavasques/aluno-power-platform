@@ -58,6 +58,36 @@ export const userSessions = pgTable("user_sessions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// User Companies table - Minhas Empresas
+export const userCompanies = pgTable("user_companies", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  corporateName: text("corporate_name").notNull(), // Razão Social
+  tradeName: text("trade_name").notNull(), // Nome Fantasia
+  address: text("address"), // Endereço
+  neighborhood: text("neighborhood"), // Bairro
+  postalCode: text("postal_code"), // CEP
+  city: text("city"), // Cidade
+  state: text("state"), // Estado
+  country: text("country").notNull().default("Brasil"), // País
+  email: text("email"), // Email
+  website: text("website"), // Website
+  phone: text("phone"), // Telefone
+  fax: text("fax"), // Fax
+  mobile: text("mobile"), // Celular
+  stateRegistration: text("state_registration"), // Inscrição Estadual
+  municipalRegistration: text("municipal_registration"), // Inscrição Municipal
+  notes: text("notes"), // Observações
+  isActive: boolean("is_active").notNull().default(true), // Status ativo/inativo
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("user_companies_user_idx").on(table.userId),
+  nameIdx: index("user_companies_name_idx").on(table.tradeName),
+  activeIdx: index("user_companies_active_idx").on(table.isActive),
+  userActiveIdx: index("user_companies_user_active_idx").on(table.userId, table.isActive),
+}));
+
 // Categories
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
@@ -1596,6 +1626,15 @@ export const insertUpscaledImageSchema = createInsertSchema(upscaledImages).omit
 });
 export type InsertUpscaledImage = z.infer<typeof insertUpscaledImageSchema>;
 export type UpscaledImage = typeof upscaledImages.$inferSelect;
+
+// Insert schemas for user companies
+export const insertUserCompanySchema = createInsertSchema(userCompanies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUserCompany = z.infer<typeof insertUserCompanySchema>;
+export type UserCompany = typeof userCompanies.$inferSelect;
 
 // Insert schemas for infographics
 export const insertInfographicSchema = createInsertSchema(infographics).omit({

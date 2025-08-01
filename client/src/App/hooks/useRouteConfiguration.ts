@@ -113,6 +113,7 @@ const lazyComponents = {
   PackingListGenerator: lazy(() => import('../../pages/myarea/importacoes/packing-list-generator')),
   DocumentosSalvos: lazy(() => import('../../pages/myarea/importacoes/documentos-salvos')),
   GeradorEtiquetas: lazy(() => import('../../pages/myarea/importacoes/gerador-etiquetas')),
+  MinhasEmpresas: lazy(() => import('../../pages/myarea/importacoes/MinhasEmpresas')),
   
   // Simulators
   SimuladoresIndex: lazy(() => import('../../pages/SimuladoresIndex')),
@@ -254,6 +255,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area/importacoes/packing-list-generator', component: lazyComponents.PackingListGenerator, isProtected: true },
       { path: '/minha-area/importacoes/documentos-salvos', component: lazyComponents.DocumentosSalvos, isProtected: true },
       { path: '/minha-area/importacoes/gerador-etiquetas', component: lazyComponents.GeradorEtiquetas, isProtected: true },
+      { path: '/minha-area/importacoes/minhas-empresas', component: lazyComponents.MinhasEmpresas, isProtected: true },
       
       // Finanças360
       { path: '/minha-area/financas360', component: lazyComponents.Financas360Index, isProtected: true }

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, FileText, Building, Users, Calculator, Ship, Package, Tags } from "lucide-react";
+import { Search, X, FileText, Building, Users, Calculator, Ship, Package, Tags, Building2 } from "lucide-react";
 
 interface ImportacaoItem {
   id: string;
@@ -76,6 +76,16 @@ const importacaoItems: ImportacaoItem[] = [
     href: "/minha-area/importacoes/gerador-etiquetas",
     icon: Tags,
     category: "Documentos",
+    isAvailable: true,
+    isNew: true,
+  },
+  {
+    id: "minhas-empresas",
+    title: "Minhas Empresas",
+    description: "Cadastre e gerencie as informações das suas empresas para documentos de importação",
+    href: "/minha-area/importacoes/minhas-empresas",
+    icon: Building2,
+    category: "Gestão",
     isAvailable: true,
     isNew: true,
   },
