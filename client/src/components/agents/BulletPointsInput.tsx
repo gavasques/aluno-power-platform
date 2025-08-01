@@ -74,54 +74,43 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
     onChange('asinList', newAsinList);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddAsin();
     }
   };
-  const { toast } = useToast();
-  const charCount = formData.textInput.length;
 
   const handleFieldChange = (field: keyof ProductFormData, value: string) => {
-    const limit = BULLET_POINTS_CONFIG.FIELD_LIMITS[field];
-    
-    if (value.length > limit) {
-      toast({
-        variant: "destructive",
-        title: "❌ Limite excedido",
-        description: `O limite para este campo é de ${limit} caracteres.`
-      });
-      return;
-    }
     onChange(field, value);
   };
 
   const handleTextInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    if (newValue.length > maxChars) {
-      toast({
-        variant: "destructive",
-        title: "❌ Limite excedido",
-        description: `O limite é de ${maxChars} caracteres. Digite menos informações.`
-      });
-      return;
+    const value = e.target.value;
+    if (value.length <= maxChars) {
+      onChange('textInput', value);
     }
-    onChange('textInput', newValue);
   };
 
-  const getFieldCharCount = (field: keyof ProductFormData, value: string) => {
-    const limit = BULLET_POINTS_CONFIG.FIELD_LIMITS[field];
-    const count = value.length;
-    const isNearLimit = count >= limit * 0.8;
-    const isOverLimit = count >= limit;
-    
-    return {
-      count,
-      limit,
-      color: isOverLimit ? 'text-red-600' : isNearLimit ? 'text-yellow-600' : 'text-gray-500'
+  const getFieldCharCount = (fieldName: string, value: string) => {
+    const limits: Record<string, number> = {
+      productName: BULLET_POINTS_CONFIG.FIELD_LIMITS.PRODUCT_NAME,
+      brand: BULLET_POINTS_CONFIG.FIELD_LIMITS.BRAND,
+      targetAudience: BULLET_POINTS_CONFIG.FIELD_LIMITS.TARGET_AUDIENCE,
+      keywords: BULLET_POINTS_CONFIG.FIELD_LIMITS.KEYWORDS,
+      uniqueDifferential: BULLET_POINTS_CONFIG.FIELD_LIMITS.UNIQUE_DIFFERENTIAL,
+      materials: BULLET_POINTS_CONFIG.FIELD_LIMITS.MATERIALS,
+      warranty: BULLET_POINTS_CONFIG.FIELD_LIMITS.WARRANTY
     };
+    
+    const limit = limits[fieldName] || 100;
+    const count = value.length;
+    const color = count >= limit ? 'text-red-600' : count >= limit * 0.8 ? 'text-yellow-600' : 'text-gray-500';
+    
+    return { count, limit, color };
   };
+
+  const charCount = formData.textInput.length;
 
   const getCharCountColor = () => {
     if (charCount >= maxChars) return 'text-red-600';
@@ -304,22 +293,6 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  {formData.asinList.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {formData.asinList.map((item) => (
-                        <Badge key={item.asin} variant="secondary" className="flex items-center gap-1">
-                          {item.asin} ({item.country})
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAsin(item.asin)}
-                            className="ml-1 hover:text-red-600"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 <div>
                   <Label htmlFor="country" className="text-sm font-medium text-gray-700 mb-1 block">
@@ -346,6 +319,26 @@ export const BulletPointsInput: React.FC<BulletPointsInputProps> = ({
                   </Select>
                 </div>
               </div>
+
+              {/* Lista de ASINs adicionados */}
+              {formData.asinList.length > 0 && (
+                <div className="mb-4">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    ASINs Adicionados
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.asinList.map((item, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-2">
+                        {item.asin} ({item.country})
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:text-red-600"
+                          onClick={() => handleRemoveAsin(item.asin)}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-3 mb-4">
                 <Button
