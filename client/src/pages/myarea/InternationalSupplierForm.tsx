@@ -287,7 +287,7 @@ export default function InternationalSupplierForm() {
             {/* Contato */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
+                <Label htmlFor="phone">TEL</Label>
                 <Input
                   id="phone"
                   value={formData.phone}
