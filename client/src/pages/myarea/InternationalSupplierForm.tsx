@@ -307,7 +307,7 @@ export default function InternationalSupplierForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="mobile">Mobile</Label>
+                <Label htmlFor="mobile">MOBILE</Label>
                 <Input
                   id="mobile"
                   value={formData.mobile}
