@@ -86,6 +86,13 @@ export default function GeradorEtiquetas() {
 
   // Handle company selection
   const handleCompanySelect = (companyId: string) => {
+    if (companyId === "manual") {
+      setSelectedCompany("");
+      setCompanyData(initialCompanyData);
+      setLogoDataUrl("");
+      return;
+    }
+    
     const company = companies.find(c => c.id.toString() === companyId);
     if (company) {
       setSelectedCompany(companyId);
@@ -108,7 +115,7 @@ export default function GeradorEtiquetas() {
       if (company.email) {
         setProductData(prev => ({
           ...prev,
-          sac: company.email
+          sac: company.email || ""
         }));
       }
     }
@@ -378,9 +385,12 @@ export default function GeradorEtiquetas() {
 
   // Carregar dados de exemplo
   const loadExample = () => {
-    setCompanyData(mockCompanyData);
-    setProductData(mockProductData);
-    generateBarcode();
+    // Removed mock data - now use company selection dropdown instead
+    toast({
+      title: "Use o dropdown",
+      description: "Selecione uma empresa cadastrada no dropdown acima.",
+      variant: "default"
+    });
   };
 
   // Gerar código de barras automaticamente quando EAN-13 muda
@@ -437,7 +447,7 @@ export default function GeradorEtiquetas() {
                           <SelectValue placeholder="Selecionar empresa cadastrada" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Preencher manualmente</SelectItem>
+                          <SelectItem value="manual">Preencher manualmente</SelectItem>
                           {companies.map((company) => (
                             <SelectItem key={company.id} value={company.id.toString()}>
                               {company.tradeName} - {company.corporateName}
