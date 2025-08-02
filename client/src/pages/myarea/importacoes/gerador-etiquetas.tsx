@@ -55,7 +55,7 @@ const initialCompanyData: CompanyData = {
   endereco: "",
   bairro: "",
   cidade: "",
-  pais: "",
+  pais: "Brasil",
   cep: "",
   cnpj: ""
 };
@@ -76,7 +76,6 @@ export default function GeradorEtiquetas() {
   const [companyData, setCompanyData] = useState<CompanyData>(initialCompanyData);
   const [productData, setProductData] = useState<ProductData>(initialProductData);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string>("");
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>("");
@@ -88,125 +87,46 @@ export default function GeradorEtiquetas() {
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
   
   // Fetch user companies
-  const { data: companies = [], isLoading: isLoadingCompanies } = useQuery<UserCompany[]>({
+  const { data: companies = [] } = useQuery<UserCompany[]>({
     queryKey: ['/api/user-companies'],
     enabled: true,
   });
 
-  // Função para verificar se há dados editados manualmente
-  const hasManualEdits = useCallback((currentData: CompanyData, initialData: CompanyData): boolean => {
-    return Object.keys(currentData).some(key => {
-      const currentValue = currentData[key as keyof CompanyData];
-      const initialValue = initialData[key as keyof CompanyData];
-      return currentValue !== initialValue && currentValue !== "";
-    });
-  }, []);
-
-  // Função melhorada para carregar dados da empresa
-  const loadCompanyData = useCallback(async (companyId: string, forceLoad: boolean = false) => {
-    const company = companies?.find(c => c.id.toString() === companyId);
-    if (!company) return;
-
-    // Verifica se há edições manuais
-    const hasEdits = hasManualEdits(companyData, initialCompanyData);
-    
-    if (hasEdits && !forceLoad) {
-      // Mostra confirmação antes de sobrescrever
-      const shouldOverwrite = window.confirm(
-        "Você fez alterações manuais nos dados da empresa. " +
-        "Deseja substituir pelos dados da empresa selecionada? " +
-        "Esta ação não pode ser desfeita."
-      );
-      
-      if (!shouldOverwrite) {
-        // Reseta o seletor para não ficar inconsistente
-        setSelectedCompanyId("");
-        return;
-      }
-    }
-
-    // Carrega dados da empresa respeitando o país original
-    const newCompanyData: CompanyData = {
-      razaoSocial: company.corporateName,
-      endereco: company.address || "",
-      bairro: company.neighborhood || "",
-      cidade: company.city || "",
-      pais: company.country || "Brasil", // ✅ CORRIGIDO: Respeita o país da empresa
-      cep: company.postalCode || "",
-      cnpj: company.cnpj || ""
-    };
-
-    setCompanyData(newCompanyData);
-    
-    // Set logo if available
-    if (company.logoUrl) {
-      setLogoDataUrl(decodeHtmlEntities(company.logoUrl));
-    }
-    
-    // Fill SAC with company email if available
-    if (company.email) {
-      setProductData(prev => ({
-        ...prev,
-        sac: company.email || ""
-      }));
-    }
-    
-    toast({
-      title: "Dados carregados",
-      description: `Dados da empresa "${company.corporateName}" foram carregados com sucesso.`,
-    });
-  }, [companies, companyData, hasManualEdits, toast]);
-
-  // Função para mesclar dados da empresa com dados atuais
-  const mergeCompanyData = useCallback((companyId: string) => {
-    const company = companies?.find(c => c.id.toString() === companyId);
-    if (!company) return;
-
-    // Mescla apenas campos vazios
-    const mergedData: CompanyData = {
-      razaoSocial: companyData.razaoSocial || company.corporateName || "",
-      endereco: companyData.endereco || company.address || "",
-      bairro: companyData.bairro || company.neighborhood || "",
-      cidade: companyData.cidade || company.city || "",
-      pais: companyData.pais || company.country || "Brasil",
-      cep: companyData.cep || company.postalCode || "",
-      cnpj: companyData.cnpj || company.cnpj || ""
-    };
-
-    setCompanyData(mergedData);
-    
-    // Set logo if available and not already set
-    if (company.logoUrl && !logoDataUrl) {
-      setLogoDataUrl(decodeHtmlEntities(company.logoUrl));
-    }
-    
-    // Fill SAC with company email if available and not already set
-    if (company.email && !productData.sac) {
-      setProductData(prev => ({
-        ...prev,
-        sac: company.email || ""
-      }));
-    }
-    
-    toast({
-      title: "Dados mesclados",
-      description: "Dados da empresa foram mesclados com suas edições.",
-    });
-  }, [companies, companyData, logoDataUrl, productData.sac, toast]);
-
-  // Handle company selection (não carrega automaticamente)
+  // Handle company selection
   const handleCompanySelect = (companyId: string) => {
     if (companyId === "manual") {
       setSelectedCompany("");
-      setSelectedCompanyId("");
       setCompanyData(initialCompanyData);
       setLogoDataUrl("");
       return;
     }
     
-    setSelectedCompany(companyId);
-    setSelectedCompanyId(companyId);
-    // Não carrega automaticamente - deixa o usuário escolher
+    const company = companies.find(c => c.id.toString() === companyId);
+    if (company) {
+      setSelectedCompany(companyId);
+      setCompanyData({
+        razaoSocial: company.corporateName,
+        endereco: company.address || "",
+        bairro: company.neighborhood || "",
+        cidade: company.city || "",
+        pais: company.country,
+        cep: company.postalCode || "",
+        cnpj: company.cnpj || ""
+      });
+      
+      // Set logo if available
+      if (company.logoUrl) {
+        setLogoDataUrl(decodeHtmlEntities(company.logoUrl));
+      }
+      
+      // Fill SAC with company email if available
+      if (company.email) {
+        setProductData(prev => ({
+          ...prev,
+          sac: company.email || ""
+        }));
+      }
+    }
   };
 
   // Validação EAN-13
@@ -325,272 +245,113 @@ export default function GeradorEtiquetas() {
     }
   }, [productData.eanCode, toast]);
 
-  // Função para sanitizar texto e remover caracteres problemáticos
-  const sanitizeText = useCallback((text: string): string => {
-    if (!text) return "";
-    return decodeHtmlEntities(text)
-      .replace(/[^\w\s\-\.\,\(\)\/]/g, '') // Remove caracteres especiais problemáticos
-      .trim()
-      .toUpperCase();
-  }, []);
-
-  // Função para quebrar texto em linhas que cabem na largura especificada
-  const splitTextToFit = useCallback((text: string, maxWidth: number, fontSize: number, pdf: any): string[] => {
-    if (!text) return [""];
-    
-    pdf.setFontSize(fontSize);
-    const words = text.split(' ');
-    const lines: string[] = [];
-    let currentLine = '';
-
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const textWidth = pdf.getTextWidth(testLine);
-      
-      if (textWidth <= maxWidth) {
-        currentLine = testLine;
-      } else {
-        if (currentLine) {
-          lines.push(currentLine);
-          currentLine = word;
-        } else {
-          // Palavra muito longa, força quebra
-          lines.push(word.substring(0, 20) + '...');
-          currentLine = '';
-        }
-      }
-    }
-    
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-    
-    return lines.length > 0 ? lines : [""];
-  }, []);
-
-  // Função para validar dados antes da geração
-  const validateLabelData = useCallback((): { isValid: boolean; warnings: string[] } => {
-    const warnings: string[] = [];
-    
-    // Verifica nome do produto
-    if (!productData.nomeProduto || productData.nomeProduto.length < 3) {
-      warnings.push("Nome do produto muito curto");
-    }
-    if (productData.nomeProduto && productData.nomeProduto.length > 50) {
-      warnings.push("Nome do produto muito longo (será truncado)");
-    }
-    
-    // Verifica razão social
-    if (!companyData.razaoSocial || companyData.razaoSocial.length < 5) {
-      warnings.push("Razão social muito curta");
-    }
-    if (companyData.razaoSocial && companyData.razaoSocial.length > 60) {
-      warnings.push("Razão social muito longa (será truncada)");
-    }
-    
-    // Verifica SKU/Código
-    if (!productData.sku) {
-      warnings.push("SKU recomendado para identificação");
-    }
-    
-    // Verifica código de barras
-    if (productData.eanCode && productData.eanCode.length < 8) {
-      warnings.push("Código EAN muito curto (pode não funcionar)");
-    }
-    
-    return {
-      isValid: Boolean(companyData.razaoSocial && productData.nomeProduto),
-      warnings
-    };
-  }, [companyData, productData]);
-
-  // Gerar PDF com layout melhorado e responsivo
+  // Gerar PDF
   const generatePDF = async () => {
-    // Validação básica
-    if (!companyData.razaoSocial || !productData.nomeProduto) {
+    if (!validateEAN13(productData.eanCode)) {
       toast({
         title: "Dados incompletos",
-        description: "Preencha pelo menos a razão social da empresa e o nome do produto.",
-        variant: "destructive",
+        description: "Verifique o código EAN-13 antes de gerar o PDF.",
+        variant: "destructive"
       });
       return;
-    }
-
-    // Validação avançada
-    const validation = validateLabelData();
-    if (validation.warnings.length > 0) {
-      console.log("Avisos de formatação:", validation.warnings);
     }
 
     setIsGenerating(true);
 
     try {
-      // ✅ CORRIGIDO: Criar PDF com configurações melhoradas
       const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: [100, 70] // Tamanho da etiqueta: 100mm x 70mm
+        orientation: "landscape",
+        unit: "mm",
+        format: [100, 60] // 10cm x 6cm
       });
 
-      // ✅ CORRIGIDO: Configurar encoding para caracteres especiais
-      pdf.setFont("helvetica");
+      // Configurar bordas finas
+      pdf.setLineWidth(0.3);
+      pdf.rect(1, 1, 98, 58);
+
+      // Coluna esquerda (40%)
+      const leftWidth = 39;
       
-      // ✅ CORRIGIDO: Controle dinâmico de posição Y
-      let currentY = 8;
-      const lineHeight = 4;
-      const maxWidth = 90;
-
-      // ✅ CORRIGIDO: Título do produto com quebra de linha
-      pdf.setFontSize(12); // Reduzido para caber melhor
-      pdf.setFont("helvetica", "bold");
-      const productTitle = sanitizeText(productData.nomeProduto);
-      const titleLines = splitTextToFit(productTitle, maxWidth, 12, pdf);
-      
-      titleLines.slice(0, 2).forEach((line, index) => { // Máximo 2 linhas
-        pdf.text(line, 5, currentY + (index * lineHeight));
-      });
-      currentY += (titleLines.slice(0, 2).length * lineHeight) + 2;
-
-      // ✅ CORRIGIDO: SKU/Código com validação
-      const skuCode = productData.sku || "SEM CÓDIGO";
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(skuCode, 5, currentY);
-      currentY += lineHeight + 1;
-
-      // ✅ CORRIGIDO: Conteúdo com validação
-      if (productData.conteudo && productData.conteudo.trim()) {
-        pdf.setFontSize(8);
-        pdf.setFont("helvetica", "normal");
-        const conteudoText = `CONTEUDO: ${sanitizeText(productData.conteudo)}`;
-        const conteudoLines = splitTextToFit(conteudoText, maxWidth, 8, pdf);
-        
-        conteudoLines.slice(0, 1).forEach((line, index) => { // Máximo 1 linha
-          pdf.text(line, 5, currentY + (index * 3));
-        });
-        currentY += (conteudoLines.slice(0, 1).length * 3) + 1;
+      // Logo (se houver)
+      if (logoDataUrl) {
+        pdf.addImage(logoDataUrl, "PNG", 3, 4, 30, 14);
       }
 
-      // ✅ CORRIGIDO: Cor (apenas se houver)
-      if (productData.cor && productData.cor.trim()) {
-        pdf.setFontSize(8);
-        pdf.text(`COR: ${sanitizeText(productData.cor)}`, 5, currentY);
-        currentY += 3;
-      }
-
-      // ✅ CORRIGIDO: Validade
-      pdf.setFontSize(8);
-      pdf.text(`VALIDADE: ${productData.validade || "INDETERMINADA"}`, 5, currentY);
-      currentY += 3;
-
-      // ✅ CORRIGIDO: País de origem
-      pdf.text(`PAIS DE ORIGEM: ${sanitizeText(productData.paisOrigem) || "CHINA"}`, 5, currentY);
-      currentY += 3;
-
-      // ✅ CORRIGIDO: SAC (apenas se houver)
-      if (productData.sac && productData.sac.trim()) {
-        const sacText = `SAC: ${productData.sac}`;
-        if (sacText.length <= 30) { // Só mostra se couber
-          pdf.text(sacText, 5, currentY);
-          currentY += 3;
-        }
-      }
-
-      // ✅ CORRIGIDO: Separador visual
-      currentY += 2;
-
-      // ✅ CORRIGIDO: Dados da empresa
+      // Texto "IMPORTADO E DISTRIBUÍDO NO BRASIL POR:"
       pdf.setFontSize(7);
       pdf.setFont("helvetica", "bold");
-      pdf.text("IMPORTADO E DISTRIBUIDO POR:", 5, currentY);
-      currentY += 3;
-      
-      // ✅ CORRIGIDO: Razão social com quebra
+      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 3, 22);
+
+      // Dados da empresa
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "normal");
-      const razaoSocial = sanitizeText(companyData.razaoSocial);
-      const razaoLines = splitTextToFit(razaoSocial, maxWidth, 7, pdf);
+      pdf.text(companyData.razaoSocial.toUpperCase(), 3, 26);
+      pdf.text(companyData.endereco.toUpperCase(), 3, 30);
+      pdf.text(`${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`, 3, 34);
+      pdf.text(`CEP ${companyData.cep}`, 3, 38);
+      pdf.text(`CNPJ ${companyData.cnpj}`, 3, 42);
+
+      // Código de barras
+      if (barcodeDataUrl) {
+        pdf.addImage(barcodeDataUrl, "PNG", 3, 44, 34, 14);
+      }
+
+      // Coluna direita (60%)
+      const rightStartX = 40;
       
-      razaoLines.slice(0, 2).forEach((line, index) => { // Máximo 2 linhas
-        pdf.text(line, 5, currentY + (index * 2.5));
+      // Nome do produto
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 57);
+      let productY = 8;
+      productLines.forEach((line: string) => {
+        pdf.text(line, rightStartX, productY);
+        productY += 4;
       });
-      currentY += (razaoLines.slice(0, 2).length * 2.5) + 1;
 
-      // ✅ CORRIGIDO: Endereço (apenas se houver espaço)
-      if (companyData.endereco && companyData.endereco.trim() && currentY < 60) {
-        const enderecoText = sanitizeText(companyData.endereco);
-        const enderecoLines = splitTextToFit(enderecoText, maxWidth, 7, pdf);
-        
-        enderecoLines.slice(0, 1).forEach((line, index) => { // Máximo 1 linha
-          pdf.text(line, 5, currentY + (index * 2.5));
-        });
-        currentY += (enderecoLines.slice(0, 1).length * 2.5) + 1;
-      }
+      // SKU - menor e mais discreto
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(productData.sku.toUpperCase(), rightStartX, productY + 4);
 
-      // ✅ CORRIGIDO: Bairro e cidade (apenas se houver espaço)
-      if (companyData.bairro && companyData.cidade && currentY < 62) {
-        const cidadeText = `${sanitizeText(companyData.bairro)}, ${sanitizeText(companyData.cidade)}`;
-        const cidadeLines = splitTextToFit(cidadeText, maxWidth, 7, pdf);
-        
-        cidadeLines.slice(0, 1).forEach((line, index) => { // Máximo 1 linha
-          pdf.text(line, 5, currentY + (index * 2.5));
-        });
-        currentY += (cidadeLines.slice(0, 1).length * 2.5) + 1;
-      }
+      // Conteúdo
+      pdf.setFontSize(9);  
+      pdf.text("CONTÉM " + productData.conteudo.toUpperCase(), rightStartX, productY + 9);
 
-      // ✅ CORRIGIDO: CEP e CNPJ na última linha disponível
-      let bottomLine = "";
-      if (companyData.cep && companyData.cep.trim()) {
-        bottomLine += `CEP ${companyData.cep}`;
-      }
-      if (companyData.cnpj && companyData.cnpj.trim()) {
-        if (bottomLine) bottomLine += " ";
-        bottomLine += `CNPJ ${companyData.cnpj}`;
+      // Informações adicionais
+      pdf.setFontSize(7);
+      pdf.setFont("helvetica", "normal");
+      
+      let infoY = productY + 15;
+      
+      if (productData.cor) {
+        pdf.text(`COR: ${productData.cor.toUpperCase()}`, rightStartX, infoY);
+        infoY += 3;
       }
       
-      if (bottomLine && currentY < 67) {
-        // Garante que cabe na última linha
-        const bottomLines = splitTextToFit(bottomLine, maxWidth, 7, pdf);
-        pdf.text(bottomLines[0], 5, Math.min(currentY, 67));
-      }
-
-      // ✅ CORRIGIDO: Código de barras apenas se houver espaço
-      if (productData.eanCode && productData.eanCode.trim() && barcodeDataUrl) {
-        try {
-          // Posiciona no canto direito, apenas se não sobrepor texto
-          const barcodeX = 65;
-          const barcodeY = Math.max(45, currentY - 15);
-          const barcodeWidth = 30;
-          const barcodeHeight = 12;
-          
-          // Só adiciona se couber na etiqueta
-          if (barcodeY + barcodeHeight <= 68) {
-            pdf.addImage(barcodeDataUrl, 'PNG', barcodeX, barcodeY, barcodeWidth, barcodeHeight);
-          }
-        } catch (error) {
-          console.error("Erro ao adicionar código de barras:", error);
-          // Continua sem o código de barras se der erro
-        }
-      }
-
-      // ✅ CORRIGIDO: Nome do arquivo mais limpo
-      const cleanSku = (productData.sku || 'produto')
-        .replace(/[^\w\-]/g, '')
-        .substring(0, 20);
-      const fileName = `etiqueta_${cleanSku}_${Date.now()}.pdf`;
+      pdf.text(`VALIDADE: ${productData.validade.toUpperCase()}`, rightStartX, infoY);
+      infoY += 3;
       
-      pdf.save(fileName);
+      pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem.toUpperCase()}`, rightStartX, infoY);
+      infoY += 3;
+      
+      // SAC mantém o email em minúsculas
+      pdf.text(`SAC: ${productData.sac}`, rightStartX, infoY);
 
+      // Salvar PDF
+      pdf.save(`etiqueta-${productData.sku}.pdf`);
+      
       toast({
-        title: "Etiqueta gerada com sucesso!",
-        description: `Arquivo ${fileName} foi baixado.`,
+        title: "PDF gerado com sucesso!",
+        description: `Etiqueta ${productData.sku} foi baixada.`
       });
 
     } catch (error) {
-      console.error("Erro ao gerar etiqueta:", error);
+      console.error("Erro ao gerar PDF:", error);
       toast({
-        title: "Erro ao gerar etiqueta",
-        description: "Ocorreu um erro durante a geração. Tente novamente.",
-        variant: "destructive",
+        title: "Erro ao gerar PDF",
+        description: "Tente novamente ou verifique os dados.",
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
@@ -599,18 +360,28 @@ export default function GeradorEtiquetas() {
 
   // Limpar dados
   const clearData = () => {
-    setCompanyData(initialCompanyData);
-    setProductData(initialProductData);
-    setSelectedCompany("");
-    setSelectedCompanyId("");
+    setCompanyData({
+      razaoSocial: "",
+      endereco: "",
+      bairro: "",
+      cidade: "",
+      pais: "",
+      cep: "",    
+      cnpj: ""
+    });
+    setProductData({
+      nomeProduto: "",
+      sku: "",
+      conteudo: "",
+      cor: "",
+      validade: "",
+      paisOrigem: "",
+      sac: "",
+      eanCode: ""
+    });
     setLogoFile(null);
     setLogoDataUrl("");
     setBarcodeDataUrl("");
-    
-    toast({
-      title: "Dados limpos",
-      description: "Todos os dados foram resetados.",
-    });
   };
 
   // Carregar dados de exemplo
@@ -671,66 +442,20 @@ export default function GeradorEtiquetas() {
                         Dados da Empresa
                       </CardTitle>
                       
-                      {/* Seletor de empresa melhorado */}
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <Select
-                            value={selectedCompanyId}
-                            onValueChange={handleCompanySelect}
-                            disabled={isLoadingCompanies}
-                          >
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Selecione uma empresa..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="manual">Preencher manualmente</SelectItem>
-                              {companies.map((company) => (
-                                <SelectItem key={company.id} value={company.id.toString()}>
-                                  {company.tradeName} - {company.corporateName}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          
-                          {/* Botões de ação */}
-                          {selectedCompanyId && selectedCompanyId !== "manual" && (
-                            <div className="flex gap-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => loadCompanyData(selectedCompanyId, false)}
-                                title="Carregar dados (com confirmação se houver edições)"
-                              >
-                                Carregar
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => mergeCompanyData(selectedCompanyId)}
-                                title="Mesclar dados (preenche apenas campos vazios)"
-                              >
-                                Mesclar
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => loadCompanyData(selectedCompanyId, true)}
-                                title="Forçar carregamento (substitui tudo)"
-                              >
-                                Substituir
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {selectedCompanyId && selectedCompanyId !== "manual" && (
-                          <p className="text-sm text-muted-foreground">
-                            <strong>Carregar:</strong> Substitui dados (com confirmação) • 
-                            <strong>Mesclar:</strong> Preenche apenas campos vazios • 
-                            <strong>Substituir:</strong> Substitui tudo sem confirmação
-                          </p>
-                        )}
-                      </div>
+                      {/* Company Selection Dropdown */}
+                      <Select value={selectedCompany} onValueChange={handleCompanySelect}>
+                        <SelectTrigger className="w-[300px]">
+                          <SelectValue placeholder="Selecionar empresa cadastrada" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="manual">Preencher manualmente</SelectItem>
+                          {companies.map((company) => (
+                            <SelectItem key={company.id} value={company.id.toString()}>
+                              {company.tradeName} - {company.corporateName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <CardDescription>
                       Informações da empresa que aparecerão na etiqueta
@@ -772,15 +497,6 @@ export default function GeradorEtiquetas() {
                           value={companyData.cidade}
                           onChange={(e) => setCompanyData(prev => ({ ...prev, cidade: e.target.value }))}
                           placeholder="Nome da cidade"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="pais">País *</Label>
-                        <Input
-                          id="pais"
-                          value={companyData.pais}
-                          onChange={(e) => setCompanyData(prev => ({ ...prev, pais: e.target.value }))}
-                          placeholder="Brasil"
                         />
                       </div>
                       <div>
@@ -986,7 +702,7 @@ export default function GeradorEtiquetas() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={generatePDF}
-                    disabled={isGenerating || !companyData.razaoSocial || !productData.nomeProduto}
+                    disabled={isGenerating || !validateEAN13(productData.eanCode)}
                     className="flex-1 md:flex-initial"
                   >
                     {isGenerating ? (
