@@ -222,7 +222,9 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/agentes/amazon-customer-service', component: lazyComponents.AmazonCustomerService, isProtected: true },
       { path: '/agentes/amazon-customer-service/resultado/:sessionId', component: lazyComponents.AmazonCustomerServiceResult, isProtected: true },
       { path: '/agents/amazon-negative-reviews', component: lazyComponents.AmazonNegativeReviews, isProtected: true },
-      { path: '/agents/amazon-negative-reviews/result', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true }
+      { path: '/agents/amazon-negative-reviews/result', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true },
+      { path: '/agentes/amazon-negative-reviews', component: lazyComponents.AmazonNegativeReviews, isProtected: true },
+      { path: '/agentes/amazon-negative-reviews/resultado/:sessionId', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true }
     ],
     
     // My Area Routes (Protected)
