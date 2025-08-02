@@ -268,41 +268,59 @@ export default function GeradorEtiquetas() {
       // Configurar bordas finas
       pdf.setLineWidth(0.3);
       pdf.rect(1, 1, 98, 58);
+      
+      // Linha divisória vertical entre colunas
+      pdf.setLineWidth(0.2);
+      pdf.line(38, 1, 38, 59);
 
-      // Coluna esquerda (40%)
-      const leftWidth = 39;
+      // Coluna esquerda (38%)
+      const leftWidth = 37;
       
       // Logo (se houver)
       if (logoDataUrl) {
-        pdf.addImage(logoDataUrl, "PNG", 3, 4, 30, 14);
+        pdf.addImage(logoDataUrl, "PNG", 3, 4, 28, 12);
       }
 
       // Texto "IMPORTADO E DISTRIBUÍDO NO BRASIL POR:"
-      pdf.setFontSize(7);
+      pdf.setFontSize(6);
       pdf.setFont("helvetica", "bold");
-      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 3, 22);
+      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 3, 20);
 
       // Dados da empresa
-      pdf.setFontSize(7);
+      pdf.setFontSize(6);
       pdf.setFont("helvetica", "normal");
-      pdf.text(companyData.razaoSocial.toUpperCase(), 3, 26);
-      pdf.text(companyData.endereco.toUpperCase(), 3, 30);
-      pdf.text(`${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`, 3, 34);
-      pdf.text(`CEP ${companyData.cep}`, 3, 38);
-      pdf.text(`CNPJ ${companyData.cnpj}`, 3, 42);
+      const companyLines = [
+        companyData.razaoSocial.toUpperCase(),
+        companyData.endereco.toUpperCase(),
+        `${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`,
+        `CEP ${companyData.cep}`,
+        `CNPJ ${companyData.cnpj}`
+      ];
+      
+      let yPos = 23;
+      companyLines.forEach(line => {
+        // Garantir que o texto não ultrapasse a coluna esquerda
+        const maxWidth = 34;
+        const splitLines = pdf.splitTextToSize(line, maxWidth);
+        splitLines.forEach((splitLine: string) => {
+          pdf.text(splitLine, 3, yPos);
+          yPos += 2.5;
+        });
+      });
 
       // Código de barras
       if (barcodeDataUrl) {
-        pdf.addImage(barcodeDataUrl, "PNG", 3, 44, 34, 14);
+        // Posicionar o código de barras garantindo que não ultrapasse a coluna
+        pdf.addImage(barcodeDataUrl, "PNG", 3, 46, 32, 11);
       }
 
       // Coluna direita (60%)
-      const rightStartX = 40;
+      const rightStartX = 42;
       
       // Nome do produto
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
-      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 57);
+      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 50);
       let productY = 10;
       productLines.forEach((line: string, index: number) => {
         pdf.text(line, rightStartX, productY);
