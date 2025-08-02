@@ -3,8 +3,11 @@ import { Request, Response, NextFunction } from 'express';
 export interface AuthRequest extends Request {
   user?: {
     id: number;
+    username: string;
     email: string;
+    name: string;
     role: string;
+    isActive: boolean;
   };
 }
 
@@ -52,8 +55,11 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
     // Attach sanitized user to request
     req.user = {
       id: user.id,
+      username: user.username,
       email: user.email,
-      role: user.role
+      name: user.name,
+      role: user.role,
+      isActive: user.isActive
     };
 
     console.log('🔍 [AUTH] Authentication successful for user:', user.email);

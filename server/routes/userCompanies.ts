@@ -229,7 +229,15 @@ router.put('/:id/logo', requireAuth, async (req, res) => {
     const companyId = parseInt(req.params.id);
     const { logoURL } = req.body;
     
-    console.log('🔍 [LOGO_UPDATE] Request received:', { companyId, logoURL, userId: req.user?.id });
+    console.log('🔍 [LOGO_UPDATE] Request received:', { 
+      companyId, 
+      logoURL: logoURL?.substring(0, 100) + '...', 
+      userId: req.user?.id,
+      headers: {
+        authorization: req.headers.authorization ? 'present' : 'missing',
+        contentType: req.headers['content-type']
+      }
+    });
     
     if (!logoURL) {
       console.log('❌ [LOGO_UPDATE] Missing logoURL');
