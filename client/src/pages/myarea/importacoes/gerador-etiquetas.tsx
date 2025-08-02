@@ -82,6 +82,7 @@ export default function GeradorEtiquetas() {
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("company");
+  const [progress, setProgress] = useState(0);
   
   const { toast } = useToast();
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -325,13 +326,12 @@ export default function GeradorEtiquetas() {
     }
   }, [productData.eanCode, toast]);
 
-  // Função para sanitizar texto e remover caracteres problemáticos
+  // Função para sanitizar texto mantendo acentos e caracteres importantes
   const sanitizeText = useCallback((text: string): string => {
     if (!text) return "";
     return decodeHtmlEntities(text)
-      .replace(/[^\w\s\-\.\,\(\)\/]/g, '') // Remove caracteres especiais problemáticos
-      .trim()
-      .toUpperCase();
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove apenas caracteres de controle
+      .trim();
   }, []);
 
   // Função para quebrar texto em linhas que cabem na largura especificada
@@ -404,8 +404,8 @@ export default function GeradorEtiquetas() {
     };
   }, [companyData, productData]);
 
-  // Gerar PDF com layout melhorado e responsivo
-  const generatePDF = async () => {
+  // Gerar etiqueta com layout profissional e logo BKZA
+  const generateLabel = async () => {
     // Validação básica
     if (!companyData.razaoSocial || !productData.nomeProduto) {
       toast({
@@ -416,168 +416,165 @@ export default function GeradorEtiquetas() {
       return;
     }
 
-    // Validação avançada
-    const validation = validateLabelData();
-    if (validation.warnings.length > 0) {
-      console.log("Avisos de formatação:", validation.warnings);
-    }
-
     setIsGenerating(true);
+    setProgress(0);
 
     try {
-      // ✅ CORRIGIDO: Criar PDF com configurações melhoradas
+      // Simular progresso
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 100);
+
+      // Criar PDF com configurações corretas
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
         format: [100, 70] // Tamanho da etiqueta: 100mm x 70mm
       });
 
-      // ✅ CORRIGIDO: Configurar encoding para caracteres especiais
-      pdf.setFont("helvetica");
-      
-      // ✅ CORRIGIDO: Controle dinâmico de posição Y
-      let currentY = 8;
-      const lineHeight = 4;
-      const maxWidth = 90;
-
-      // ✅ CORRIGIDO: Título do produto com quebra de linha
-      pdf.setFontSize(12); // Reduzido para caber melhor
-      pdf.setFont("helvetica", "bold");
-      const productTitle = sanitizeText(productData.nomeProduto);
-      const titleLines = splitTextToFit(productTitle, maxWidth, 12, pdf);
-      
-      titleLines.slice(0, 2).forEach((line, index) => { // Máximo 2 linhas
-        pdf.text(line, 5, currentY + (index * lineHeight));
-      });
-      currentY += (titleLines.slice(0, 2).length * lineHeight) + 2;
-
-      // ✅ CORRIGIDO: SKU/Código com validação
-      const skuCode = productData.sku || "SEM CÓDIGO";
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(skuCode, 5, currentY);
-      currentY += lineHeight + 1;
-
-      // ✅ CORRIGIDO: Conteúdo com validação
-      if (productData.conteudo && productData.conteudo.trim()) {
-        pdf.setFontSize(8);
-        pdf.setFont("helvetica", "normal");
-        const conteudoText = `CONTEUDO: ${sanitizeText(productData.conteudo)}`;
-        const conteudoLines = splitTextToFit(conteudoText, maxWidth, 8, pdf);
+      // Função para criar logo BKZA
+      const createLogo = () => {
+        // Fundo preto para a logo
+        pdf.setFillColor(0, 0, 0);
+        pdf.rect(5, 8, 25, 12, 'F');
         
-        conteudoLines.slice(0, 1).forEach((line, index) => { // Máximo 1 linha
-          pdf.text(line, 5, currentY + (index * 3));
-        });
-        currentY += (conteudoLines.slice(0, 1).length * 3) + 1;
-      }
-
-      // ✅ CORRIGIDO: Cor (apenas se houver)
-      if (productData.cor && productData.cor.trim()) {
+        // Texto "bkza" em branco
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(16);
+        pdf.text("bkza", 7, 16);
+        
+        // ".com.br" menor
         pdf.setFontSize(8);
-        pdf.text(`COR: ${sanitizeText(productData.cor)}`, 5, currentY);
-        currentY += 3;
-      }
+        pdf.text(".com.br", 18, 18);
+        
+        // Volta cor do texto para preto
+        pdf.setTextColor(0, 0, 0);
+      };
 
-      // ✅ CORRIGIDO: Validade
-      pdf.setFontSize(8);
-      pdf.text(`VALIDADE: ${productData.validade || "INDETERMINADA"}`, 5, currentY);
-      currentY += 3;
+      // Layout seguindo o modelo exato
+      
+      // 1. LOGO BKZA (canto superior esquerdo)
+      createLogo();
 
-      // ✅ CORRIGIDO: País de origem
-      pdf.text(`PAIS DE ORIGEM: ${sanitizeText(productData.paisOrigem) || "CHINA"}`, 5, currentY);
-      currentY += 3;
-
-      // ✅ CORRIGIDO: SAC (apenas se houver)
-      if (productData.sac && productData.sac.trim()) {
-        const sacText = `SAC: ${productData.sac}`;
-        if (sacText.length <= 30) { // Só mostra se couber
-          pdf.text(sacText, 5, currentY);
-          currentY += 3;
+      // 2. NOME DO PRODUTO (lado direito, grande)
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(14);
+      const nomeProduto = sanitizeText(productData.nomeProduto).toUpperCase();
+      
+      // Quebra o nome do produto em linhas se necessário
+      const maxWidthProduto = 40;
+      const palavras = nomeProduto.split(' ');
+      let linha1 = '';
+      let linha2 = '';
+      
+      for (const palavra of palavras) {
+        const testeLinha = linha1 ? `${linha1} ${palavra}` : palavra;
+        if (pdf.getTextWidth(testeLinha) <= maxWidthProduto) {
+          linha1 = testeLinha;
+        } else {
+          linha2 = linha2 ? `${linha2} ${palavra}` : palavra;
         }
       }
-
-      // ✅ CORRIGIDO: Separador visual
-      currentY += 2;
-
-      // ✅ CORRIGIDO: Dados da empresa
-      pdf.setFontSize(7);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("IMPORTADO E DISTRIBUIDO POR:", 5, currentY);
-      currentY += 3;
       
-      // ✅ CORRIGIDO: Razão social com quebra
+      pdf.text(linha1, 55, 15);
+      if (linha2) {
+        pdf.text(linha2, 55, 22);
+      }
+
+      // 3. DADOS DA EMPRESA (lado esquerdo)
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 5, 32);
+      
       pdf.setFont("helvetica", "normal");
-      const razaoSocial = sanitizeText(companyData.razaoSocial);
-      const razaoLines = splitTextToFit(razaoSocial, maxWidth, 7, pdf);
+      pdf.setFontSize(8);
+      pdf.text(sanitizeText(companyData.razaoSocial), 5, 37);
       
-      razaoLines.slice(0, 2).forEach((line, index) => { // Máximo 2 linhas
-        pdf.text(line, 5, currentY + (index * 2.5));
-      });
-      currentY += (razaoLines.slice(0, 2).length * 2.5) + 1;
-
-      // ✅ CORRIGIDO: Endereço (apenas se houver espaço)
-      if (companyData.endereco && companyData.endereco.trim() && currentY < 60) {
-        const enderecoText = sanitizeText(companyData.endereco);
-        const enderecoLines = splitTextToFit(enderecoText, maxWidth, 7, pdf);
-        
-        enderecoLines.slice(0, 1).forEach((line, index) => { // Máximo 1 linha
-          pdf.text(line, 5, currentY + (index * 2.5));
-        });
-        currentY += (enderecoLines.slice(0, 1).length * 2.5) + 1;
-      }
-
-      // ✅ CORRIGIDO: Bairro e cidade (apenas se houver espaço)
-      if (companyData.bairro && companyData.cidade && currentY < 62) {
-        const cidadeText = `${sanitizeText(companyData.bairro)}, ${sanitizeText(companyData.cidade)}`;
-        const cidadeLines = splitTextToFit(cidadeText, maxWidth, 7, pdf);
-        
-        cidadeLines.slice(0, 1).forEach((line, index) => { // Máximo 1 linha
-          pdf.text(line, 5, currentY + (index * 2.5));
-        });
-        currentY += (cidadeLines.slice(0, 1).length * 2.5) + 1;
-      }
-
-      // ✅ CORRIGIDO: CEP e CNPJ na última linha disponível
-      let bottomLine = "";
-      if (companyData.cep && companyData.cep.trim()) {
-        bottomLine += `CEP ${companyData.cep}`;
-      }
-      if (companyData.cnpj && companyData.cnpj.trim()) {
-        if (bottomLine) bottomLine += " ";
-        bottomLine += `CNPJ ${companyData.cnpj}`;
+      if (companyData.endereco) {
+        pdf.text(sanitizeText(companyData.endereco), 5, 42);
       }
       
-      if (bottomLine && currentY < 67) {
-        // Garante que cabe na última linha
-        const bottomLines = splitTextToFit(bottomLine, maxWidth, 7, pdf);
-        pdf.text(bottomLines[0], 5, Math.min(currentY, 67));
+      if (companyData.bairro && companyData.cidade) {
+        pdf.text(`${sanitizeText(companyData.bairro)}, ${sanitizeText(companyData.cidade)}`, 5, 47);
+      }
+      
+      let linhaFinal = '';
+      if (companyData.cep) {
+        linhaFinal += `CEP ${companyData.cep}`;
+      }
+      if (companyData.cnpj) {
+        if (linhaFinal) linhaFinal += ' ';
+        linhaFinal += `CNPJ ${companyData.cnpj}`;
+      }
+      if (linhaFinal) {
+        pdf.text(linhaFinal, 5, 52);
       }
 
-      // ✅ CORRIGIDO: Código de barras apenas se houver espaço
-      if (productData.eanCode && productData.eanCode.trim() && barcodeDataUrl) {
+      // 4. DADOS DO PRODUTO (lado direito)
+      let yProduto = 32;
+      
+      // SKU/Código
+      const skuCodigo = productData.sku;
+      if (skuCodigo) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(12);
+        pdf.text(skuCodigo, 55, yProduto);
+        yProduto += 6;
+      }
+      
+      // Conteúdo
+      if (productData.conteudo) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
+        pdf.text(`CONTÉM ${sanitizeText(productData.conteudo).toUpperCase()}`, 55, yProduto);
+        yProduto += 5;
+      }
+      
+      // Cor
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      if (productData.cor) {
+        pdf.text(`COR: ${sanitizeText(productData.cor).toUpperCase()}`, 55, yProduto);
+      } else {
+        pdf.text("COR: CONFORME IMAGEM", 55, yProduto);
+      }
+      yProduto += 4;
+      
+      // Validade
+      pdf.text(`VALIDADE: ${productData.validade || "INDETERMINADA"}`, 55, yProduto);
+      yProduto += 4;
+      
+      // País de origem
+      pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem || "CHINA"}`, 55, yProduto);
+      yProduto += 4;
+      
+      // SAC
+      if (productData.sac) {
+        pdf.text(`SAC: ${productData.sac}`, 55, yProduto);
+      }
+
+      // 5. CÓDIGO DE BARRAS (canto inferior esquerdo)
+      if (productData.eanCode && barcodeDataUrl) {
         try {
-          // Posiciona no canto direito, apenas se não sobrepor texto
-          const barcodeX = 65;
-          const barcodeY = Math.max(45, currentY - 15);
-          const barcodeWidth = 30;
-          const barcodeHeight = 12;
-          
-          // Só adiciona se couber na etiqueta
-          if (barcodeY + barcodeHeight <= 68) {
-            pdf.addImage(barcodeDataUrl, 'PNG', barcodeX, barcodeY, barcodeWidth, barcodeHeight);
-          }
+          // Posição correta do código de barras
+          pdf.addImage(barcodeDataUrl, 'PNG', 5, 57, 35, 10);
         } catch (error) {
-          console.error("Erro ao adicionar código de barras:", error);
-          // Continua sem o código de barras se der erro
+          console.error("Erro ao gerar código de barras:", error);
         }
       }
 
-      // ✅ CORRIGIDO: Nome do arquivo mais limpo
-      const cleanSku = (productData.sku || 'produto')
-        .replace(/[^\w\-]/g, '')
-        .substring(0, 20);
-      const fileName = `etiqueta_${cleanSku}_${Date.now()}.pdf`;
-      
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      // Salvar PDF
+      const fileName = `etiqueta_${productData.sku || 'produto'}_${Date.now()}.pdf`;
       pdf.save(fileName);
 
       toast({
@@ -594,6 +591,7 @@ export default function GeradorEtiquetas() {
       });
     } finally {
       setIsGenerating(false);
+      setProgress(0);
     }
   };
 
@@ -985,7 +983,7 @@ export default function GeradorEtiquetas() {
               <CardContent className="pt-6">
                 <div className="flex flex-wrap gap-3">
                   <Button
-                    onClick={generatePDF}
+                    onClick={generateLabel}
                     disabled={isGenerating || !companyData.razaoSocial || !productData.nomeProduto}
                     className="flex-1 md:flex-initial"
                   >
