@@ -225,17 +225,26 @@ export default function GeradorEtiquetas() {
 
     try {
       const canvas = document.createElement("canvas");
+      // Aumentar a resolução do canvas
+      const scale = 2; // Fator de escala para melhor qualidade
       JsBarcode(canvas, productData.eanCode, {
         format: "EAN13",
-        width: 3,
-        height: 90,
+        width: 3 * scale,
+        height: 90 * scale,
         displayValue: true,
-        fontSize: 24,
-        textMargin: 2,
+        fontSize: 32 * scale,
+        textMargin: 4 * scale,
         background: "#ffffff",
-        lineColor: "#000000"
+        lineColor: "#000000",
+        font: "monospace"
       });
-      setBarcodeDataUrl(canvas.toDataURL('image/png', 1.0));
+      // Redimensionar o canvas de volta ao tamanho normal mas mantendo a alta resolução
+      const finalCanvas = document.createElement("canvas");
+      const ctx = finalCanvas.getContext("2d");
+      finalCanvas.width = canvas.width / scale;
+      finalCanvas.height = canvas.height / scale;
+      ctx?.drawImage(canvas, 0, 0, finalCanvas.width, finalCanvas.height);
+      setBarcodeDataUrl(finalCanvas.toDataURL('image/png', 1.0));
     } catch (error) {
       toast({
         title: "Erro ao gerar código de barras",
