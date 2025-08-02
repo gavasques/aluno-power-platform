@@ -92,7 +92,7 @@ const ESTADOS = [
 ];
 
 export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) {
-  const [logoPreview, setLogoPreview] = useState<string>(company?.logoUrl || '');
+  const [logoPreview, setLogoPreview] = useState<string | null>(company?.logoUrl || null);
   const { toast } = useToast();
   
   // Logo upload mutation
@@ -544,15 +544,18 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
           </h3>
           <div className="flex items-center gap-4">
             {logoPreview && (
-              <div className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden">
+              <div className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                 <img 
                   src={logoPreview}
-                  alt="Logo preview" 
-                  className="w-full h-full object-contain bg-white"
+                  alt="Logo da empresa" 
+                  className="w-full h-full object-contain"
                   onError={(e) => {
-                    console.error('Error loading logo:', logoPreview);
-                    // Instead of hiding, show a placeholder
-                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yOCAyMEgzNlYyOEgyOFYyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHA9YXRoIGQ9Ik0yMCAzMkg0NFY0MEgyMFYzMloiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
+                    console.warn('Logo failed to load:', logoPreview);
+                    // Clear the preview on error to prevent infinite loops
+                    setLogoPreview(null);
+                  }}
+                  onLoad={() => {
+                    console.log('Logo loaded successfully:', logoPreview);
                   }}
                 />
               </div>
@@ -578,8 +581,8 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                     
                     // Use the normalized path from the server response
                     const normalizedLogoUrl = updateResult.data?.logoUrl || logoURL;
-                    setLogoPreview(normalizedLogoUrl);
-                    form.setValue('logoUrl', normalizedLogoUrl);
+                    setLogoPreview(normalizedLogoUrl || null);
+                    form.setValue('logoUrl', normalizedLogoUrl || '');
                     
                     toast({
                       title: "Sucesso",
