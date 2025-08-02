@@ -2060,18 +2060,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user;
       console.log('📦 [CUSTOMER_SERVICE] Received body:', req.body);
-      const { sessionId, customerName, productPurchased, emailContent, userAnalysis } = req.body;
+      const { sessionId, customerName, productPurchased, emailContent, userAnalysis, isUnderWarranty, shippingFormat } = req.body;
 
-      if (!sessionId || !customerName || !productPurchased || !emailContent || !userAnalysis) {
-        console.log('❌ [CUSTOMER_SERVICE] Missing fields:', { 
+      if (!sessionId || !emailContent || !userAnalysis) {
+        console.log('❌ [CUSTOMER_SERVICE] Missing required fields:', { 
           hasSessionId: !!sessionId, 
-          hasCustomerName: !!customerName,
-          hasProductPurchased: !!productPurchased,
           hasEmailContent: !!emailContent, 
           hasUserAnalysis: !!userAnalysis,
           body: req.body
         });
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios: sessionId, customerName, productPurchased, emailContent, userAnalysis' });
+        return res.status(400).json({ error: 'Campos obrigatórios: sessionId, emailContent, userAnalysis' });
       }
 
       // Get session data
@@ -2090,14 +2088,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customer_name: customerName,
         product_purchased: productPurchased,
         email_content: emailContent,
-        user_analysis: userAnalysis
+        user_analysis: userAnalysis,
+        is_under_warranty: isUnderWarranty,
+        shipping_format: shippingFormat
       };
 
       console.log('🎯 [CUSTOMER_SERVICE] Sending customer data to webhook:', { 
         customerName,
         productPurchased,
         emailContentLength: emailContent.length,
-        userAnalysisLength: userAnalysis.length 
+        userAnalysisLength: userAnalysis.length,
+        isUnderWarranty,
+        shippingFormat 
       });
 
       // Call webhook instead of AI provider
@@ -2164,7 +2166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save to AI Generation Logs with AUTOMATIC CREDIT DEDUCTION
       try {
-        const inputData = `Cliente: ${customerName}\nProduto: ${productPurchased}\nEmail: ${emailContent}\nAnálise: ${userAnalysis}`;
+        const inputData = `Cliente: ${customerName || 'Não informado'}\nProduto: ${productPurchased || 'Não informado'}\nEmail: ${emailContent}\nAnálise: ${userAnalysis}\nGarantia: ${isUnderWarranty === true ? 'Sim' : isUnderWarranty === false ? 'Não' : 'Não informado'}\nFormato de Envio: ${shippingFormat || 'Não informado'}`;
         
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Bot, AlertCircle, ArrowRight, Clock, Target, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +30,8 @@ const AmazonCustomerService = () => {
   const [productPurchased, setProductPurchased] = useState("");
   const [emailContent, setEmailContent] = useState("");
   const [userAnalysis, setUserAnalysis] = useState("");
+  const [isUnderWarranty, setIsUnderWarranty] = useState<boolean | null>(null);
+  const [shippingFormat, setShippingFormat] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -36,24 +40,6 @@ const AmazonCustomerService = () => {
   const FEATURE_CODE = 'agents.customer_service';
 
   const handleSubmit = async () => {
-    if (!customerName.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Por favor, insira o nome do comprador",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!productPurchased.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Por favor, insira o produto comprado",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!emailContent.trim()) {
       toast({
         title: "Campo obrigatório",
@@ -90,7 +76,9 @@ const AmazonCustomerService = () => {
             customerName: customerName.trim(),
             productPurchased: productPurchased.trim(),
             emailContent: emailContent.trim(),
-            userAnalysis: userAnalysis.trim()
+            userAnalysis: userAnalysis.trim(),
+            isUnderWarranty: isUnderWarranty,
+            shippingFormat: shippingFormat
           }
         } as any,
       }) as SessionResponse;
@@ -102,7 +90,9 @@ const AmazonCustomerService = () => {
           customerName: customerName.trim(),
           productPurchased: productPurchased.trim(),
           emailContent: emailContent.trim(),
-          userAnalysis: userAnalysis.trim()
+          userAnalysis: userAnalysis.trim(),
+          isUnderWarranty: isUnderWarranty,
+          shippingFormat: shippingFormat
         };
         
         console.log('Sending process request with body:', processBody);
@@ -194,7 +184,7 @@ João Silva`;
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="customerName">Nome do Comprador *</Label>
+                <Label htmlFor="customerName">Nome do Comprador</Label>
                 <Input
                   id="customerName"
                   placeholder="Digite o nome do cliente que enviou o email..."
@@ -204,7 +194,7 @@ João Silva`;
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="productPurchased">Produto Comprado *</Label>
+                <Label htmlFor="productPurchased">Produto Comprado</Label>
                 <Input
                   id="productPurchased"
                   placeholder="Digite o produto que o cliente comprou..."
@@ -235,10 +225,39 @@ João Silva`;
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="isUnderWarranty">Está na Garantia?</Label>
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="isUnderWarranty"
+                    checked={isUnderWarranty === true}
+                    onCheckedChange={(checked) => setIsUnderWarranty(checked ? true : null)}
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {isUnderWarranty === true ? 'Sim' : isUnderWarranty === false ? 'Não' : 'Não especificado'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="shippingFormat">Formato de Envio</Label>
+                <Select value={shippingFormat} onValueChange={setShippingFormat}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o formato de envio..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FBA">FBA</SelectItem>
+                    <SelectItem value="FBM">FBM</SelectItem>
+                    <SelectItem value="DBA">DBA</SelectItem>
+                    <SelectItem value="FBA On Site">FBA On Site</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="flex gap-3">
                 <Button
                   onClick={handleSubmit}
-                  disabled={isProcessing || !customerName.trim() || !productPurchased.trim() || !emailContent.trim() || !userAnalysis.trim()}
+                  disabled={isProcessing || !emailContent.trim() || !userAnalysis.trim()}
                   className="flex-1"
                 >
                   {isProcessing ? (
@@ -261,6 +280,8 @@ João Silva`;
                     setProductPurchased("Fone de ouvido Bluetooth XYZ");
                     setEmailContent(exampleEmail);
                     setUserAnalysis("Produto com defeito de fabricação confirmado. Cliente relatou que já tentou soluções básicas. Oferecemos troca imediata e acompanhamento personalizado para reverter possível avaliação negativa.");
+                    setIsUnderWarranty(true);
+                    setShippingFormat("FBA");
                   }}
                   disabled={isProcessing}
                 >
