@@ -210,7 +210,7 @@ João Silva`;
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="emailContent">Conteúdo do Email *</Label>
+                <Label htmlFor="emailContent">O que o comprador mandou *</Label>
                 <Textarea
                   id="emailContent"
                   placeholder="Cole aqui o email completo do cliente..."
@@ -221,7 +221,7 @@ João Silva`;
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="userAnalysis">Informações do Usuário</Label>
+                <Label htmlFor="userAnalysis">Informações do Vendedor</Label>
                 <Textarea
                   id="userAnalysis"
                   placeholder="Sua análise sobre o caso - explique o que ocorreu, contexto adicional, observações..."
