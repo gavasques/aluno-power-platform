@@ -23,8 +23,12 @@ interface SessionData {
   id: string;
   status: 'processing' | 'completed' | 'failed';
   input_data: {
+    customerName?: string;
+    productPurchased?: string;
     emailContent: string;
-    userObservations: string;
+    userAnalysis: string;
+    isUnderWarranty?: boolean;
+    shippingFormat?: string;
   };
   result_data?: {
     response: string;
@@ -301,10 +305,53 @@ const AmazonCustomerServiceResult = () => {
               </CardContent>
             </Card>
 
-            {/* User Observations */}
+            {/* Additional Customer Info */}
+            {(sessionData.input_data.customerName || sessionData.input_data.productPurchased || 
+              sessionData.input_data.isUnderWarranty !== undefined || sessionData.input_data.shippingFormat) && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Informações Adicionais</CardTitle>
+                  <CardDescription>
+                    Dados complementares sobre o cliente e produto
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {sessionData.input_data.customerName && (
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Nome do Comprador</p>
+                        <p className="text-sm">{sessionData.input_data.customerName}</p>
+                      </div>
+                    )}
+                    {sessionData.input_data.productPurchased && (
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Produto Comprado</p>
+                        <p className="text-sm">{sessionData.input_data.productPurchased}</p>
+                      </div>
+                    )}
+                    {sessionData.input_data.isUnderWarranty !== undefined && (
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Está na Garantia?</p>
+                        <Badge variant={sessionData.input_data.isUnderWarranty ? "default" : "secondary"}>
+                          {sessionData.input_data.isUnderWarranty ? "Sim" : "Não"}
+                        </Badge>
+                      </div>
+                    )}
+                    {sessionData.input_data.shippingFormat && (
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Formato de Envio</p>
+                        <Badge variant="outline">{sessionData.input_data.shippingFormat}</Badge>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* User Analysis */}
             <Card className="mt-6">
               <CardHeader>
-                <CardTitle className="text-lg">Informações do Usuário</CardTitle>
+                <CardTitle className="text-lg">Análise do Usuário</CardTitle>
                 <CardDescription>
                   Observações e contexto adicional fornecido para o atendimento
                 </CardDescription>
@@ -312,7 +359,7 @@ const AmazonCustomerServiceResult = () => {
               <CardContent>
                 <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
                   <pre className="whitespace-pre-wrap font-sans text-sm text-muted-foreground">
-                    {sessionData.input_data.userObservations}
+                    {sessionData.input_data.userAnalysis}
                   </pre>
                 </div>
               </CardContent>

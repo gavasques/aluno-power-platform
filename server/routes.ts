@@ -2119,13 +2119,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const webhookResult = await webhookResponse.json();
       const processingTime = Date.now() - startTime;
       
-      // Webhook started but response will come later
-      const responseText = webhookResult.response || webhookResult.email_response || webhookResult.output || 'Processing in background...';
+      // Extract response from webhook result with multiple possible fields
+      let responseText = 'Processing in background...';
+      
+      // Check all possible response fields from the webhook
+      if (webhookResult.response) {
+        responseText = webhookResult.response;
+      } else if (webhookResult.email_response) {
+        responseText = webhookResult.email_response;
+      } else if (webhookResult.output) {
+        responseText = webhookResult.output;
+      } else if (webhookResult.data && webhookResult.data.response) {
+        responseText = webhookResult.data.response;
+      } else if (webhookResult.result) {
+        responseText = webhookResult.result;
+      } else if (typeof webhookResult === 'string') {
+        responseText = webhookResult;
+      }
 
       console.log('🎯 [CUSTOMER_SERVICE] Webhook response received:', { 
         responseLength: responseText.length,
         processingTime: `${processingTime}ms`,
-        webhookResult: JSON.stringify(webhookResult, null, 2)
+        webhookResult: JSON.stringify(webhookResult, null, 2),
+        extractedResponse: responseText.substring(0, 200) + '...'
       });
 
       // Fixed values for webhook processing
