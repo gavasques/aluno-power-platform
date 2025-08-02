@@ -122,7 +122,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
       
       return apiRequest(`/api/user-companies/${companyId}/logo`, {
         method: 'PUT',
-        body: JSON.stringify({ logoURL }),
+        body: { logoURL }, // Remove JSON.stringify, apiRequest faz isso automaticamente
       });
     },
     onSuccess: (data) => {
