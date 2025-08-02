@@ -122,7 +122,14 @@ router.put('/:id', requireAuth, async (req, res) => {
       });
     }
 
+    // Debug logging to check received data
+    console.log('🔍 [USER_COMPANIES] Update request body:', req.body);
+    
     const validatedData = updateUserCompanySchema.parse(req.body);
+    
+    // Debug logging to check validated data
+    console.log('🔍 [USER_COMPANIES] Validated data:', validatedData);
+    
     const company = await storage.updateUserCompany(id, validatedData);
 
     res.json({
