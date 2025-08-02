@@ -300,12 +300,12 @@ export default function GeradorEtiquetas() {
       }
 
       // Coluna direita
-      const rightStartX = 50;
+      const rightStartX = 55;
       
       // Nome do produto
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
-      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 47);
+      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 42);
       let productY = 8;
       productLines.forEach((line: string, index: number) => {
         pdf.text(line, rightStartX, productY);
