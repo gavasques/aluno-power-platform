@@ -28,6 +28,14 @@ import type { UserCompany } from '@shared/schema';
 import { Image, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+// Função para decodificar HTML entities
+const decodeHtmlEntities = (text: string): string => {
+  if (!text) return text;
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+};
+
 // Schema de validação do formulário
 const companyFormSchema = z.object({
   corporateName: z.string().min(1, 'Razão social é obrigatória'),
@@ -125,8 +133,9 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
   // Sincronizar logoPreview quando company muda (importante para edição)
   useEffect(() => {
     if (company?.logoUrl) {
-      setLogoPreview(company.logoUrl);
-      form.setValue('logoUrl', company.logoUrl);
+      const decodedUrl = decodeHtmlEntities(company.logoUrl);
+      setLogoPreview(decodedUrl);
+      form.setValue('logoUrl', decodedUrl);
     }
   }, [company?.logoUrl, form]);
   
@@ -576,7 +585,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
               {logoPreview ? (
                 <div className="relative w-20 h-20 border-2 border-gray-200 rounded-lg overflow-hidden bg-white">
                   <img 
-                    src={logoPreview}
+                    src={decodeHtmlEntities(logoPreview)}
                     alt="Logo da empresa" 
                     className="w-full h-full object-contain"
                     onError={(e) => {
