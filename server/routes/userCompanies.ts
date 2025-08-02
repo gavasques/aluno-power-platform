@@ -135,9 +135,17 @@ router.put('/:id', requireAuth, async (req, res) => {
       Object.entries(validatedData).filter(([key, value]) => value !== null && value !== undefined)
     );
     
-    // Convert null logoUrl to undefined to match expected type
-    if ('logoUrl' in cleanData && cleanData.logoUrl === null) {
-      cleanData.logoUrl = undefined;
+    // Convert null logoUrl to undefined and normalize path
+    if ('logoUrl' in cleanData) {
+      if (cleanData.logoUrl === null) {
+        delete cleanData.logoUrl; // Remove null values completely
+      } else if (cleanData.logoUrl && typeof cleanData.logoUrl === 'string') {
+        // Normalize logoUrl to use /objects/ path format
+        const { ObjectStorageService } = await import('../objectStorage');
+        const objectStorageService = new ObjectStorageService();
+        cleanData.logoUrl = objectStorageService.normalizeObjectEntityPath(cleanData.logoUrl);
+        console.log('🔄 [USER_COMPANIES] Normalized logo URL:', cleanData.logoUrl);
+      }
     }
     
     // Ensure logoUrl is properly typed for the update function
