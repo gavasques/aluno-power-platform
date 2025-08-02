@@ -271,7 +271,7 @@ export default function GeradorEtiquetas() {
 
       // Logo (se houver)
       if (logoDataUrl) {
-        pdf.addImage(logoDataUrl, "PNG", 3, 4, 30, 12);
+        pdf.addImage(logoDataUrl, "PNG", 3, 4, 35, 14);
       }
 
       // Texto "IMPORTADO E DISTRIBUÍDO POR:"
@@ -300,46 +300,48 @@ export default function GeradorEtiquetas() {
       }
 
       // Coluna direita
-      const rightStartX = 43;
+      const rightStartX = 50;
       
       // Nome do produto
-      pdf.setFontSize(12);
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
-      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 54);
+      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 47);
       let productY = 8;
       productLines.forEach((line: string, index: number) => {
         pdf.text(line, rightStartX, productY);
-        productY += 5;
+        productY += 4;
       });
 
       // Espaço após o nome do produto
-      productY += 4;
+      productY += 3;
 
       // SKU
-      pdf.setFontSize(12);
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "bold");
       pdf.text(productData.sku.toUpperCase(), rightStartX, productY);
-      productY += 7;
+      productY += 5;
 
       // Conteúdo
-      pdf.setFontSize(11);  
+      pdf.setFontSize(9);  
       pdf.text("CONTÉM " + productData.conteudo.toUpperCase(), rightStartX, productY);
-      productY += 8;
+      productY += 6;
 
       // Informações adicionais
-      pdf.setFontSize(9);
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
+      
+      productY += 2;
       
       if (productData.cor) {
         pdf.text(`COR: ${productData.cor.toUpperCase()}`, rightStartX, productY);
-        productY += 4;
+        productY += 3.5;
       }
       
       pdf.text(`VALIDADE: ${productData.validade.toUpperCase()}`, rightStartX, productY);
-      productY += 4;
+      productY += 3.5;
       
       pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem.toUpperCase()}`, rightStartX, productY);
-      productY += 4;
+      productY += 3.5;
       
       // SAC mantém o email em minúsculas
       pdf.text(`SAC: ${productData.sac}`, rightStartX, productY);
