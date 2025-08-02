@@ -2139,7 +2139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract response from webhook result with multiple possible fields
       let responseText = 'Processing in background...';
       
-      // Check all possible response fields from the webhook
+      // Check all possible response fields from the webhook - including more field variations
       if (webhookResult.response) {
         responseText = webhookResult.response;
       } else if (webhookResult.email_response) {
@@ -2150,8 +2150,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseText = webhookResult.data.response;
       } else if (webhookResult.result) {
         responseText = webhookResult.result;
+      } else if (webhookResult.body) {
+        responseText = webhookResult.body;
+      } else if (webhookResult.content) {
+        responseText = webhookResult.content;
+      } else if (webhookResult.text) {
+        responseText = webhookResult.text;
+      } else if (webhookResult.message && webhookResult.message !== 'Workflow was started') {
+        responseText = webhookResult.message;
       } else if (typeof webhookResult === 'string') {
         responseText = webhookResult;
+      }
+      
+      // If response is still default, try to extract from nested objects
+      if (responseText === 'Processing in background...' && typeof webhookResult === 'object') {
+        // Try to find any string value that looks like a response
+        const keys = Object.keys(webhookResult);
+        for (const key of keys) {
+          const value = webhookResult[key];
+          if (typeof value === 'string' && value.length > 50 && !['id', 'status', 'timestamp'].includes(key)) {
+            responseText = value;
+            console.log(`🔍 [CUSTOMER_SERVICE] Found response in field: ${key}`);
+            break;
+          }
+        }
       }
 
       console.log('🎯 [CUSTOMER_SERVICE] Webhook response received:', { 

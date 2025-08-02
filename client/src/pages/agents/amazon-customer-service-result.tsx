@@ -281,9 +281,16 @@ const AmazonCustomerServiceResult = () => {
               </CardHeader>
               <CardContent>
                 <div className="bg-muted p-4 rounded-lg">
-                  <pre className="whitespace-pre-wrap font-sans text-sm">
-                    {sessionData.result_data.response}
-                  </pre>
+                  <div 
+                    className="whitespace-pre-wrap font-sans text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: sessionData.result_data.response
+                        .replace(/\\n/g, '<br>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/--/g, '—')
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>
