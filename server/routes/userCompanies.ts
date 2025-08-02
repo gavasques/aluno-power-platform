@@ -4,6 +4,7 @@ import { storage } from '../storage';
 import { insertUserCompanySchema } from '@shared/schema';
 import { requireAuth } from '../middleware/auth';
 import { ObjectStorageService } from '../objectStorage';
+import he from 'he';
 
 const router = Router();
 
@@ -17,6 +18,15 @@ const updateUserCompanySchema = insertUserCompanySchema.partial();
 
 // GET /api/user-companies - Lista empresas do usuário
 router.get('/', requireAuth, async (req, res) => {
+  console.log('🔍 [AUTH] Request headers:', {
+    authorization: req.headers.authorization ? 'Bearer eyJhbGciOi...' : 'missing',
+    'user-agent': req.headers['user-agent']?.substring(0, 50) + '...'
+  });
+  
+  console.log('🔍 [AUTH] Extracted token:', req.headers.authorization?.split(' ')[1]?.substring(0, 10) + '...');
+  console.log('🔍 [AUTH] Token validation result:', req.user ? 'valid' : 'invalid');
+  console.log('🔍 [AUTH] Authentication successful for user:', req.user?.email);
+  
   try {
     const userId = req.user!.id;
     const { search } = req.query;
@@ -28,7 +38,16 @@ router.get('/', requireAuth, async (req, res) => {
       companies = await storage.getUserCompanies(userId);
     }
 
-    res.json(companies);
+    // Normalize logo URLs for display
+    const objectStorageService = new ObjectStorageService();
+    const normalizedCompanies = companies.map(company => {
+      if (company.logoUrl) {
+        company.logoUrl = objectStorageService.normalizeObjectEntityPath(company.logoUrl);
+      }
+      return company;
+    });
+
+    res.json(normalizedCompanies);
   } catch (error) {
     console.error('Error fetching user companies:', error);
     res.status(500).json({ 
@@ -57,6 +76,12 @@ router.get('/:id', requireAuth, async (req, res) => {
         success: false, 
         error: 'Acesso negado' 
       });
+    }
+
+    // Normalize logo URL for display
+    if (company.logoUrl) {
+      const objectStorageService = new ObjectStorageService();
+      company.logoUrl = objectStorageService.normalizeObjectEntityPath(company.logoUrl);
     }
 
     res.json(company);
@@ -267,8 +292,12 @@ router.put('/:id/logo', requireAuth, async (req, res) => {
     }
 
     const objectStorageService = new ObjectStorageService();
-    const normalizedPath = objectStorageService.normalizeObjectEntityPath(logoURL);
     
+    // Decode HTML entities if present
+    const decodedURL = he.decode(logoURL);
+    console.log('🔍 [LOGO_UPDATE] Decoded URL:', decodedURL);
+    
+    const normalizedPath = objectStorageService.normalizeObjectEntityPath(decodedURL);
     console.log('🔍 [LOGO_UPDATE] Normalized path:', normalizedPath);
 
     // Update company with logo URL
