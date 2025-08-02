@@ -2059,9 +2059,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agents/amazon-customer-service/process', requireAuth, async (req: any, res: any) => {
     try {
       const user = req.user;
+      console.log('📦 [CUSTOMER_SERVICE] Received body:', req.body);
       const { sessionId, emailContent, userObservations } = req.body;
 
       if (!sessionId || !emailContent || !userObservations) {
+        console.log('❌ [CUSTOMER_SERVICE] Missing fields:', { 
+          hasSessionId: !!sessionId, 
+          hasEmailContent: !!emailContent, 
+          hasUserObservations: !!userObservations,
+          body: req.body
+        });
         return res.status(400).json({ error: 'SessionId, emailContent e userObservations são obrigatórios' });
       }
 

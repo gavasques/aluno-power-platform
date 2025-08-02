@@ -64,23 +64,27 @@ const AmazonCustomerService = () => {
       // Create a new session for this analysis
       const sessionResponse = await apiRequest('/api/agents/amazon-customer-service/sessions', {
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           input_data: {
             emailContent: emailContent.trim(),
             userObservations: userObservations.trim()
           }
-        }),
+        } as any,
       }) as SessionResponse;
 
       if (sessionResponse?.sessionId) {
         // Start processing
+        const processBody = {
+          sessionId: sessionResponse.sessionId,
+          emailContent: emailContent.trim(),
+          userObservations: userObservations.trim()
+        };
+        
+        console.log('Sending process request with body:', processBody);
+        
         const processResponse = await apiRequest('/api/agents/amazon-customer-service/process', {
           method: 'POST',
-          body: JSON.stringify({
-            sessionId: sessionResponse.sessionId,
-            emailContent: emailContent.trim(),
-            userObservations: userObservations.trim()
-          }),
+          body: processBody as any,
         }) as ProcessResponse;
 
         if (processResponse) {
