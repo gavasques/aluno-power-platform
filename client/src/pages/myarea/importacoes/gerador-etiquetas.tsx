@@ -271,14 +271,14 @@ export default function GeradorEtiquetas() {
       
       // Linha divisória vertical entre colunas
       pdf.setLineWidth(0.2);
-      pdf.line(38, 1, 38, 59);
+      pdf.line(40, 1, 40, 59);
 
-      // Coluna esquerda (38%)
-      const leftWidth = 37;
+      // Coluna esquerda (40%)
+      const leftWidth = 39;
       
       // Logo (se houver)
       if (logoDataUrl) {
-        pdf.addImage(logoDataUrl, "PNG", 3, 4, 32, 14);
+        pdf.addImage(logoDataUrl, "PNG", 3, 3, 34, 15);
       }
 
       // Texto "IMPORTADO E DISTRIBUÍDO POR:"
@@ -329,53 +329,53 @@ export default function GeradorEtiquetas() {
       // Código de barras
       if (barcodeDataUrl) {
         // Posicionar o código de barras garantindo que não ultrapasse a coluna
-        pdf.addImage(barcodeDataUrl, "PNG", 3, 45, 32, 12);
+        pdf.addImage(barcodeDataUrl, "PNG", 3, 44, 34, 13);
       }
 
       // Coluna direita (60%)
-      const rightStartX = 42;
+      const rightStartX = 45;
       
       // Nome do produto
-      pdf.setFontSize(9);
+      pdf.setFontSize(11);
       pdf.setFont("helvetica", "normal");
-      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 50);
-      let productY = 10;
+      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 52);
+      let productY = 12;
       productLines.forEach((line: string, index: number) => {
         pdf.text(line, rightStartX, productY);
-        productY += 3.5;
+        productY += 4;
       });
 
       // Espaço após o nome do produto
-      productY += 2;
+      productY += 3;
 
       // SKU - menor e mais discreto
-      pdf.setFontSize(9);
+      pdf.setFontSize(11);
       pdf.setFont("helvetica", "bold");
       pdf.text(productData.sku.toUpperCase(), rightStartX, productY);
-      productY += 5;
+      productY += 6;
 
       // Conteúdo
-      pdf.setFontSize(8);  
+      pdf.setFontSize(10);  
       pdf.text("CONTÉM " + productData.conteudo.toUpperCase(), rightStartX, productY);
-      productY += 5;
+      productY += 6;
 
       // Informações adicionais
-      pdf.setFontSize(7);
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
       
       // Espaço antes das informações adicionais
-      productY += 2;
+      productY += 3;
       
       if (productData.cor) {
         pdf.text(`COR: ${productData.cor.toUpperCase()}`, rightStartX, productY);
-        productY += 3;
+        productY += 4;
       }
       
       pdf.text(`VALIDADE: ${productData.validade.toUpperCase()}`, rightStartX, productY);
-      productY += 3;
+      productY += 4;
       
       pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem.toUpperCase()}`, rightStartX, productY);
-      productY += 3;
+      productY += 4;
       
       // SAC mantém o email em minúsculas
       pdf.text(`SAC: ${productData.sac}`, rightStartX, productY);
