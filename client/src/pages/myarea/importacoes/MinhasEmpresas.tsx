@@ -40,6 +40,14 @@ import type { UserCompany } from '@shared/schema';
 import { CompanyForm } from './components/CompanyForm';
 import { useDebounce } from '@/hooks/useDebounce';
 
+// Função para decodificar HTML entities
+const decodeHtmlEntities = (text: string): string => {
+  if (!text) return text;
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+};
+
 // ✅ OTIMIZAÇÃO: Componente de empresa memorizado para evitar re-renders
 const CompanyCard = memo(({ 
   company, 
@@ -58,7 +66,7 @@ const CompanyCard = memo(({
             {company.logoUrl && (
               <div className="w-12 h-12 flex-shrink-0 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                 <img 
-                  src={company.logoUrl}
+                  src={decodeHtmlEntities(company.logoUrl)}
                   alt={`Logo ${company.tradeName}`}
                   className="w-full h-full object-contain"
                   loading="lazy"
