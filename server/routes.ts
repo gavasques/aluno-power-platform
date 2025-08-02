@@ -7136,7 +7136,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   console.log('✅ [INTERNATIONAL_SUPPLIERS] Missing detail API routes added');
 
   // Object Storage - Serve uploaded files (like company logos)
-  app.get('/objects/*', requireAuth, async (req: any, res: any) => {
+  // Note: No authentication required for serving images (they're accessed via <img> tags)
+  app.get('/objects/*', async (req: any, res: any) => {
     try {
       const { ObjectStorageService } = await import('./objectStorage');
       const objectStorageService = new ObjectStorageService();
