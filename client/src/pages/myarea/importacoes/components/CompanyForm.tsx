@@ -33,6 +33,7 @@ import { useToast } from '@/hooks/use-toast';
 const companyFormSchema = z.object({
   corporateName: z.string().min(1, 'Razão social é obrigatória'),
   tradeName: z.string().min(1, 'Nome fantasia é obrigatório'),
+  cnpj: z.string().optional(),
   address: z.string().optional(),
   neighborhood: z.string().optional(),
   postalCode: z.string().optional(),
@@ -125,6 +126,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
     defaultValues: {
       corporateName: company?.corporateName || '',
       tradeName: company?.tradeName || '',
+      cnpj: company?.cnpj || '',
       address: company?.address || '',
       neighborhood: company?.neighborhood || '',
       postalCode: company?.postalCode || '',
@@ -228,6 +230,24 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                     <Input 
                       {...field} 
                       placeholder="EX: SILVA IMPORTAÇÕES" 
+                      onChange={(e) => field.onChange(toUpperCase(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="cnpj"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CNPJ</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="00.000.000/0001-00" 
                       onChange={(e) => field.onChange(toUpperCase(e.target.value))}
                     />
                   </FormControl>

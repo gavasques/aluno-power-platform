@@ -103,7 +103,7 @@ export default function GeradorEtiquetas() {
         cidade: company.city || "",
         pais: company.country,
         cep: company.postalCode || "",
-        cnpj: "" // CNPJ não está no schema, manter vazio
+        cnpj: company.cnpj || ""
       });
       
       // Set logo if available

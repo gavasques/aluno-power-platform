@@ -6,13 +6,19 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 ## User Preferences
 **Communication Style**: Simple, everyday language (user is non-technical)
 
-## Recent Changes (August 1, 2025)
+## Recent Changes (August 1-2, 2025)
+- **CNPJ Field Addition**: Added CNPJ field to company registration system
+  - **Database Update**: Added cnpj column to user_companies table
+  - **Form Integration**: CNPJ field added to CompanyForm with validation
+  - **Display Enhancement**: CNPJ shown in company cards on MinhasEmpresas page
+  - **Label Generator**: CNPJ automatically populated and displayed in generated labels
+  - **PDF Export**: CNPJ included in label PDF output with proper formatting
 - **Minhas Empresas System Implementation**: Complete "My Companies" registration system
   - **Full CRUD Operations**: Create, read, update, delete companies with database integration
   - **Advanced Form Features**: Automatic uppercase conversion (except notes), organized field layout
   - **UI/UX Improvements**: Fixed button positioning, scroll optimization, sticky action buttons
   - **API Integration**: Protected routes with authentication, complete validation system
-  - **Database Schema**: user_companies table with comprehensive company information fields
+  - **Database Schema**: user_companies table with comprehensive company information fields including CNPJ
   - **Frontend Integration**: Added to Importações menu, modern interface with search and filters
   - **Real-world Data**: Successfully tested with BKZA company registration
 - **Packing List & Commercial Invoice System Enhancement**: Major improvements to import documentation system

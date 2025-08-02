@@ -221,6 +221,14 @@ export function MinhasEmpresas() {
               </CardHeader>
               
               <CardContent className="space-y-3">
+                {/* CNPJ */}
+                {company.cnpj && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="font-medium">CNPJ:</span>
+                    <span>{company.cnpj}</span>
+                  </div>
+                )}
+
                 {/* Location */}
                 {(company.city || company.state) && (
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">

@@ -64,6 +64,7 @@ export const userCompanies = pgTable("user_companies", {
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   corporateName: text("corporate_name").notNull(), // Razão Social
   tradeName: text("trade_name").notNull(), // Nome Fantasia
+  cnpj: text("cnpj"), // CNPJ
   address: text("address"), // Endereço
   neighborhood: text("neighborhood"), // Bairro
   postalCode: text("postal_code"), // CEP
