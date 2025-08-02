@@ -94,6 +94,34 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
   const [logoPreview, setLogoPreview] = useState<string | null>(company?.logoUrl || null);
   const { toast } = useToast();
   
+  // Função para converter para maiúsculo (exceto observações)
+  const toUpperCase = (value: string) => value.toUpperCase();
+
+  const form = useForm<CompanyFormData>({
+    resolver: zodResolver(companyFormSchema),
+    defaultValues: {
+      corporateName: company?.corporateName || '',
+      tradeName: company?.tradeName || '',
+      cnpj: company?.cnpj || '',
+      address: company?.address || '',
+      neighborhood: company?.neighborhood || '',
+      postalCode: company?.postalCode || '',
+      city: company?.city || '',
+      state: company?.state || '',
+      country: company?.country || 'BRASIL',
+      email: company?.email || '',
+      website: company?.website || '',
+      phone: company?.phone || '',
+      fax: company?.fax || '',
+      mobile: company?.mobile || '',
+      stateRegistration: company?.stateRegistration || '',
+      municipalRegistration: company?.municipalRegistration || '',
+      logoUrl: company?.logoUrl || '',
+      notes: company?.notes || '',
+      isActive: company?.isActive ?? true,
+    },
+  });
+
   // Sincronizar logoPreview quando company muda (importante para edição)
   useEffect(() => {
     if (company?.logoUrl) {
@@ -133,34 +161,6 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
     },
     onError: (error) => {
       console.error('🔍 [FRONTEND] Logo update failed:', error);
-    },
-  });
-  
-  // Função para converter para maiúsculo (exceto observações)
-  const toUpperCase = (value: string) => value.toUpperCase();
-
-  const form = useForm<CompanyFormData>({
-    resolver: zodResolver(companyFormSchema),
-    defaultValues: {
-      corporateName: company?.corporateName || '',
-      tradeName: company?.tradeName || '',
-      cnpj: company?.cnpj || '',
-      address: company?.address || '',
-      neighborhood: company?.neighborhood || '',
-      postalCode: company?.postalCode || '',
-      city: company?.city || '',
-      state: company?.state || '',
-      country: company?.country || 'BRASIL',
-      email: company?.email || '',
-      website: company?.website || '',
-      phone: company?.phone || '',
-      fax: company?.fax || '',
-      mobile: company?.mobile || '',
-      stateRegistration: company?.stateRegistration || '',
-      municipalRegistration: company?.municipalRegistration || '',
-      logoUrl: company?.logoUrl || '',
-      notes: company?.notes || '',
-      isActive: company?.isActive ?? true,
     },
   });
 
