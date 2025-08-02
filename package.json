@@ -51,6 +51,7 @@
     "@types/compression": "^1.8.1",
     "@types/csurf": "^1.11.5",
     "@types/file-saver": "^2.0.7",
+    "@types/he": "^1.2.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/memoizee": "^0.4.12",
     "@types/multer": "^2.0.0",

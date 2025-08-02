@@ -7139,17 +7139,26 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   // Note: No authentication required for serving images (they're accessed via <img> tags)
   app.get('/objects/*', async (req: any, res: any) => {
     try {
-      const { ObjectStorageService } = await import('./objectStorage');
+      const { ObjectStorageService, ObjectNotFoundError } = await import('./objectStorage');
       const objectStorageService = new ObjectStorageService();
       
       const objectPath = req.path; // This will be /objects/uploads/uuid
       console.log('🔍 [OBJECT_STORAGE] Serving object:', objectPath);
+      console.log('🔍 [OBJECT_STORAGE] Private dir:', process.env.PRIVATE_OBJECT_DIR);
       
       const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      console.log('🔍 [OBJECT_STORAGE] Object file found, downloading...');
+      
       await objectStorageService.downloadObject(objectFile, res);
     } catch (error) {
       console.error('❌ [OBJECT_STORAGE] Error serving object:', error);
-      if (error instanceof Error && error.message === 'Object not found') {
+      console.error('❌ [OBJECT_STORAGE] Error details:', {
+        path: req.path,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      if (error instanceof ObjectNotFoundError) {
         res.status(404).json({ error: 'Object not found' });
       } else {
         res.status(500).json({ error: 'Internal server error' });
