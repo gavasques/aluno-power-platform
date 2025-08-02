@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Bot, AlertCircle, ArrowRight, Clock, Target, ArrowLeft } from "lucide-react";
@@ -23,8 +24,10 @@ interface ProcessResponse {
 }
 
 const AmazonCustomerService = () => {
+  const [customerName, setCustomerName] = useState("");
+  const [productPurchased, setProductPurchased] = useState("");
   const [emailContent, setEmailContent] = useState("");
-  const [userObservations, setUserObservations] = useState("");
+  const [userAnalysis, setUserAnalysis] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -33,19 +36,37 @@ const AmazonCustomerService = () => {
   const FEATURE_CODE = 'agents.customer_service';
 
   const handleSubmit = async () => {
-    if (!emailContent.trim()) {
+    if (!customerName.trim()) {
       toast({
         title: "Campo obrigatório",
-        description: "Por favor, insira o email do cliente",
+        description: "Por favor, insira o nome do comprador",
         variant: "destructive",
       });
       return;
     }
 
-    if (!userObservations.trim()) {
+    if (!productPurchased.trim()) {
       toast({
         title: "Campo obrigatório",
-        description: "Por favor, insira suas observações sobre o ocorrido",
+        description: "Por favor, insira o produto comprado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!emailContent.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, insira o conteúdo do email",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!userAnalysis.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, insira sua análise sobre o caso",
         variant: "destructive",
       });
       return;
@@ -66,8 +87,10 @@ const AmazonCustomerService = () => {
         method: 'POST',
         body: {
           input_data: {
+            customerName: customerName.trim(),
+            productPurchased: productPurchased.trim(),
             emailContent: emailContent.trim(),
-            userObservations: userObservations.trim()
+            userAnalysis: userAnalysis.trim()
           }
         } as any,
       }) as SessionResponse;
@@ -76,8 +99,10 @@ const AmazonCustomerService = () => {
         // Start processing
         const processBody = {
           sessionId: sessionResponse.sessionId,
+          customerName: customerName.trim(),
+          productPurchased: productPurchased.trim(),
           emailContent: emailContent.trim(),
-          userObservations: userObservations.trim()
+          userAnalysis: userAnalysis.trim()
         };
         
         console.log('Sending process request with body:', processBody);
@@ -169,7 +194,27 @@ João Silva`;
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="emailContent">Email do Cliente *</Label>
+                <Label htmlFor="customerName">Nome do Comprador *</Label>
+                <Input
+                  id="customerName"
+                  placeholder="Digite o nome do cliente que enviou o email..."
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="productPurchased">Produto Comprado *</Label>
+                <Input
+                  id="productPurchased"
+                  placeholder="Digite o produto que o cliente comprou..."
+                  value={productPurchased}
+                  onChange={(e) => setProductPurchased(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="emailContent">Conteúdo do Email *</Label>
                 <Textarea
                   id="emailContent"
                   placeholder="Cole aqui o email completo do cliente..."
@@ -180,12 +225,12 @@ João Silva`;
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="userObservations">Informações do Usuário *</Label>
+                <Label htmlFor="userAnalysis">Informações do Usuário *</Label>
                 <Textarea
-                  id="userObservations"
-                  placeholder="Explique o que ocorreu, contexto adicional, observações sobre o caso..."
-                  value={userObservations}
-                  onChange={(e) => setUserObservations(e.target.value)}
+                  id="userAnalysis"
+                  placeholder="Sua análise sobre o caso - explique o que ocorreu, contexto adicional, observações..."
+                  value={userAnalysis}
+                  onChange={(e) => setUserAnalysis(e.target.value)}
                   className="min-h-[150px] resize-none"
                 />
               </div>
@@ -193,7 +238,7 @@ João Silva`;
               <div className="flex gap-3">
                 <Button
                   onClick={handleSubmit}
-                  disabled={isProcessing || !emailContent.trim() || !userObservations.trim()}
+                  disabled={isProcessing || !customerName.trim() || !productPurchased.trim() || !emailContent.trim() || !userAnalysis.trim()}
                   className="flex-1"
                 >
                   {isProcessing ? (
@@ -212,8 +257,10 @@ João Silva`;
                 <Button
                   variant="outline"
                   onClick={() => {
+                    setCustomerName("João Silva");
+                    setProductPurchased("Fone de ouvido Bluetooth XYZ");
                     setEmailContent(exampleEmail);
-                    setUserObservations("Produto com defeito de fabricação confirmado. Cliente relatou que já tentou soluções básicas. Oferecemos troca imediata e acompanhamento personalizado para reverter possível avaliação negativa.");
+                    setUserAnalysis("Produto com defeito de fabricação confirmado. Cliente relatou que já tentou soluções básicas. Oferecemos troca imediata e acompanhamento personalizado para reverter possível avaliação negativa.");
                   }}
                   disabled={isProcessing}
                 >

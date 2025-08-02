@@ -2060,16 +2060,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user;
       console.log('📦 [CUSTOMER_SERVICE] Received body:', req.body);
-      const { sessionId, emailContent, userObservations } = req.body;
+      const { sessionId, customerName, productPurchased, emailContent, userAnalysis } = req.body;
 
-      if (!sessionId || !emailContent || !userObservations) {
+      if (!sessionId || !customerName || !productPurchased || !emailContent || !userAnalysis) {
         console.log('❌ [CUSTOMER_SERVICE] Missing fields:', { 
           hasSessionId: !!sessionId, 
+          hasCustomerName: !!customerName,
+          hasProductPurchased: !!productPurchased,
           hasEmailContent: !!emailContent, 
-          hasUserObservations: !!userObservations,
+          hasUserAnalysis: !!userAnalysis,
           body: req.body
         });
-        return res.status(400).json({ error: 'SessionId, emailContent e userObservations são obrigatórios' });
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios: sessionId, customerName, productPurchased, emailContent, userAnalysis' });
       }
 
       // Get session data
@@ -2083,15 +2085,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const startTime = Date.now();
 
-      // Prepare data for webhook - ONLY client email and user info (no prompts!)
+      // Prepare data for webhook - ONLY client data and user analysis (no prompts!)
       const webhookData = {
+        customer_name: customerName,
+        product_purchased: productPurchased,
         email_content: emailContent,
-        user_observations: userObservations
+        user_analysis: userAnalysis
       };
 
-      console.log('🎯 [CUSTOMER_SERVICE] Sending only client email and user info to webhook:', { 
+      console.log('🎯 [CUSTOMER_SERVICE] Sending customer data to webhook:', { 
+        customerName,
+        productPurchased,
         emailContentLength: emailContent.length,
-        userObservationsLength: userObservations.length 
+        userAnalysisLength: userAnalysis.length 
       });
 
       // Call webhook instead of AI provider
@@ -2158,7 +2164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save to AI Generation Logs with AUTOMATIC CREDIT DEDUCTION
       try {
-        const inputData = `Email: ${emailContent}\nObservações: ${userObservations}`;
+        const inputData = `Cliente: ${customerName}\nProduto: ${productPurchased}\nEmail: ${emailContent}\nAnálise: ${userAnalysis}`;
         
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
