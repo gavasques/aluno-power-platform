@@ -7,6 +7,11 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 **Communication Style**: Simple, everyday language (user is non-technical)
 
 ## Recent Changes (August 1-2, 2025)
+- **Header Navigation Reorganization**: Moved "Nossos Cursos" and "Ir para o Curso" buttons from header to dashboard
+  - **Header Update**: Removed both buttons from main navigation menu for cleaner header layout
+  - **Dashboard Integration**: Added buttons to "Conecte-se Conosco" section with proper styling
+  - **Layout Optimization**: Changed grid from 4 columns to 3 columns for better button arrangement
+  - **Visual Consistency**: Maintained color scheme - yellow for "Nossos Cursos", emerald for "Ir para o Curso"
 - **CNPJ Field Addition**: Added CNPJ field to company registration system
   - **Database Update**: Added cnpj column to user_companies table
   - **Form Integration**: CNPJ field added to CompanyForm with validation
