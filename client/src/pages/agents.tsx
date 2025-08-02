@@ -180,7 +180,7 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
           featureName={AGENT_FEATURE_MAP[agent.id] || `agents.${agent.id}`}
           userBalance={userBalance}
           onProcess={() => {
-            const href = agent.id === 'agent-amazon-listings' ? '/agents/amazon-listings-optimizer' : `/agents/${agent.id}`;
+            const href = agent.id === 'agent-amazon-listings' ? '/agents/amazon-listings-optimizer' : `/agentes/${agent.id}`;
             window.location.href = href;
           }}
           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200"
