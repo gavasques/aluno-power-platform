@@ -228,10 +228,10 @@ export default function GeradorEtiquetas() {
       JsBarcode(canvas, productData.eanCode, {
         format: "EAN13",
         width: 3,
-        height: 100,
+        height: 90,
         displayValue: true,
-        fontSize: 18,
-        textMargin: 0,
+        fontSize: 24,
+        textMargin: 2,
         background: "#ffffff",
         lineColor: "#000000"
       });
@@ -265,8 +265,8 @@ export default function GeradorEtiquetas() {
         format: [100, 60] // 10cm x 6cm
       });
 
-      // Configurar bordas mais grossas
-      pdf.setLineWidth(1);
+      // Configurar bordas finas
+      pdf.setLineWidth(0.3);
       pdf.rect(1, 1, 98, 58);
 
       // Coluna esquerda (40%)
@@ -274,90 +274,68 @@ export default function GeradorEtiquetas() {
       
       // Logo (se houver)
       if (logoDataUrl) {
-        pdf.addImage(logoDataUrl, "PNG", 3, 3, 32, 12);
+        pdf.addImage(logoDataUrl, "PNG", 3, 4, 30, 14);
       }
 
       // Texto "IMPORTADO E DISTRIBUÍDO NO BRASIL POR:"
-      pdf.setFontSize(6);
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "bold");
-      pdf.text("IMPORTADO E DISTRIBUÍDO NO", 3, 18);
-      pdf.text("BRASIL POR:", 3, 21);
+      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 3, 22);
 
       // Dados da empresa
-      pdf.setFontSize(5.5);
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "normal");
-      const companyInfo = [
-        companyData.razaoSocial,
-        companyData.endereco,
-        `${companyData.bairro}, ${companyData.cidade}`,
-        `CEP: ${companyData.cep}`,
-        `CNPJ: ${companyData.cnpj}`
-      ];
-      
-      let yPos = 24;
-      companyInfo.forEach((line) => {
-        if (line.length > 45) {
-          const words = line.split(' ');
-          let currentLine = '';
-          words.forEach((word, i) => {
-            if ((currentLine + word).length > 45) {
-              pdf.text(currentLine.trim(), 3, yPos);
-              yPos += 2.5;
-              currentLine = word + ' ';
-            } else {
-              currentLine += word + ' ';
-            }
-            if (i === words.length - 1 && currentLine.trim()) {
-              pdf.text(currentLine.trim(), 3, yPos);
-              yPos += 2.5;
-            }
-          });
-        } else {
-          pdf.text(line, 3, yPos);
-          yPos += 2.5;
-        }
-      });
+      pdf.text(companyData.razaoSocial, 3, 26);
+      pdf.text(companyData.endereco, 3, 30);
+      pdf.text(`${companyData.bairro}, ${companyData.cidade}`, 3, 34);
+      pdf.text(`CEP ${companyData.cep}`, 3, 38);
+      pdf.text(`CNPJ ${companyData.cnpj}`, 3, 42);
 
-      // Código de barras com melhor qualidade
+      // Código de barras
       if (barcodeDataUrl) {
-        pdf.addImage(barcodeDataUrl, "PNG", 3, 40, 34, 16);
+        pdf.addImage(barcodeDataUrl, "PNG", 3, 44, 34, 14);
       }
 
       // Coluna direita (60%)
-      const rightStartX = 41;
+      const rightStartX = 40;
       
       // Nome do produto
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      const productLines = pdf.splitTextToSize(productData.nomeProduto, 55);
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "normal");
+      const productLines = pdf.splitTextToSize(productData.nomeProduto, 57);
       let productY = 8;
       productLines.forEach((line: string) => {
         pdf.text(line, rightStartX, productY);
-        productY += 5;
+        productY += 4.5;
       });
 
-      // SKU
-      pdf.setFontSize(14);
-      pdf.text("REP" + productData.sku, rightStartX, productY + 6);
+      // SKU - menor e mais discreto
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(productData.sku, rightStartX, productY + 5);
 
       // Conteúdo
       pdf.setFontSize(10);  
-      pdf.text("CONTÉM " + productData.conteudo, rightStartX, productY + 12);
+      pdf.text("CONTÉM " + productData.conteudo, rightStartX, productY + 11);
 
       // Informações adicionais
       pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
-      const additionalInfo = [
-        `VALIDADE: ${productData.validade}`,
-        `PAÍS DE ORIGEM: ${productData.paisOrigem}`,
-        `SAC: ${productData.sac}`
-      ];
-
-      yPos = productY + 18;
-      additionalInfo.forEach((line) => {
-        pdf.text(line.toUpperCase(), rightStartX, yPos);
-        yPos += 3.5;
-      });
+      
+      let infoY = productY + 17;
+      
+      if (productData.cor) {
+        pdf.text(`COR: ${productData.cor}`, rightStartX, infoY);
+        infoY += 3.5;
+      }
+      
+      pdf.text(`VALIDADE: ${productData.validade}`, rightStartX, infoY);
+      infoY += 3.5;
+      
+      pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem}`, rightStartX, infoY);
+      infoY += 3.5;
+      
+      pdf.text(`SAC: ${productData.sac}`, rightStartX, infoY);
 
       // Salvar PDF
       pdf.save(`etiqueta-${productData.sku}.pdf`);
@@ -765,41 +743,41 @@ export default function GeradorEtiquetas() {
               <CardContent>
                 {/* Preview Container */}
                 <div className="overflow-auto">
-                  <div className="bg-white border-4 border-gray-800 mx-auto shadow-lg" style={{ width: '400px', maxWidth: '100%', height: '240px' }}>
+                  <div className="bg-white border border-gray-800 mx-auto shadow-lg" style={{ width: '400px', maxWidth: '100%', height: '240px' }}>
                     <div className="flex h-full p-3">
                     {/* Coluna Esquerda (40%) */}
                     <div className="w-2/5 pr-3 flex flex-col">
                       {/* Logo */}
                       <div className="mb-2">
                         {logoDataUrl ? (
-                          <img src={logoDataUrl} alt="Logo" className="max-h-12 max-w-full object-contain" />
+                          <img src={logoDataUrl} alt="Logo" className="max-h-14 max-w-full object-contain" />
                         ) : (
-                          <div className="h-12 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs">
+                          <div className="h-14 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs">
                             Logo
                           </div>
                         )}
                       </div>
                       
                       {/* Texto importado */}
-                      <div className="text-[8px] font-bold mb-1 uppercase leading-tight">
-                        IMPORTADO E DISTRIBUÍDO NO<br />BRASIL POR:
+                      <div className="text-[9px] font-bold mb-1 uppercase">
+                        IMPORTADO E DISTRIBUÍDO NO BRASIL POR:
                       </div>
                       
                       {/* Dados da empresa */}
-                      <div className="text-[8px] space-y-0.5 mb-2 flex-1">
-                        <div className="font-semibold truncate">{companyData.razaoSocial || "Empresa Ltda"}</div>
-                        <div className="truncate">{companyData.endereco || "Endereço"}</div>
-                        <div className="truncate">{companyData.bairro || "Bairro"}, {companyData.cidade || "Cidade"}</div>
-                        <div>CEP: {companyData.cep || "00000000"}</div>
-                        <div>CNPJ: {companyData.cnpj || "00.000.000/0001-00"}</div>
+                      <div className="text-[9px] space-y-0.5 mb-2 flex-1">
+                        <div>{companyData.razaoSocial || "Empresa Ltda"}</div>
+                        <div>{companyData.endereco || "Endereço"}</div>
+                        <div>{companyData.bairro || "Bairro"}, {companyData.cidade || "Cidade"}</div>
+                        <div>CEP {companyData.cep || "00000000"}</div>
+                        <div>CNPJ {companyData.cnpj || "00.000.000/0001-00"}</div>
                       </div>
                       
                       {/* Código de barras */}
                       <div className="mt-auto">
                         {barcodeDataUrl ? (
-                          <img src={barcodeDataUrl} alt="Barcode" className="w-full h-auto" style={{ maxHeight: '50px' }} />
+                          <img src={barcodeDataUrl} alt="Barcode" className="w-full h-auto" style={{ maxHeight: '56px' }} />
                         ) : (
-                          <div className="h-10 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                          <div className="h-14 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
                             Código de barras
                           </div>
                         )}
@@ -809,25 +787,26 @@ export default function GeradorEtiquetas() {
                     {/* Coluna Direita (60%) */}
                     <div className="w-3/5 pl-3 flex flex-col">
                       {/* Nome do produto */}
-                      <div className="text-sm font-bold mb-3 leading-tight line-clamp-2">
+                      <div className="text-sm mb-4 leading-tight line-clamp-3">
                         {productData.nomeProduto || "Nome do Produto"}
                       </div>
                       
                       {/* SKU */}
-                      <div className="text-lg font-black mb-3">
-                        REP{productData.sku || "010"}
+                      <div className="text-base font-bold mb-3">
+                        {productData.sku || "SKU001"}
                       </div>
                       
                       {/* Conteúdo */}
-                      <div className="text-sm font-bold mb-3 uppercase">
+                      <div className="text-sm font-semibold mb-4 uppercase">
                         CONTÉM {productData.conteudo || "10 PEÇAS"}
                       </div>
                       
                       {/* Informações adicionais */}
-                      <div className="text-[10px] space-y-1 mt-auto uppercase">
-                        <div className="truncate">VALIDADE: {productData.validade || "INDETERMINADA"}</div>
-                        <div className="truncate">PAÍS DE ORIGEM: {productData.paisOrigem || "CHINA"}</div>
-                        <div className="truncate">SAC: {productData.sac || "contato@bkza.com.br"}</div>
+                      <div className="text-[10px] space-y-1 mt-auto">
+                        {productData.cor && <div>COR: {productData.cor}</div>}
+                        <div>VALIDADE: {productData.validade || "INDETERMINADA"}</div>
+                        <div>PAÍS DE ORIGEM: {productData.paisOrigem || "CHINA"}</div>
+                        <div>SAC: {productData.sac || "contato@bkza.com.br"}</div>
                       </div>
                     </div>
                   </div>
