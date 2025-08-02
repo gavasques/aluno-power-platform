@@ -2116,8 +2116,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error(`Webhook error: ${webhookResponse.status} ${webhookResponse.statusText}`);
       }
 
-      const webhookResult = await webhookResponse.json();
+      let webhookResult;
       const processingTime = Date.now() - startTime;
+      
+      try {
+        const responseText = await webhookResponse.text();
+        console.log('🔍 [CUSTOMER_SERVICE] Raw webhook response:', responseText);
+        
+        if (responseText.trim()) {
+          webhookResult = JSON.parse(responseText);
+        } else {
+          console.log('⚠️ [CUSTOMER_SERVICE] Empty response from webhook');
+          webhookResult = { message: 'Empty response' };
+        }
+      } catch (parseError) {
+        console.error('❌ [CUSTOMER_SERVICE] JSON parse error:', parseError);
+        console.log('🔍 [CUSTOMER_SERVICE] Response status:', webhookResponse.status);
+        console.log('🔍 [CUSTOMER_SERVICE] Response headers:', Object.fromEntries(webhookResponse.headers.entries()));
+        webhookResult = { error: 'Invalid JSON response', message: 'Webhook returned invalid response' };
+      }
       
       // Extract response from webhook result with multiple possible fields
       let responseText = 'Processing in background...';
@@ -2151,8 +2168,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalCost = 0;
 
       // Update session with results
-      // If webhook just started the workflow, keep status as processing
-      if (webhookResult.message === 'Workflow was started') {
+      // If webhook has an error, mark as failed
+      if (webhookResult.error) {
+        sessionData.status = 'failed';
+        sessionData.error = webhookResult.message || 'Erro no webhook';
+        sessionData.result_data = {
+          response: 'Erro ao processar a solicitação. Tente novamente.',
+          analysis: {
+            customerIssue: 'Erro no processamento',
+            sentiment: 'N/A',
+            urgency: 'N/A'
+          }
+        };
+      } else if (webhookResult.message === 'Workflow was started') {
         sessionData.status = 'processing';
         sessionData.result_data = {
           response: 'Aguardando processamento do webhook...',
