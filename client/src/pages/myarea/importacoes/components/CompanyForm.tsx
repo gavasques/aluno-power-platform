@@ -100,7 +100,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
     mutationFn: async () => {
       const response = await apiRequest('/api/user-companies/upload-logo', {
         method: 'POST',
-      });
+      }) as { uploadURL: string };
       return response.uploadURL;
     },
   });
@@ -110,7 +110,10 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
     mutationFn: async ({ companyId, logoURL }: { companyId: number; logoURL: string }) => {
       return apiRequest(`/api/user-companies/${companyId}/logo`, {
         method: 'PUT',
-        body: { logoURL },
+        body: JSON.stringify({ logoURL }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
     },
     onSuccess: () => {
@@ -159,7 +162,10 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
       // apiRequest will handle JSON serialization automatically
       return apiRequest(url, {
         method,
-        body: data,
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
     },
     onSuccess: (data) => {
@@ -535,9 +541,13 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
             {logoPreview && (
               <div className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden">
                 <img 
-                  src={logoPreview} 
+                  src={logoPreview.startsWith('/objects/') ? logoPreview : logoPreview} 
                   alt="Logo preview" 
                   className="w-full h-full object-contain"
+                  onError={(e) => {
+                    console.error('Error loading logo:', logoPreview);
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             )}
@@ -550,23 +560,30 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                 return { method: 'PUT' as const, url: uploadURL };
               }}
               onComplete={async (result) => {
-                if (result.successful.length > 0 && company) {
+                if (result.successful && result.successful.length > 0 && company) {
                   const uploadedFile = result.successful[0];
-                  const logoURL = uploadedFile.uploadURL;
+                  const logoURL = uploadedFile.uploadURL || '';
                   
                   try {
-                    await updateLogoMutation.mutateAsync({
+                    const updateResult = await updateLogoMutation.mutateAsync({
                       companyId: company.id,
                       logoURL: logoURL,
-                    });
+                    }) as any;
                     
-                    setLogoPreview(logoURL);
-                    form.setValue('logoUrl', logoURL);
+                    // Use the normalized path from the server response
+                    const normalizedLogoUrl = updateResult.data?.logoUrl || logoURL;
+                    setLogoPreview(normalizedLogoUrl);
+                    form.setValue('logoUrl', normalizedLogoUrl);
                     
                     toast({
                       title: "Sucesso",
                       description: "Logo atualizado com sucesso!",
                     });
+                    
+                    // Force close the modal by resetting Uppy state
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 500);
                   } catch (error) {
                     toast({
                       title: "Erro",

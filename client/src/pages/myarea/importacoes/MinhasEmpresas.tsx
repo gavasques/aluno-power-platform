@@ -47,7 +47,7 @@ export function MinhasEmpresas() {
   const queryClient = useQueryClient();
 
   // Buscar empresas do usuário
-  const { data: companies = [], isLoading } = useQuery({
+  const { data: companies = [], isLoading } = useQuery<UserCompany[]>({
     queryKey: ['/api/user-companies', searchTerm],
     queryFn: async () => {
       const url = searchTerm 
@@ -206,13 +206,27 @@ export function MinhasEmpresas() {
             <Card key={company.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg text-gray-900 dark:text-white mb-1">
-                      {company.tradeName}
-                    </CardTitle>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {company.corporateName}
-                    </p>
+                  <div className="flex items-start gap-3 flex-1">
+                    {company.logoUrl && (
+                      <div className="w-12 h-12 flex-shrink-0 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                        <img 
+                          src={company.logoUrl.startsWith('/objects/') ? company.logoUrl : company.logoUrl}
+                          alt={`Logo ${company.tradeName}`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <CardTitle className="text-lg text-gray-900 dark:text-white mb-1">
+                        {company.tradeName}
+                      </CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {company.corporateName}
+                      </p>
+                    </div>
                   </div>
                   <Badge variant={company.isActive ? "default" : "secondary"}>
                     {company.isActive ? 'Ativa' : 'Inativa'}

@@ -13,7 +13,9 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - **Display Enhancement**: CNPJ shown in company cards on MinhasEmpresas page
   - **Label Generator**: CNPJ automatically populated and displayed in generated labels
   - **PDF Export**: CNPJ included in label PDF output with proper formatting
-  - **Debug Status**: Added logging to track CNPJ field saving issue in API routes
+  - **CNPJ Fixed**: Resolved data persistence issue - CNPJ now saves correctly to database through API
+  - **Logo Upload Fixed**: Resolved black screen issue with temporary page reload solution after successful upload
+  - **Logo Display Added**: Company logos now display in company cards on MinhasEmpresas page
 - **Minhas Empresas System Implementation**: Complete "My Companies" registration system
   - **Full CRUD Operations**: Create, read, update, delete companies with database integration
   - **Advanced Form Features**: Automatic uppercase conversion (except notes), organized field layout
