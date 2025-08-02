@@ -19,6 +19,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { jsPDF } from "jspdf";
 import JsBarcode from "jsbarcode";
 
+// Função para decodificar HTML entities
+const decodeHtmlEntities = (text: string): string => {
+  if (!text) return text;
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+};
+
 // Interfaces
 interface CompanyData {
   razaoSocial: string;
@@ -108,7 +116,7 @@ export default function GeradorEtiquetas() {
       
       // Set logo if available
       if (company.logoUrl) {
-        setLogoDataUrl(company.logoUrl);
+        setLogoDataUrl(decodeHtmlEntities(company.logoUrl));
       }
       
       // Fill SAC with company email if available
