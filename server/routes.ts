@@ -2110,7 +2110,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const webhookResult = await webhookResponse.json();
       const processingTime = Date.now() - startTime;
-      const responseText = webhookResult.response || webhookResult.email_response || webhookResult.output || '';
+      
+      // Webhook started but response will come later
+      const responseText = webhookResult.response || webhookResult.email_response || webhookResult.output || 'Processing in background...';
 
       console.log('🎯 [CUSTOMER_SERVICE] Webhook response received:', { 
         responseLength: responseText.length,
@@ -2125,16 +2127,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalCost = 0;
 
       // Update session with results
-      sessionData.status = 'completed';
-      sessionData.completed_at = new Date().toISOString();
-      sessionData.result_data = {
-        response: responseText,
-        analysis: {
-          customerIssue: 'Produto com defeito',
-          sentiment: 'Negativo',
-          urgency: 'Alta'
-        }
-      };
+      // If webhook just started the workflow, keep status as processing
+      if (webhookResult.message === 'Workflow was started') {
+        sessionData.status = 'processing';
+        sessionData.result_data = {
+          response: 'Aguardando processamento do webhook...',
+          analysis: {
+            customerIssue: 'Analisando...',
+            sentiment: 'Processando...',
+            urgency: 'Verificando...'
+          }
+        };
+      } else {
+        sessionData.status = 'completed';
+        sessionData.completed_at = new Date().toISOString();
+        sessionData.result_data = {
+          response: responseText,
+          analysis: {
+            customerIssue: 'Produto com defeito',
+            sentiment: 'Negativo',
+            urgency: 'Alta'
+          }
+        };
+      }
       sessionData.processing_time = processingTime;
       sessionData.tokens_used = { input: inputTokens, output: outputTokens, total: totalTokens };
       sessionData.cost = totalCost;
@@ -2225,6 +2240,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('❌ [CUSTOMER_SERVICE] Error fetching session:', error);
       res.status(500).json({ error: 'Erro ao buscar sessão' });
+    }
+  });
+
+  // Webhook callback endpoint for n8n to update results
+  app.post('/api/agents/amazon-customer-service/webhook-callback', async (req: any, res: any) => {
+    try {
+      const { sessionId, response, error } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ error: 'SessionId é obrigatório' });
+      }
+
+      if (!global.customerServiceSessions || !global.customerServiceSessions.has(sessionId)) {
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+
+      const sessionData = global.customerServiceSessions.get(sessionId);
+      
+      if (error) {
+        sessionData.status = 'failed';
+        sessionData.error = error;
+      } else {
+        sessionData.status = 'completed';
+        sessionData.completed_at = new Date().toISOString();
+        sessionData.result_data = {
+          response: response || 'Resposta processada com sucesso',
+          analysis: {
+            customerIssue: 'Analisado pelo webhook',
+            sentiment: 'Processado',
+            urgency: 'Definida'
+          }
+        };
+      }
+      
+      global.customerServiceSessions.set(sessionId, sessionData);
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('❌ [CUSTOMER_SERVICE] Webhook callback error:', error);
+      res.status(500).json({ error: 'Erro ao processar callback' });
     }
   });
 

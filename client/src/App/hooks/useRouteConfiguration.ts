@@ -219,8 +219,8 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/agents/advanced-infographic-generator', component: lazyComponents.AdvancedInfographicGenerator, isProtected: true },
       { path: '/agents/amazon-listings-optimizer', component: lazyComponents.AmazonListingsOptimizer, isProtected: true },
       { path: '/agents/amazon-listings-optimizer/result', component: lazyComponents.AmazonListingsOptimizerResult, isProtected: true },
-      { path: '/agents/amazon-customer-service', component: lazyComponents.AmazonCustomerService, isProtected: true },
-      { path: '/agents/amazon-customer-service/result', component: lazyComponents.AmazonCustomerServiceResult, isProtected: true },
+      { path: '/agentes/amazon-customer-service', component: lazyComponents.AmazonCustomerService, isProtected: true },
+      { path: '/agentes/amazon-customer-service/resultado/:sessionId', component: lazyComponents.AmazonCustomerServiceResult, isProtected: true },
       { path: '/agents/amazon-negative-reviews', component: lazyComponents.AmazonNegativeReviews, isProtected: true },
       { path: '/agents/amazon-negative-reviews/result', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true }
     ],
