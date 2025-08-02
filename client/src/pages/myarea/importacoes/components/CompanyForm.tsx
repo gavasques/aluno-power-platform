@@ -98,8 +98,9 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
   useEffect(() => {
     if (company?.logoUrl) {
       setLogoPreview(company.logoUrl);
+      form.setValue('logoUrl', company.logoUrl);
     }
-  }, [company?.logoUrl]);
+  }, [company?.logoUrl, form]);
   
   // Logo upload mutation
   const uploadLogoMutation = useMutation({
@@ -127,7 +128,8 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
     },
     onSuccess: (data) => {
       console.log('🔍 [FRONTEND] Logo update successful:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/user-companies'] });
+      // Não invalidar cache aqui - será invalidado apenas no submit final do formulário
+      // queryClient.invalidateQueries({ queryKey: ['/api/user-companies'] });
     },
     onError: (error) => {
       console.error('🔍 [FRONTEND] Logo update failed:', error);
@@ -577,9 +579,28 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                     src={logoPreview}
                     alt="Logo da empresa" 
                     className="w-full h-full object-contain"
-                    onError={() => {
-                      console.warn('Logo failed to load, clearing preview');
-                      setLogoPreview(null);
+                    onError={(e) => {
+                      // Não remover automaticamente - mostrar placeholder svg no erro
+                      console.warn('Logo failed to load:', logoPreview);
+                      e.currentTarget.style.display = 'none';
+                      
+                      // Mostrar SVG placeholder em caso de erro
+                      const parent = e.currentTarget.parentElement;
+                      if (parent && !parent.querySelector('.error-placeholder')) {
+                        const svgPlaceholder = document.createElement('div');
+                        svgPlaceholder.className = 'error-placeholder w-full h-full flex items-center justify-center bg-gray-100';
+                        svgPlaceholder.innerHTML = '<svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg>';
+                        parent.appendChild(svgPlaceholder);
+                      }
+                    }}
+                    onLoad={(e) => {
+                      // Remove placeholder se imagem carregar corretamente
+                      const parent = e.currentTarget.parentElement;
+                      const placeholder = parent?.querySelector('.error-placeholder');
+                      if (placeholder) {
+                        placeholder.remove();
+                      }
+                      e.currentTarget.style.display = 'block';
                     }}
                   />
                   <button
@@ -664,8 +685,10 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
 
                       // Update preview and form with normalized URL
                       const normalizedLogoUrl = updateResult.data?.logoUrl || updateResult.logoUrl;
-                      setLogoPreview(normalizedLogoUrl);
-                      form.setValue('logoUrl', normalizedLogoUrl || '');
+                      if (normalizedLogoUrl) {
+                        setLogoPreview(normalizedLogoUrl);
+                        form.setValue('logoUrl', normalizedLogoUrl);
+                      }
 
                       toast({
                         title: "Sucesso",
