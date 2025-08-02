@@ -13,6 +13,15 @@ import { PermissionGuard } from "@/components/guards/PermissionGuard";
 import { Link } from "wouter";
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 
+interface SessionResponse {
+  sessionId: string;
+}
+
+interface ProcessResponse {
+  result?: string;
+  status?: string;
+}
+
 const AmazonCustomerService = () => {
   const [emailContent, setEmailContent] = useState("");
   const [userObservations, setUserObservations] = useState("");
@@ -61,7 +70,7 @@ const AmazonCustomerService = () => {
             userObservations: userObservations.trim()
           }
         }),
-      });
+      }) as SessionResponse;
 
       if (sessionResponse?.sessionId) {
         // Start processing
@@ -72,27 +81,13 @@ const AmazonCustomerService = () => {
             emailContent: emailContent.trim(),
             userObservations: userObservations.trim()
           }),
-        });
+        }) as ProcessResponse;
 
-        if (processResponse?.sessionId) {
-          // Registrar log de uso com dedução automática de créditos
-          await logAIGeneration({
-            featureCode: FEATURE_CODE,
-            provider: 'amazon-customer-service',
-            model: 'customer-service-ai',
-            prompt: `Email de atendimento processado`,
-            response: 'Resposta gerada com sucesso',
-            inputTokens: 0,
-            outputTokens: 0,
-            totalTokens: 0,
-            cost: 0,
-            duration: 0
-          });
-
+        if (processResponse) {
           // Navigate to results page
-          setLocation(`/agentes/amazon-customer-service/resultado/${processResponse.sessionId}`);
+          setLocation(`/agentes/amazon-customer-service/resultado/${sessionResponse.sessionId}`);
         } else {
-          throw new Error('Session ID not received');
+          throw new Error('Erro no processamento');
         }
       } else {
         throw new Error('Failed to create session');
