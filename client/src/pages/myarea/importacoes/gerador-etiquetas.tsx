@@ -300,43 +300,49 @@ export default function GeradorEtiquetas() {
       const rightStartX = 40;
       
       // Nome do produto
-      pdf.setFontSize(10);
+      pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
       const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 57);
-      let productY = 8;
-      productLines.forEach((line: string) => {
+      let productY = 10;
+      productLines.forEach((line: string, index: number) => {
         pdf.text(line, rightStartX, productY);
-        productY += 4;
+        productY += 3.5;
       });
 
+      // Espaço após o nome do produto
+      productY += 2;
+
       // SKU - menor e mais discreto
-      pdf.setFontSize(10);
+      pdf.setFontSize(9);
       pdf.setFont("helvetica", "bold");
-      pdf.text(productData.sku.toUpperCase(), rightStartX, productY + 4);
+      pdf.text(productData.sku.toUpperCase(), rightStartX, productY);
+      productY += 5;
 
       // Conteúdo
-      pdf.setFontSize(9);  
-      pdf.text("CONTÉM " + productData.conteudo.toUpperCase(), rightStartX, productY + 9);
+      pdf.setFontSize(8);  
+      pdf.text("CONTÉM " + productData.conteudo.toUpperCase(), rightStartX, productY);
+      productY += 5;
 
       // Informações adicionais
       pdf.setFontSize(7);
       pdf.setFont("helvetica", "normal");
       
-      let infoY = productY + 15;
+      // Espaço antes das informações adicionais
+      productY += 2;
       
       if (productData.cor) {
-        pdf.text(`COR: ${productData.cor.toUpperCase()}`, rightStartX, infoY);
-        infoY += 3;
+        pdf.text(`COR: ${productData.cor.toUpperCase()}`, rightStartX, productY);
+        productY += 3;
       }
       
-      pdf.text(`VALIDADE: ${productData.validade.toUpperCase()}`, rightStartX, infoY);
-      infoY += 3;
+      pdf.text(`VALIDADE: ${productData.validade.toUpperCase()}`, rightStartX, productY);
+      productY += 3;
       
-      pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem.toUpperCase()}`, rightStartX, infoY);
-      infoY += 3;
+      pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem.toUpperCase()}`, rightStartX, productY);
+      productY += 3;
       
       // SAC mantém o email em minúsculas
-      pdf.text(`SAC: ${productData.sac}`, rightStartX, infoY);
+      pdf.text(`SAC: ${productData.sac}`, rightStartX, productY);
 
       // Salvar PDF
       pdf.save(`etiqueta-${productData.sku}.pdf`);
