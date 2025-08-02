@@ -77,6 +77,7 @@ export const userCompanies = pgTable("user_companies", {
   mobile: text("mobile"), // Celular
   stateRegistration: text("state_registration"), // Inscrição Estadual
   municipalRegistration: text("municipal_registration"), // Inscrição Municipal
+  logoUrl: text("logo_url"), // URL da logomarca da empresa
   notes: text("notes"), // Observações
   isActive: boolean("is_active").notNull().default(true), // Status ativo/inativo
   createdAt: timestamp("created_at").notNull().defaultNow(),

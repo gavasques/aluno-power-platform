@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { storage } from '../storage';
 import { insertUserCompanySchema } from '@shared/schema';
 import { requireAuth } from '../middleware/auth';
+import { ObjectStorageService } from '../objectStorage';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ const updateUserCompanySchema = insertUserCompanySchema.partial();
 // GET /api/user-companies - Lista empresas do usuário
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const { search } = req.query;
 
     let companies;
@@ -51,7 +52,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     }
 
     // Verifica se a empresa pertence ao usuário
-    if (company.userId !== req.user.id) {
+    if (company.userId !== req.user!.id) {
       return res.status(403).json({ 
         success: false, 
         error: 'Acesso negado' 
@@ -73,7 +74,7 @@ router.post('/', requireAuth, async (req, res) => {
   try {
     const validatedData = createUserCompanySchema.parse({
       ...req.body,
-      userId: req.user.id,
+      userId: req.user!.id,
     });
 
     const company = await storage.createUserCompany(validatedData);
@@ -114,7 +115,7 @@ router.put('/:id', requireAuth, async (req, res) => {
       });
     }
 
-    if (existingCompany.userId !== req.user.id) {
+    if (existingCompany.userId !== req.user!.id) {
       return res.status(403).json({ 
         success: false, 
         error: 'Acesso negado' 
@@ -160,7 +161,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
       });
     }
 
-    if (existingCompany.userId !== req.user.id) {
+    if (existingCompany.userId !== req.user!.id) {
       return res.status(403).json({ 
         success: false, 
         error: 'Acesso negado' 
@@ -179,6 +180,54 @@ router.delete('/:id', requireAuth, async (req, res) => {
       success: false, 
       error: 'Erro interno do servidor' 
     });
+  }
+});
+
+// Logo upload endpoint
+router.post('/upload-logo', requireAuth, async (req, res) => {
+  try {
+    const objectStorageService = new ObjectStorageService();
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    res.json({ uploadURL });
+  } catch (error) {
+    console.error('Erro ao obter URL de upload do logo:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Update logo endpoint
+router.put('/:id/logo', requireAuth, async (req, res) => {
+  try {
+    const companyId = parseInt(req.params.id);
+    const { logoURL } = req.body;
+    
+    if (!logoURL) {
+      return res.status(400).json({ error: 'logoURL é obrigatório' });
+    }
+
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Não autorizado' });
+    }
+
+    const objectStorageService = new ObjectStorageService();
+    const normalizedPath = objectStorageService.normalizeObjectEntityPath(logoURL);
+
+    // Update company with logo URL
+    const company = await storage.updateUserCompany(companyId, { logoUrl: normalizedPath });
+    
+    if (!company) {
+      return res.status(404).json({ error: 'Empresa não encontrada' });
+    }
+
+    res.json({
+      success: true,
+      data: company,
+      message: 'Logo atualizado com sucesso'
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar logo da empresa:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 

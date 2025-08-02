@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -24,6 +24,10 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { UserCompany } from '@shared/schema';
+import { ObjectUploader } from '@/components/ObjectUploader';
+import type { UploadResult } from '@uppy/core';
+import { Image, Upload } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 // Schema de validação do formulário
 const companyFormSchema = z.object({
@@ -43,6 +47,7 @@ const companyFormSchema = z.object({
   stateRegistration: z.string().optional(),
   municipalRegistration: z.string().optional(),
   notes: z.string().optional(),
+  logoUrl: z.string().optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -86,6 +91,32 @@ const ESTADOS = [
 ];
 
 export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) {
+  const [logoPreview, setLogoPreview] = useState<string>(company?.logoUrl || '');
+  const { toast } = useToast();
+  
+  // Logo upload mutation
+  const uploadLogoMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('/api/user-companies/upload-logo', {
+        method: 'POST',
+      });
+      return response.uploadURL;
+    },
+  });
+
+  // Update logo mutation  
+  const updateLogoMutation = useMutation({
+    mutationFn: async ({ companyId, logoURL }: { companyId: number; logoURL: string }) => {
+      return apiRequest(`/api/user-companies/${companyId}/logo`, {
+        method: 'PUT',
+        body: { logoURL },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user-companies'] });
+    },
+  });
+  
   // Função para converter para maiúsculo (exceto observações)
   const toUpperCase = (value: string) => value.toUpperCase();
 
@@ -107,6 +138,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
       mobile: company?.mobile || '',
       stateRegistration: company?.stateRegistration || '',
       municipalRegistration: company?.municipalRegistration || '',
+      logoUrl: company?.logoUrl || '',
       notes: company?.notes || '',
       isActive: company?.isActive ?? true,
     },
@@ -472,6 +504,70 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
               )}
             />
           </div>
+        </div>
+
+        {/* Logo Upload Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Logo da Empresa
+          </h3>
+          <div className="flex items-center gap-4">
+            {logoPreview && (
+              <div className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden">
+                <img 
+                  src={logoPreview} 
+                  alt="Logo preview" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+            
+            <ObjectUploader
+              maxNumberOfFiles={1}
+              maxFileSize={2 * 1024 * 1024} // 2MB
+              onGetUploadParameters={async () => {
+                const uploadURL = await uploadLogoMutation.mutateAsync();
+                return { method: 'PUT' as const, url: uploadURL };
+              }}
+              onComplete={async (result) => {
+                if (result.successful.length > 0 && company) {
+                  const uploadedFile = result.successful[0];
+                  const logoURL = uploadedFile.uploadURL;
+                  
+                  try {
+                    await updateLogoMutation.mutateAsync({
+                      companyId: company.id,
+                      logoURL: logoURL,
+                    });
+                    
+                    setLogoPreview(logoURL);
+                    form.setValue('logoUrl', logoURL);
+                    
+                    toast({
+                      title: "Sucesso",
+                      description: "Logo atualizado com sucesso!",
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "Erro",
+                      description: "Erro ao atualizar logo da empresa.",
+                      variant: "destructive",
+                    });
+                  }
+                }
+              }}
+              buttonClassName="w-fit"
+            >
+              <div className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                <span>{logoPreview ? 'Alterar Logo' : 'Upload Logo'}</span>
+              </div>
+            </ObjectUploader>
+          </div>
+          
+          <p className="text-xs text-gray-500">
+            Formatos aceitos: PNG, JPEG, JPG. Tamanho máximo: 2MB.
+          </p>
         </div>
 
         {/* Observações */}

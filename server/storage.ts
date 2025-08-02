@@ -2825,7 +2825,7 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async updateUserCompany(id: number, company: Partial<InsertUserCompany>): Promise<UserCompany> {
+  async updateUserCompany(id: number, company: Partial<InsertUserCompany & { logoUrl?: string }>): Promise<UserCompany> {
     const [updated] = await db
       .update(userCompanies)
       .set({

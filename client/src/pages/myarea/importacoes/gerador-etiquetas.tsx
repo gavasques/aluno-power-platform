@@ -12,6 +12,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Upload, Download, AlertCircle, CheckCircle, Trash2, Eye, Image } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { UserCompany } from "@shared/schema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { jsPDF } from "jspdf";
 import JsBarcode from "jsbarcode";
 
@@ -37,32 +41,33 @@ interface ProductData {
   eanCode: string;
 }
 
-// Dados mock para exemplo
-const mockCompanyData: CompanyData = {
-  razaoSocial: "Bkza Comercio de Utilidades Ltda",
-  endereco: "Rua São João Del Rey, 5863, Sala A",
-  bairro: "Vila Gaúcha",
-  cidade: "Marechal Cândido Rondon",
+// Dados iniciais vazios (serão preenchidos ao selecionar empresa)
+const initialCompanyData: CompanyData = {
+  razaoSocial: "",
+  endereco: "",
+  bairro: "",
+  cidade: "",
   pais: "Brasil",
-  cep: "85966174",
-  cnpj: "39.634.307/0001.80"
+  cep: "",
+  cnpj: ""
 };
 
-const mockProductData: ProductData = {
-  nomeProduto: "Suporte de Cabeça para Cama de Massagem",
-  sku: "REP001",
-  conteudo: "CONTÉM 1 PEÇA",
-  cor: "PRETA",
-  validade: "INDETERMINADA",
-  paisOrigem: "CHINA",
-  sac: "contato@bkza.com.br",
-  eanCode: "7898741210559"
+const initialProductData: ProductData = {
+  nomeProduto: "",
+  sku: "",
+  conteudo: "",
+  cor: "",
+  validade: "",
+  paisOrigem: "",
+  sac: "",
+  eanCode: ""
 };
 
 // Componente principal
 export default function GeradorEtiquetas() {
-  const [companyData, setCompanyData] = useState<CompanyData>(mockCompanyData);
-  const [productData, setProductData] = useState<ProductData>(mockProductData);
+  const [companyData, setCompanyData] = useState<CompanyData>(initialCompanyData);
+  const [productData, setProductData] = useState<ProductData>(initialProductData);
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string>("");
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>("");
@@ -72,6 +77,42 @@ export default function GeradorEtiquetas() {
   const { toast } = useToast();
   const logoInputRef = useRef<HTMLInputElement>(null);
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Fetch user companies
+  const { data: companies = [] } = useQuery<UserCompany[]>({
+    queryKey: ['/api/user-companies'],
+    enabled: true,
+  });
+
+  // Handle company selection
+  const handleCompanySelect = (companyId: string) => {
+    const company = companies.find(c => c.id.toString() === companyId);
+    if (company) {
+      setSelectedCompany(companyId);
+      setCompanyData({
+        razaoSocial: company.corporateName,
+        endereco: company.address || "",
+        bairro: company.neighborhood || "",
+        cidade: company.city || "",
+        pais: company.country,
+        cep: company.postalCode || "",
+        cnpj: "" // CNPJ não está no schema, manter vazio
+      });
+      
+      // Set logo if available
+      if (company.logoUrl) {
+        setLogoDataUrl(company.logoUrl);
+      }
+      
+      // Fill SAC with company email if available
+      if (company.email) {
+        setProductData(prev => ({
+          ...prev,
+          sac: company.email
+        }));
+      }
+    }
+  };
 
   // Validação EAN-13
   const validateEAN13 = (code: string): boolean => {
@@ -384,10 +425,27 @@ export default function GeradorEtiquetas() {
               <TabsContent value="company">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Badge variant="outline">1</Badge>
-                      Dados da Empresa
-                    </CardTitle>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="flex items-center gap-2">
+                        <Badge variant="outline">1</Badge>
+                        Dados da Empresa
+                      </CardTitle>
+                      
+                      {/* Company Selection Dropdown */}
+                      <Select value={selectedCompany} onValueChange={handleCompanySelect}>
+                        <SelectTrigger className="w-[300px]">
+                          <SelectValue placeholder="Selecionar empresa cadastrada" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Preencher manualmente</SelectItem>
+                          {companies.map((company) => (
+                            <SelectItem key={company.id} value={company.id.toString()}>
+                              {company.tradeName} - {company.corporateName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <CardDescription>
                       Informações da empresa que aparecerão na etiqueta
                     </CardDescription>
