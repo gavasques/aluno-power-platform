@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -93,6 +93,13 @@ const ESTADOS = [
 export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(company?.logoUrl || null);
   const { toast } = useToast();
+  
+  // Sincronizar logoPreview quando company muda (importante para edição)
+  useEffect(() => {
+    if (company?.logoUrl) {
+      setLogoPreview(company.logoUrl);
+    }
+  }, [company?.logoUrl]);
   
   // Logo upload mutation
   const uploadLogoMutation = useMutation({
@@ -193,13 +200,30 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
   });
 
   const onSubmit = (data: CompanyFormData) => {
-    // Limpar campos vazios para não enviar strings vazias
+    // Limpar campos vazios para não enviar strings vazias, MAS PRESERVAR logoUrl
     const cleanData = Object.entries(data).reduce((acc, [key, value]) => {
+      // Sempre preservar logoUrl, mesmo se for string vazia
+      if (key === 'logoUrl') {
+        return { ...acc, [key]: value || '' };
+      }
+      
+      // Para outros campos, remover se estiver vazio
       if (value === '' || value === null || value === undefined) {
         return acc;
       }
       return { ...acc, [key]: value };
     }, {} as CompanyFormData);
+
+    // Se logoPreview existe mas logoUrl não está no cleanData, adicionar
+    if (logoPreview && !cleanData.logoUrl) {
+      cleanData.logoUrl = logoPreview;
+    }
+
+    // Debug log para verificar dados enviados
+    if (import.meta.env.DEV) {
+      console.log('🔍 [FORM] Dados sendo enviados:', cleanData);
+      console.log('🔍 [FORM] Logo preview atual:', logoPreview);
+    }
 
     mutation.mutate(cleanData);
   };
