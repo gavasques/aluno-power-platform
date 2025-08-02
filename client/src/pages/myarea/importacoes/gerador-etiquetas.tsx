@@ -746,93 +746,20 @@ export default function GeradorEtiquetas() {
             </Card>
           </div>
 
-          {/* Preview da Etiqueta */}
+          {/* Status dos dados */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Eye className="h-5 w-5" />
-                  Preview da Etiqueta
+                  Status dos Dados
                 </CardTitle>
                 <CardDescription>
-                  Visualização em tempo real da etiqueta
+                  Verificação dos dados para geração da etiqueta
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Preview Container */}
-                <div className="overflow-auto">
-                  <div className="bg-white border border-gray-800 mx-auto shadow-lg" style={{ width: '400px', maxWidth: '100%', height: '240px' }}>
-                    <div className="flex h-full p-3">
-                    {/* Coluna Esquerda (40%) */}
-                    <div className="w-2/5 pr-3 flex flex-col">
-                      {/* Logo */}
-                      <div className="mb-2">
-                        {logoDataUrl ? (
-                          <img src={logoDataUrl} alt="Logo" className="max-h-14 max-w-full object-contain" />
-                        ) : (
-                          <div className="h-14 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs">
-                            Logo
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Texto importado */}
-                      <div className="text-[9px] font-bold mb-1 uppercase">
-                        IMPORTADO E DISTRIBUÍDO POR:
-                      </div>
-                      
-                      {/* Dados da empresa */}
-                      <div className="text-[9px] space-y-0.5 mb-2 flex-1 uppercase">
-                        <div>{companyData.razaoSocial || "Empresa Ltda"}</div>
-                        <div>{companyData.endereco || "Endereço"}</div>
-                        <div>{companyData.bairro || "Bairro"}, {companyData.cidade || "Cidade"}</div>
-                        <div>CEP {companyData.cep || "00000000"}</div>
-                        <div>CNPJ {companyData.cnpj || "00.000.000/0001-00"}</div>
-                      </div>
-                      
-                      {/* Código de barras */}
-                      <div className="mt-auto">
-                        {barcodeDataUrl ? (
-                          <img src={barcodeDataUrl} alt="Barcode" className="w-full h-auto" style={{ maxHeight: '56px' }} />
-                        ) : (
-                          <div className="h-14 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                            Código de barras
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Coluna Direita (60%) */}
-                    <div className="w-3/5 pl-3 flex flex-col">
-                      {/* Nome do produto */}
-                      <div className="text-sm mb-4 leading-tight line-clamp-3 uppercase">
-                        {productData.nomeProduto || "Nome do Produto"}
-                      </div>
-                      
-                      {/* SKU */}
-                      <div className="text-base font-bold mb-3 uppercase">
-                        {productData.sku || "SKU001"}
-                      </div>
-                      
-                      {/* Conteúdo */}
-                      <div className="text-sm font-semibold mb-4 uppercase">
-                        CONTÉM {productData.conteudo || "10 PEÇAS"}
-                      </div>
-                      
-                      {/* Informações adicionais */}
-                      <div className="text-[10px] space-y-1 mt-auto">
-                        {productData.cor && <div className="uppercase">COR: {productData.cor}</div>}
-                        <div className="uppercase">VALIDADE: {productData.validade || "INDETERMINADA"}</div>
-                        <div className="uppercase">PAÍS DE ORIGEM: {productData.paisOrigem || "CHINA"}</div>
-                        <div>SAC: {productData.sac || "contato@bkza.com.br"}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                </div>
-                
-                {/* Status */}
-                <div className="mt-4 space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
                     {validateEAN13(productData.eanCode) ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
@@ -848,6 +775,14 @@ export default function GeradorEtiquetas() {
                       <AlertCircle className="h-4 w-4 text-amber-500" />
                     )}
                     Logo: {logoDataUrl ? "Carregado" : "Não carregado"}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {barcodeDataUrl ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    )}
+                    Código de Barras: {barcodeDataUrl ? "Gerado" : "Não gerado"}
                   </div>
                 </div>
               </CardContent>
