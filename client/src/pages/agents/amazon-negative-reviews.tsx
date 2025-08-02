@@ -13,6 +13,7 @@ import { PermissionGuard } from "@/components/guards/PermissionGuard";
 // Layout removed - component is already wrapped by app layout
 import { Link } from "wouter";
 import { useCreditSystem } from '@/hooks/useCreditSystem';
+import { usePermissions } from '@/contexts/UserContext';
 
 const AmazonNegativeReviews = () => {
   const [negativeReview, setNegativeReview] = useState("");
@@ -109,6 +110,16 @@ const AmazonNegativeReviews = () => {
       setIsProcessing(false);
     }
   };
+
+  // Debug permission state
+  const { hasAccess, isLoading: permissionLoading, features } = usePermissions();
+  console.log('🔍 [DEBUG] Amazon Negative Reviews Permission Check:', {
+    featureCode: 'agents.negative_reviews',
+    hasAccess: hasAccess('agents.negative_reviews'),
+    permissionLoading,
+    features,
+    featuresIncludesTarget: features.includes('agents.negative_reviews')
+  });
 
   return (
     <PermissionGuard 
