@@ -12,9 +12,7 @@ import {
   CheckCircle, 
   Clock, 
   AlertCircle,
-  RefreshCw,
-  Download,
-  Share2
+  Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -402,59 +400,7 @@ const AmazonCustomerServiceResult = () => {
               </CardContent>
             </Card>
 
-            {/* Analysis Summary */}
-            {sessionData.result_data.analysis && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Análise do Email</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium">Problema Principal</p>
-                    <p className="text-sm text-muted-foreground">
-                      {sessionData.result_data.analysis.customerIssue}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Sentimento</p>
-                    <Badge variant="outline">
-                      {sessionData.result_data.analysis.sentiment}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Urgência</p>
-                    <Badge variant="outline">
-                      {sessionData.result_data.analysis.urgency}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Ações</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => window.open('/agentes/amazon-customer-service', '_blank')}
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Nova Análise
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => copyToClipboard(sessionData.result_data!.response)}
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Compartilhar
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       )}
