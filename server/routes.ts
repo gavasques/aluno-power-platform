@@ -7135,5 +7135,28 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
   console.log('✅ [INTERNATIONAL_SUPPLIERS] Missing detail API routes added');
 
+  // Object Storage - Serve uploaded files (like company logos)
+  app.get('/objects/*', requireAuth, async (req: any, res: any) => {
+    try {
+      const { ObjectStorageService } = await import('./objectStorage');
+      const objectStorageService = new ObjectStorageService();
+      
+      const objectPath = req.path; // This will be /objects/uploads/uuid
+      console.log('🔍 [OBJECT_STORAGE] Serving object:', objectPath);
+      
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      await objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error('❌ [OBJECT_STORAGE] Error serving object:', error);
+      if (error instanceof Error && error.message === 'Object not found') {
+        res.status(404).json({ error: 'Object not found' });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    }
+  });
+
+  console.log('✅ [OBJECT_STORAGE] Object serving route registered');
+
   return httpServer;
 }

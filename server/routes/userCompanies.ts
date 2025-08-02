@@ -130,12 +130,20 @@ router.put('/:id', requireAuth, async (req, res) => {
     // Debug logging to check validated data
     console.log('🔍 [USER_COMPANIES] Validated data:', validatedData);
     
-    // Filter out null values for logoUrl to handle TypeScript type compatibility
+    // Filter out null values and handle logoUrl type compatibility
     const cleanData = Object.fromEntries(
       Object.entries(validatedData).filter(([key, value]) => value !== null && value !== undefined)
-    ) as Partial<typeof validatedData>;
+    );
     
-    const company = await storage.updateUserCompany(id, cleanData);
+    // Convert null logoUrl to undefined to match expected type
+    if ('logoUrl' in cleanData && cleanData.logoUrl === null) {
+      cleanData.logoUrl = undefined;
+    }
+    
+    // Ensure logoUrl is properly typed for the update function
+    const updateData = cleanData as Partial<import('@shared/schema').InsertUserCompany>;
+    
+    const company = await storage.updateUserCompany(id, updateData);
 
     res.json({
       success: true,

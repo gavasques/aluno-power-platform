@@ -546,12 +546,13 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
             {logoPreview && (
               <div className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden">
                 <img 
-                  src={logoPreview.startsWith('/objects/') ? logoPreview : logoPreview} 
+                  src={logoPreview}
                   alt="Logo preview" 
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain bg-white"
                   onError={(e) => {
                     console.error('Error loading logo:', logoPreview);
-                    e.currentTarget.style.display = 'none';
+                    // Instead of hiding, show a placeholder
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yOCAyMEgzNlYyOEgyOFYyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHA9YXRoIGQ9Ik0yMCAzMkg0NFY0MEgyMFYzMloiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
                   }}
                 />
               </div>
