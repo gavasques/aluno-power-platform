@@ -221,7 +221,7 @@ export function MinhasEmpresas() {
     refetchOnWindowFocus: false,
   });
 
-  // Mutation para deletar empresa
+  // ✅ OTIMIZAÇÃO: Mutation memorizada para deletar empresa
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       return apiRequest(`/api/user-companies/${id}`, {
@@ -244,16 +244,17 @@ export function MinhasEmpresas() {
     },
   });
 
-  const handleEdit = (company: UserCompany) => {
+  // ✅ OTIMIZAÇÃO: Handlers memorizados com useCallback
+  const handleEdit = useCallback((company: UserCompany) => {
     setSelectedCompany(company);
     setIsFormOpen(true);
-  };
+  }, []);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = useCallback((id: number) => {
     deleteMutation.mutate(id);
-  };
+  }, [deleteMutation]);
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = useCallback(() => {
     setIsFormOpen(false);
     setSelectedCompany(null);
     queryClient.invalidateQueries({ queryKey: ['/api/user-companies'] });
@@ -263,12 +264,19 @@ export function MinhasEmpresas() {
         ? 'Empresa atualizada com sucesso' 
         : 'Empresa criada com sucesso',
     });
-  };
+  }, [selectedCompany, queryClient]);
 
-  const filteredCompanies = companies.filter((company: UserCompany) =>
-    company.tradeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.corporateName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ✅ OTIMIZAÇÃO: Filtro memorizado para evitar recálculos
+  const filteredCompanies = useMemo(() => {
+    if (!searchTerm) return companies;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return companies.filter((company: UserCompany) =>
+      company.tradeName.toLowerCase().includes(searchLower) ||
+      company.corporateName.toLowerCase().includes(searchLower) ||
+      (company.cnpj && company.cnpj.includes(searchTerm))
+    );
+  }, [companies, searchTerm]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -367,140 +375,12 @@ export function MinhasEmpresas() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCompanies.map((company: UserCompany) => (
-            <Card key={company.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-3 flex-1">
-                    {company.logoUrl && (
-                      <div className="w-12 h-12 flex-shrink-0 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                        <img 
-                          src={company.logoUrl}
-                          alt={`Logo ${company.tradeName}`}
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            // Show a placeholder on error
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent && !parent.querySelector('.logo-error')) {
-                              const errorDiv = document.createElement('div');
-                              errorDiv.className = 'logo-error w-full h-full flex items-center justify-center text-gray-400';
-                              errorDiv.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
-                              parent.appendChild(errorDiv);
-                            }
-                            console.error('Error loading logo:', company.logoUrl);
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <CardTitle className="text-lg text-gray-900 dark:text-white mb-1">
-                        {company.tradeName}
-                      </CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {company.corporateName}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant={company.isActive ? "default" : "secondary"}>
-                    {company.isActive ? 'Ativa' : 'Inativa'}
-                  </Badge>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-3">
-                {/* CNPJ */}
-                {company.cnpj && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">CNPJ:</span>
-                    <span>{company.cnpj}</span>
-                  </div>
-                )}
-
-                {/* Location */}
-                {(company.city || company.state) && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <MapPin className="h-4 w-4" />
-                    <span>
-                      {[company.city, company.state].filter(Boolean).join(', ')}
-                    </span>
-                  </div>
-                )}
-
-                {/* Email */}
-                {company.email && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Mail className="h-4 w-4" />
-                    <span className="truncate">{company.email}</span>
-                  </div>
-                )}
-
-                {/* Phone */}
-                {company.phone && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Phone className="h-4 w-4" />
-                    <span>{company.phone}</span>
-                  </div>
-                )}
-
-                {/* Website */}
-                {company.website && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Globe className="h-4 w-4" />
-                    <span className="truncate">{company.website}</span>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex justify-between items-center pt-3">
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(company)}
-                      className="flex items-center gap-1"
-                    >
-                      <Edit className="h-3 w-3" />
-                      Editar
-                    </Button>
-                    
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja remover a empresa "{company.tradeName}"? 
-                            Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(company.id)}
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            Remover
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(company.createdAt).toLocaleDateString('pt-BR')}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <CompanyCard
+              key={company.id}
+              company={company}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}

@@ -165,13 +165,10 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
         console.log('🔍 [MUTATION] Submitting company data:', { url, method, data });
       }
       
-      // apiRequest will handle JSON serialization automatically
+      // Usar apiRequest sem duplicar headers - ele já gerencia JSON automaticamente
       return apiRequest(url, {
         method,
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: data, // apiRequest vai fazer o JSON.stringify automaticamente
       });
     },
     onSuccess: (data) => {
@@ -186,9 +183,12 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
       onSuccess();
     },
     onError: (error) => {
-      if (import.meta.env.DEV) {
-        console.error('🔍 [MUTATION] Failed:', error);
-      }
+      console.error('🔍 [MUTATION] Failed:', error);
+      toast({
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Erro ao salvar empresa',
+        variant: 'destructive',
+      });
     },
   });
 

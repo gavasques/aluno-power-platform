@@ -169,9 +169,10 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   let body = options?.body;
   if (body && !(body instanceof FormData) && typeof body === 'object') {
     body = JSON.stringify(body);
-    (headers as any)['Content-Type'] = 'application/json';
-  } else if (!(body instanceof FormData) && options?.body) {
-    (headers as any)['Content-Type'] = 'application/json';
+    // Only set Content-Type if not already set
+    if (!(headers as any)['Content-Type'] && !(headers as any)['content-type']) {
+      (headers as any)['Content-Type'] = 'application/json';
+    }
   }
 
   const response = await fetch(url, {
