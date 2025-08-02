@@ -734,8 +734,9 @@ export default function GeradorEtiquetas() {
               </CardHeader>
               <CardContent>
                 {/* Preview Container */}
-                <div className="bg-white border-4 border-gray-800 mx-auto shadow-lg" style={{ width: '400px', height: '240px' }}>
-                  <div className="flex h-full p-4">
+                <div className="overflow-auto">
+                  <div className="bg-white border-4 border-gray-800 mx-auto shadow-lg" style={{ width: '400px', maxWidth: '100%', height: '240px' }}>
+                    <div className="flex h-full p-4">
                     {/* Coluna Esquerda (40%) */}
                     <div className="w-2/5 pr-4 flex flex-col">
                       {/* Logo */}
@@ -750,15 +751,15 @@ export default function GeradorEtiquetas() {
                       </div>
                       
                       {/* Texto importado */}
-                      <div className="text-xs font-bold mb-2 uppercase tracking-tight">
+                      <div className="text-[10px] font-bold mb-2 uppercase leading-tight">
                         IMPORTADO E DISTRIBUÍDO NO BRASIL POR:
                       </div>
                       
                       {/* Dados da empresa */}
-                      <div className="text-xs space-y-0.5 mb-3 flex-1">
-                        <div className="font-semibold">{companyData.razaoSocial || "Empresa Ltda"}</div>
-                        <div>{companyData.endereco || "Endereço"}</div>
-                        <div>{companyData.bairro || "Bairro"}, {companyData.cidade || "Cidade"}</div>
+                      <div className="text-[10px] space-y-0.5 mb-3 flex-1">
+                        <div className="font-semibold truncate">{companyData.razaoSocial || "Empresa Ltda"}</div>
+                        <div className="truncate">{companyData.endereco || "Endereço"}</div>
+                        <div className="truncate">{companyData.bairro || "Bairro"}, {companyData.cidade || "Cidade"}</div>
                         <div>CEP: {companyData.cep || "00000000"}</div>
                         <div>CNPJ: {companyData.cnpj || "00.000.000/0001-00"}</div>
                       </div>
@@ -778,29 +779,30 @@ export default function GeradorEtiquetas() {
                     {/* Coluna Direita (60%) */}
                     <div className="w-3/5 pl-4 flex flex-col border-l border-gray-300">
                       {/* Nome do produto */}
-                      <div className="text-lg font-bold mb-3 leading-tight">
+                      <div className="text-base font-bold mb-2 leading-tight line-clamp-2">
                         {productData.nomeProduto || "Nome do Produto"}
                       </div>
                       
                       {/* SKU */}
-                      <div className="text-2xl font-black mb-2">
+                      <div className="text-xl font-black mb-2">
                         {productData.sku || "SKU001"}
                       </div>
                       
                       {/* Conteúdo */}
-                      <div className="text-base font-bold mb-4 uppercase">
+                      <div className="text-sm font-bold mb-3 uppercase">
                         {productData.conteudo || "Contém 1 peça"}
                       </div>
                       
                       {/* Informações adicionais */}
-                      <div className="text-sm space-y-1 mt-auto">
-                        {productData.cor && <div><span className="font-semibold">COR:</span> {productData.cor}</div>}
-                        <div><span className="font-semibold">VALIDADE:</span> {productData.validade || "Indeterminada"}</div>
-                        <div><span className="font-semibold">PAÍS DE ORIGEM:</span> {productData.paisOrigem || "CHINA"}</div>
-                        <div><span className="font-semibold">SAC:</span> {productData.sac || "contato@empresa.com"}</div>
+                      <div className="text-xs space-y-0.5 mt-auto">
+                        {productData.cor && <div className="truncate"><span className="font-semibold">COR:</span> {productData.cor}</div>}
+                        <div className="truncate"><span className="font-semibold">VALIDADE:</span> {productData.validade || "Indeterminada"}</div>
+                        <div className="truncate"><span className="font-semibold">PAÍS DE ORIGEM:</span> {productData.paisOrigem || "CHINA"}</div>
+                        <div className="truncate"><span className="font-semibold">SAC:</span> {productData.sac || "contato@empresa.com"}</div>
                       </div>
                     </div>
                   </div>
+                </div>
                 </div>
                 
                 {/* Status */}
