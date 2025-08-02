@@ -28,6 +28,7 @@ interface ProcessResponse {
 const AmazonCustomerService = () => {
   const [customerName, setCustomerName] = useState("");
   const [productPurchased, setProductPurchased] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [emailContent, setEmailContent] = useState("");
   const [userAnalysis, setUserAnalysis] = useState("");
   const [isUnderWarranty, setIsUnderWarranty] = useState<boolean | null>(null);
@@ -75,6 +76,7 @@ const AmazonCustomerService = () => {
           input_data: {
             customerName: customerName.trim(),
             productPurchased: productPurchased.trim(),
+            companyName: companyName.trim(),
             emailContent: emailContent.trim(),
             userAnalysis: userAnalysis.trim(),
             isUnderWarranty: isUnderWarranty,
@@ -89,6 +91,7 @@ const AmazonCustomerService = () => {
           sessionId: sessionResponse.sessionId,
           customerName: customerName.trim(),
           productPurchased: productPurchased.trim(),
+          companyName: companyName.trim(),
           emailContent: emailContent.trim(),
           userAnalysis: userAnalysis.trim(),
           isUnderWarranty: isUnderWarranty,
@@ -200,6 +203,16 @@ João Silva`;
                   placeholder="Digite o produto que o cliente comprou..."
                   value={productPurchased}
                   onChange={(e) => setProductPurchased(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Nome da Empresa</Label>
+                <Input
+                  id="companyName"
+                  placeholder="Digite o nome da empresa do vendedor (opcional)..."
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
                 />
               </div>
 

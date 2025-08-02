@@ -2060,7 +2060,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user;
       console.log('📦 [CUSTOMER_SERVICE] Received body:', req.body);
-      const { sessionId, customerName, productPurchased, emailContent, userAnalysis, isUnderWarranty, shippingFormat } = req.body;
+      const { sessionId, customerName, productPurchased, companyName, emailContent, userAnalysis, isUnderWarranty, shippingFormat } = req.body;
 
       if (!sessionId || !emailContent || !userAnalysis) {
         console.log('❌ [CUSTOMER_SERVICE] Missing required fields:', { 
@@ -2087,6 +2087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const webhookData = {
         customer_name: customerName,
         product_purchased: productPurchased,
+        company_name: companyName,
         email_content: emailContent,
         user_analysis: userAnalysis,
         is_under_warranty: isUnderWarranty,
@@ -2096,6 +2097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🎯 [CUSTOMER_SERVICE] Sending customer data to webhook:', { 
         customerName,
         productPurchased,
+        companyName,
         emailContentLength: emailContent.length,
         userAnalysisLength: userAnalysis.length,
         isUnderWarranty,
