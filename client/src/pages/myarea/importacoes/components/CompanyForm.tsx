@@ -24,8 +24,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { UserCompany } from '@shared/schema';
-import { ObjectUploader } from '@/components/ObjectUploader';
-import type { UploadResult } from '@uppy/core';
+
 import { Image, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -542,78 +541,131 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Logo da Empresa
           </h3>
-          <div className="flex items-center gap-4">
-            {logoPreview && (
-              <div className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                <img 
-                  src={logoPreview}
-                  alt="Logo da empresa" 
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    console.warn('Logo failed to load:', logoPreview);
-                    // Clear the preview on error to prevent infinite loops
-                    setLogoPreview(null);
-                  }}
-                  onLoad={() => {
-                    console.log('Logo loaded successfully:', logoPreview);
-                  }}
-                />
-              </div>
-            )}
-            
-            <ObjectUploader
-              maxNumberOfFiles={1}
-              maxFileSize={2 * 1024 * 1024} // 2MB
-              onGetUploadParameters={async () => {
-                const uploadURL = await uploadLogoMutation.mutateAsync();
-                return { method: 'PUT' as const, url: uploadURL };
-              }}
-              onComplete={async (result) => {
-                if (result.successful && result.successful.length > 0 && company) {
-                  const uploadedFile = result.successful[0];
-                  const logoURL = uploadedFile.uploadURL || '';
-                  
-                  try {
-                    const updateResult = await updateLogoMutation.mutateAsync({
-                      companyId: company.id,
-                      logoURL: logoURL,
-                    }) as any;
-                    
-                    // Use the normalized path from the server response
-                    const normalizedLogoUrl = updateResult.data?.logoUrl || logoURL;
-                    setLogoPreview(normalizedLogoUrl || null);
-                    form.setValue('logoUrl', normalizedLogoUrl || '');
-                    
-                    toast({
-                      title: "Sucesso",
-                      description: "Logo atualizado com sucesso!",
-                    });
-                    
-                    // Force close the modal by resetting Uppy state
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 500);
-                  } catch (error) {
-                    toast({
-                      title: "Erro",
-                      description: "Erro ao atualizar logo da empresa.",
-                      variant: "destructive",
-                    });
-                  }
-                }
-              }}
-              buttonClassName="w-fit"
-            >
-              <div className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                <span>{logoPreview ? 'Alterar Logo' : 'Upload Logo'}</span>
-              </div>
-            </ObjectUploader>
-          </div>
           
-          <p className="text-xs text-gray-500">
-            Formatos aceitos: PNG, JPEG, JPG. Tamanho máximo: 2MB.
-          </p>
+          <div className="flex items-start gap-4">
+            {/* Logo Preview */}
+            <div className="flex-shrink-0">
+              {logoPreview ? (
+                <div className="relative w-20 h-20 border-2 border-gray-200 rounded-lg overflow-hidden bg-white">
+                  <img 
+                    src={logoPreview}
+                    alt="Logo da empresa" 
+                    className="w-full h-full object-contain"
+                    onError={() => {
+                      console.warn('Logo failed to load, clearing preview');
+                      setLogoPreview(null);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLogoPreview(null);
+                      form.setValue('logoUrl', '');
+                    }}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                  <Image className="w-8 h-8 text-gray-400" />
+                </div>
+              )}
+            </div>
+
+            {/* Upload Controls */}
+            <div className="flex-1 space-y-2">
+              <div>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file || !company) return;
+
+                    // Validate file size (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                      toast({
+                        title: "Erro",
+                        description: "Arquivo muito grande. Máximo: 2MB",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+
+                    // Validate file type
+                    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+                      toast({
+                        title: "Erro",
+                        description: "Formato não aceito. Use PNG, JPEG ou JPG",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+
+                    try {
+                      // Get upload URL
+                      const uploadURL = await uploadLogoMutation.mutateAsync();
+                      
+                      // Upload file directly
+                      const uploadResponse = await fetch(uploadURL, {
+                        method: 'PUT',
+                        body: file,
+                        headers: {
+                          'Content-Type': file.type,
+                        },
+                      });
+
+                      if (!uploadResponse.ok) {
+                        throw new Error('Upload failed');
+                      }
+
+                      // Update company with logo URL
+                      const updateResult = await updateLogoMutation.mutateAsync({
+                        companyId: company.id,
+                        logoURL: uploadURL,
+                      }) as any;
+
+                      // Update preview and form
+                      const normalizedLogoUrl = updateResult.data?.logoUrl || uploadURL;
+                      setLogoPreview(normalizedLogoUrl);
+                      form.setValue('logoUrl', normalizedLogoUrl || '');
+
+                      toast({
+                        title: "Sucesso",
+                        description: "Logo atualizado com sucesso!",
+                      });
+
+                      // Clear the input
+                      e.target.value = '';
+
+                    } catch (error) {
+                      console.error('Logo upload error:', error);
+                      toast({
+                        title: "Erro",
+                        description: "Erro ao fazer upload do logo",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="hidden"
+                  id="logo-upload"
+                />
+                <label
+                  htmlFor="logo-upload"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>{logoPreview ? 'Alterar Logo' : 'Upload Logo'}</span>
+                </label>
+              </div>
+              
+              <p className="text-xs text-gray-500">
+                Formatos aceitos: PNG, JPEG, JPG. Tamanho máximo: 2MB.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Observações */}
