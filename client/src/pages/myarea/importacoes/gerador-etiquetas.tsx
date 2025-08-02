@@ -278,40 +278,58 @@ export default function GeradorEtiquetas() {
       
       // Logo (se houver)
       if (logoDataUrl) {
-        pdf.addImage(logoDataUrl, "PNG", 3, 4, 28, 12);
+        pdf.addImage(logoDataUrl, "PNG", 3, 4, 32, 14);
       }
 
-      // Texto "IMPORTADO E DISTRIBUÍDO NO BRASIL POR:"
-      pdf.setFontSize(6);
+      // Texto "IMPORTADO E DISTRIBUÍDO POR:"
+      pdf.setFontSize(5);
       pdf.setFont("helvetica", "bold");
-      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 3, 20);
+      const importadoLines = pdf.splitTextToSize("IMPORTADO E DISTRIBUÍDO POR:", 30);
+      let importY = 19;
+      importadoLines.forEach((line: string) => {
+        pdf.text(line, 3, importY);
+        importY += 2;
+      });
 
       // Dados da empresa
-      pdf.setFontSize(6);
+      pdf.setFontSize(5);
       pdf.setFont("helvetica", "normal");
-      const companyLines = [
-        companyData.razaoSocial.toUpperCase(),
-        companyData.endereco.toUpperCase(),
-        `${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`,
-        `CEP ${companyData.cep}`,
-        `CNPJ ${companyData.cnpj}`
-      ];
       
-      let yPos = 23;
-      companyLines.forEach(line => {
-        // Garantir que o texto não ultrapasse a coluna esquerda
-        const maxWidth = 34;
-        const splitLines = pdf.splitTextToSize(line, maxWidth);
-        splitLines.forEach((splitLine: string) => {
-          pdf.text(splitLine, 3, yPos);
-          yPos += 2.5;
-        });
+      // Renderizar cada linha de informação da empresa
+      let yPos = importY + 1;
+      
+      // Razão Social
+      const razaoLines = pdf.splitTextToSize(companyData.razaoSocial.toUpperCase(), 30);
+      razaoLines.forEach((line: string) => {
+        pdf.text(line, 3, yPos);
+        yPos += 2;
       });
+      
+      // Endereço
+      const enderecoLines = pdf.splitTextToSize(companyData.endereco.toUpperCase(), 30);
+      enderecoLines.forEach((line: string) => {
+        pdf.text(line, 3, yPos);
+        yPos += 2;
+      });
+      
+      // Bairro e Cidade
+      const localLines = pdf.splitTextToSize(`${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`, 30);
+      localLines.forEach((line: string) => {
+        pdf.text(line, 3, yPos);
+        yPos += 2;
+      });
+      
+      // CEP
+      pdf.text(`CEP ${companyData.cep}`, 3, yPos);
+      yPos += 2;
+      
+      // CNPJ
+      pdf.text(`CNPJ ${companyData.cnpj}`, 3, yPos);
 
       // Código de barras
       if (barcodeDataUrl) {
         // Posicionar o código de barras garantindo que não ultrapasse a coluna
-        pdf.addImage(barcodeDataUrl, "PNG", 3, 46, 32, 11);
+        pdf.addImage(barcodeDataUrl, "PNG", 3, 45, 32, 12);
       }
 
       // Coluna direita (60%)
@@ -785,7 +803,7 @@ export default function GeradorEtiquetas() {
                       
                       {/* Texto importado */}
                       <div className="text-[9px] font-bold mb-1 uppercase">
-                        IMPORTADO E DISTRIBUÍDO NO BRASIL POR:
+                        IMPORTADO E DISTRIBUÍDO POR:
                       </div>
                       
                       {/* Dados da empresa */}
