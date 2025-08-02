@@ -13,7 +13,6 @@ import { PermissionGuard } from "@/components/guards/PermissionGuard";
 // Layout removed - component is already wrapped by app layout
 import { Link } from "wouter";
 import { useCreditSystem } from '@/hooks/useCreditSystem';
-import { usePermissions } from '@/contexts/UserContext';
 
 const AmazonNegativeReviews = () => {
   const [negativeReview, setNegativeReview] = useState("");
@@ -83,21 +82,7 @@ const AmazonNegativeReviews = () => {
       });
 
       if (response.sessionId) {
-        // Registrar log de uso com dedução automática de créditos
-        await logAIGeneration({
-          featureCode: FEATURE_CODE,
-          provider: 'amazon-negative-reviews',
-          model: 'negative-reviews-ai',
-          prompt: `Resposta para avaliação negativa processada`,
-          response: 'Resposta gerada com sucesso',
-          inputTokens: 0,
-          outputTokens: 0,
-          totalTokens: 0,
-          cost: 0,
-          duration: 0
-        });
-
-        setLocation(`/agentes/amazon-negative-reviews/result?sessionId=${response.sessionId}`);
+        setLocation(`/agentes/amazon-negative-reviews/resultado/${response.sessionId}`);
       }
     } catch (error: any) {
       console.error("Error processing review response:", error);
@@ -111,15 +96,7 @@ const AmazonNegativeReviews = () => {
     }
   };
 
-  // Debug permission state
-  const { hasAccess, isLoading: permissionLoading, features } = usePermissions();
-  console.log('🔍 [DEBUG] Amazon Negative Reviews Permission Check:', {
-    featureCode: 'agents.negative_reviews',
-    hasAccess: hasAccess('agents.negative_reviews'),
-    permissionLoading,
-    features,
-    featuresIncludesTarget: features.includes('agents.negative_reviews')
-  });
+  // Removed debug logging
 
   return (
     <PermissionGuard 

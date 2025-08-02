@@ -2382,19 +2382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Dados obrigatórios não fornecidos' });
       }
 
-      // Get agent configuration
-      const agent = await storage.getAgentById('amazon-negative-reviews');
-      if (!agent) {
-        return res.status(404).json({ error: 'Agente não encontrado' });
-      }
-
-      // Get prompts
-      const systemPrompt = await storage.getAgentPrompt('amazon-negative-reviews', 'system');
-      const mainPrompt = await storage.getAgentPrompt('amazon-negative-reviews', 'main');
-
-      if (!systemPrompt || !mainPrompt) {
-        return res.status(404).json({ error: 'Prompts do agente não encontrados' });
-      }
+      // Using webhook - no need for agent configuration or prompts
 
       // Create session
       const sessionData = {
@@ -2413,107 +2401,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       global.negativeReviewsSessions.set(sessionId, sessionData);
 
-      // Process prompt with user data
-      const processedPrompt = mainPrompt.content
-        .replace('[NEGATIVE_REVIEW]', negativeReview)
-        .replace('[USER_INFO]', userInfo || 'Nenhuma informação adicional fornecida')
-        .replace('[SELLER_NAME]', sellerName)
-        .replace('[SELLER_POSITION]', sellerPosition)
-        .replace('[CUSTOMER_NAME]', customerName)
-        .replace('[ORDER_ID]', orderId);
-
-      console.log('🤖 [NEGATIVE_REVIEWS] Processing with Anthropic Claude:', agent.model);
-
-      // Call Anthropic API
-      const anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
-      });
-
-      const startTime = Date.now();
-
-      const response = await anthropic.messages.create({
-        model: agent.model || 'claude-sonnet-4-20250514',
-        max_tokens: parseInt(String(agent.maxTokens)) || 4000,
-        temperature: parseFloat(String(agent.temperature)) || 0.7,
-        messages: [
-          {
-            role: 'user',
-            content: `${systemPrompt.content}\n\n${processedPrompt}`,
-          },
-        ],
-      });
-
-      const processingTime = Date.now() - startTime;
-      const responseText = response.content[0]?.text || '';
-
-      // Calculate usage and cost
-      const inputTokens = response.usage?.input_tokens || 0;
-      const outputTokens = response.usage?.output_tokens || 0;
-      const totalTokens = inputTokens + outputTokens;
-      const costPer1k = agent.costPer1kTokens || 0.015;
-      const totalCost = (totalTokens / 1000) * costPer1k;
-
-      // Update session with results
-      sessionData.status = 'completed';
-      sessionData.completed_at = new Date().toISOString();
-      sessionData.result_data = {
-        response: responseText,
-        analysis: {
-          sentiment: 'Negativo',
-          urgency: 'Alta',
-          keyIssues: ['Defeito no produto', 'Atraso na entrega', 'Embalagem danificada']
-        }
+      // Prepare webhook payload - only user data, no prompts
+      const webhookPayload = {
+        sessionId,
+        avaliacaoNegativa: negativeReview.trim(),
+        informacoesAdicionais: userInfo?.trim() || '',
+        nomeVendedor: sellerName.trim(),
+        cargoVendedor: sellerPosition.trim(),
+        nomeCliente: customerName.trim(),
+        idPedido: orderId.trim(),
+        userId: user.id,
+        timestamp: new Date().toISOString()
       };
-      sessionData.processing_time = processingTime;
-      sessionData.tokens_used = { input: inputTokens, output: outputTokens, total: totalTokens };
-      sessionData.cost = totalCost;
 
-      global.negativeReviewsSessions.set(sessionId, sessionData);
+      console.log('🌐 [NEGATIVE_REVIEWS] Enviando dados para webhook:', {
+        sessionId,
+        cliente: customerName,
+        vendedor: sellerName,
+        pedido: orderId
+      });
 
-      // Save to AI Generation Logs with AUTOMATIC CREDIT DEDUCTION
-      try {
-        const fullPrompt = `${systemPrompt.content}\n\n${processedPrompt}`;
-        
-        const { LoggingService } = await import('./services/loggingService');
-        await LoggingService.saveAiLog(
-          user.id,
-          'agents.negative_reviews', // Feature code para dedução de créditos
-          fullPrompt,
-          responseText,
-          'anthropic',
-          agent.model || 'claude-sonnet-4-20250514',
-          inputTokens,
-          outputTokens,
-          totalTokens,
-          totalCost,
-          0, // creditsUsed = 0 para dedução automática
-          processingTime
-        );
-        
-        console.log(`📊 [AI_GENERATION_LOG] Amazon Negative Reviews processado`);
-        console.log(`📊 [DETAILS] Cliente: ${customerName} | Pedido: ${orderId} | Vendedor: ${sellerName}`);
-        console.log(`📊 [PERFORMANCE] Tokens: ${totalTokens} | Custo: $${totalCost.toFixed(6)} | Tempo: ${processingTime}ms`);
-      } catch (logError) {
-        console.error('❌ [AI_LOG] Error saving generation log:', logError);
+      // Send to webhook
+      const webhookUrl = 'https://n8n.guivasques.app/webhook-test/amazon-negative-feedback';
+      const webhookResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookPayload),
+      });
+
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook failed with status: ${webhookResponse.status}`);
       }
 
-      // Log usage for tracking (existing)
-      try {
-        await storage.createAgentUsage({
-          agentId: 'amazon-negative-reviews',
-          userId: user.id,
-          inputTokens,
-          outputTokens,
-          totalTokens,
-          cost: totalCost,
-          processingTime,
-          createdAt: new Date()
-        });
-      } catch (logError) {
-        console.error('❌ [NEGATIVE_REVIEWS] Error logging usage:', logError);
-      }
+      console.log('✅ [NEGATIVE_REVIEWS] Webhook enviado com sucesso');
 
-      res.json({ sessionId, status: 'completed' });
+      res.json({ sessionId, status: 'processing' });
     } catch (error: any) {
       console.error('❌ [NEGATIVE_REVIEWS] Error processing:', error);
       
@@ -2526,6 +2450,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Webhook callback for negative reviews response
+  app.post('/api/agents/amazon-negative-reviews/webhook-callback', async (req, res) => {
+    try {
+      const { sessionId, generatedContent, userId } = req.body;
+      
+      console.log('🔄 [NEGATIVE_REVIEWS] Callback recebido:', { sessionId, userId });
+      
+      if (!sessionId || !global.negativeReviewsSessions.has(sessionId)) {
+        console.log('❌ [NEGATIVE_REVIEWS] Sessão não encontrada:', sessionId);
+        return res.status(404).json({ error: 'Sessão não encontrada' });
+      }
+      
+      const sessionData = global.negativeReviewsSessions.get(sessionId);
+      
+      // Update session with webhook response
+      sessionData.status = 'completed';
+      sessionData.completed_at = new Date().toISOString();
+      sessionData.result_data = {
+        response: generatedContent || 'Resposta gerada pelo webhook',
+        analysis: {
+          sentiment: 'Negativo - Processado',
+          urgency: 'Definida pelo webhook',
+          keyIssues: ['Analisado via webhook']
+        }
+      };
+      
+      global.negativeReviewsSessions.set(sessionId, sessionData);
+      
+      // Log AI generation with credit deduction
+      if (userId) {
+        try {
+          const { LoggingService } = await import('./services/loggingService');
+          await LoggingService.saveAiLog(
+            userId,
+            'agents.negative_reviews',
+            'Processamento via webhook',
+            generatedContent || 'Resposta gerada',
+            'webhook',
+            'amazon-negative-reviews',
+            0, 0, 0, 0,
+            0, // creditsUsed = 0 para dedução automática
+            1000 // Processing time estimate
+          );
+        } catch (logError) {
+          console.error('❌ [NEGATIVE_REVIEWS] Error logging webhook generation:', logError);
+        }
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('❌ [NEGATIVE_REVIEWS] Webhook callback error:', error);
+      res.status(500).json({ error: 'Erro ao processar callback' });
     }
   });
 
