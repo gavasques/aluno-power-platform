@@ -47,14 +47,7 @@ const AmazonNegativeReviews = () => {
       return;
     }
 
-    if (!sellerName.trim() || !sellerPosition.trim() || !customerName.trim() || !orderId.trim()) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Campos opcionais - apenas avaliação negativa é obrigatória
 
     // Verificar créditos primeiro
     const creditCheck = await checkCredits(FEATURE_CODE);
@@ -155,7 +148,7 @@ const AmazonNegativeReviews = () => {
                 <div>
                   <Label htmlFor="sellerName" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    Seu Nome *
+                    Seu Nome
                   </Label>
                   <Input
                     id="sellerName"
@@ -163,14 +156,13 @@ const AmazonNegativeReviews = () => {
                     value={sellerName}
                     onChange={(e) => setSellerName(e.target.value)}
                     className="mt-2"
-                    required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="sellerPosition" className="flex items-center gap-2">
                     <Building className="h-4 w-4" />
-                    Cargo *
+                    Cargo
                   </Label>
                   <Input
                     id="sellerPosition"
@@ -178,14 +170,13 @@ const AmazonNegativeReviews = () => {
                     value={sellerPosition}
                     onChange={(e) => setSellerPosition(e.target.value)}
                     className="mt-2"
-                    required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="customerName" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    Nome do Cliente *
+                    Nome do Cliente
                   </Label>
                   <Input
                     id="customerName"
@@ -193,14 +184,13 @@ const AmazonNegativeReviews = () => {
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="mt-2"
-                    required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="orderId" className="flex items-center gap-2">
                     <Hash className="h-4 w-4" />
-                    ID do Pedido *
+                    ID do Pedido
                   </Label>
                   <Input
                     id="orderId"
@@ -208,7 +198,6 @@ const AmazonNegativeReviews = () => {
                     value={orderId}
                     onChange={(e) => setOrderId(e.target.value)}
                     className="mt-2"
-                    required
                   />
                 </div>
               </div>

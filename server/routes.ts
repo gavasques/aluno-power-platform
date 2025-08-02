@@ -2378,8 +2378,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { sessionId, negativeReview, userInfo, sellerName, sellerPosition, customerName, orderId } = req.body;
 
-      if (!sessionId || !negativeReview || !sellerName || !sellerPosition || !customerName || !orderId) {
-        return res.status(400).json({ error: 'Dados obrigatórios não fornecidos' });
+      if (!sessionId || !negativeReview) {
+        return res.status(400).json({ error: 'SessionId e avaliação negativa são obrigatórios' });
       }
 
       // Using webhook - no need for agent configuration or prompts
