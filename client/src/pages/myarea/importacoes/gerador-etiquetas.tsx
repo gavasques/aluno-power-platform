@@ -419,7 +419,7 @@ export default function GeradorEtiquetas() {
   }, [productData.eanCode, generateBarcode]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       <div className="container max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
