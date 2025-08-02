@@ -285,9 +285,9 @@ export default function GeradorEtiquetas() {
       // Dados da empresa
       pdf.setFontSize(7);
       pdf.setFont("helvetica", "normal");
-      pdf.text(companyData.razaoSocial, 3, 26);
-      pdf.text(companyData.endereco, 3, 30);
-      pdf.text(`${companyData.bairro}, ${companyData.cidade}`, 3, 34);
+      pdf.text(companyData.razaoSocial.toUpperCase(), 3, 26);
+      pdf.text(companyData.endereco.toUpperCase(), 3, 30);
+      pdf.text(`${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`, 3, 34);
       pdf.text(`CEP ${companyData.cep}`, 3, 38);
       pdf.text(`CNPJ ${companyData.cnpj}`, 3, 42);
 
@@ -300,41 +300,42 @@ export default function GeradorEtiquetas() {
       const rightStartX = 40;
       
       // Nome do produto
-      pdf.setFontSize(11);
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
-      const productLines = pdf.splitTextToSize(productData.nomeProduto, 57);
+      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 57);
       let productY = 8;
       productLines.forEach((line: string) => {
         pdf.text(line, rightStartX, productY);
-        productY += 4.5;
+        productY += 4;
       });
 
       // SKU - menor e mais discreto
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "bold");
-      pdf.text(productData.sku, rightStartX, productY + 5);
+      pdf.text(productData.sku.toUpperCase(), rightStartX, productY + 4);
 
       // Conteúdo
-      pdf.setFontSize(10);  
-      pdf.text("CONTÉM " + productData.conteudo, rightStartX, productY + 11);
+      pdf.setFontSize(9);  
+      pdf.text("CONTÉM " + productData.conteudo.toUpperCase(), rightStartX, productY + 9);
 
       // Informações adicionais
-      pdf.setFontSize(8);
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "normal");
       
-      let infoY = productY + 17;
+      let infoY = productY + 15;
       
       if (productData.cor) {
-        pdf.text(`COR: ${productData.cor}`, rightStartX, infoY);
-        infoY += 3.5;
+        pdf.text(`COR: ${productData.cor.toUpperCase()}`, rightStartX, infoY);
+        infoY += 3;
       }
       
-      pdf.text(`VALIDADE: ${productData.validade}`, rightStartX, infoY);
-      infoY += 3.5;
+      pdf.text(`VALIDADE: ${productData.validade.toUpperCase()}`, rightStartX, infoY);
+      infoY += 3;
       
-      pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem}`, rightStartX, infoY);
-      infoY += 3.5;
+      pdf.text(`PAÍS DE ORIGEM: ${productData.paisOrigem.toUpperCase()}`, rightStartX, infoY);
+      infoY += 3;
       
+      // SAC mantém o email em minúsculas
       pdf.text(`SAC: ${productData.sac}`, rightStartX, infoY);
 
       // Salvar PDF
@@ -764,7 +765,7 @@ export default function GeradorEtiquetas() {
                       </div>
                       
                       {/* Dados da empresa */}
-                      <div className="text-[9px] space-y-0.5 mb-2 flex-1">
+                      <div className="text-[9px] space-y-0.5 mb-2 flex-1 uppercase">
                         <div>{companyData.razaoSocial || "Empresa Ltda"}</div>
                         <div>{companyData.endereco || "Endereço"}</div>
                         <div>{companyData.bairro || "Bairro"}, {companyData.cidade || "Cidade"}</div>
@@ -787,25 +788,25 @@ export default function GeradorEtiquetas() {
                     {/* Coluna Direita (60%) */}
                     <div className="w-3/5 pl-3 flex flex-col">
                       {/* Nome do produto */}
-                      <div className="text-sm mb-4 leading-tight line-clamp-3">
+                      <div className="text-xs mb-3 leading-tight line-clamp-3 uppercase">
                         {productData.nomeProduto || "Nome do Produto"}
                       </div>
                       
                       {/* SKU */}
-                      <div className="text-base font-bold mb-3">
+                      <div className="text-sm font-bold mb-2 uppercase">
                         {productData.sku || "SKU001"}
                       </div>
                       
                       {/* Conteúdo */}
-                      <div className="text-sm font-semibold mb-4 uppercase">
+                      <div className="text-xs font-semibold mb-3 uppercase">
                         CONTÉM {productData.conteudo || "10 PEÇAS"}
                       </div>
                       
                       {/* Informações adicionais */}
-                      <div className="text-[10px] space-y-1 mt-auto">
-                        {productData.cor && <div>COR: {productData.cor}</div>}
-                        <div>VALIDADE: {productData.validade || "INDETERMINADA"}</div>
-                        <div>PAÍS DE ORIGEM: {productData.paisOrigem || "CHINA"}</div>
+                      <div className="text-[9px] space-y-0.5 mt-auto">
+                        {productData.cor && <div className="uppercase">COR: {productData.cor}</div>}
+                        <div className="uppercase">VALIDADE: {productData.validade || "INDETERMINADA"}</div>
+                        <div className="uppercase">PAÍS DE ORIGEM: {productData.paisOrigem || "CHINA"}</div>
                         <div>SAC: {productData.sac || "contato@bkza.com.br"}</div>
                       </div>
                     </div>
