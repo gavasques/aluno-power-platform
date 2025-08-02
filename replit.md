@@ -14,8 +14,13 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - **Label Generator**: CNPJ automatically populated and displayed in generated labels
   - **PDF Export**: CNPJ included in label PDF output with proper formatting
   - **CNPJ Fixed**: Resolved data persistence issue - CNPJ now saves correctly to database through API
-  - **Logo Upload Fixed**: Resolved black screen issue with temporary page reload solution after successful upload
-  - **Logo Display Added**: Company logos now display in company cards on MinhasEmpresas page
+  - **Logo Upload System Complete**: Fully resolved PNG logo upload and display functionality
+    - **Missing Route Fixed**: Added /objects/* route to serve uploaded images from object storage
+    - **URL Normalization**: Implemented automatic conversion of Google Storage URLs to /objects/ paths
+    - **TypeScript Errors Fixed**: Resolved type compatibility issues in company update function
+    - **Database Update**: Updated existing logo URLs to use normalized paths for proper display
+    - **Enhanced Error Handling**: Added SVG placeholder fallback for failed image loads
+    - **Logo Display Fixed**: Company logos now display correctly instead of showing black squares
 - **Minhas Empresas System Implementation**: Complete "My Companies" registration system
   - **Full CRUD Operations**: Create, read, update, delete companies with database integration
   - **Advanced Form Features**: Automatic uppercase conversion (except notes), organized field layout
