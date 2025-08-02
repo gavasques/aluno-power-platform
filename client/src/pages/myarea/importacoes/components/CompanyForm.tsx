@@ -607,8 +607,9 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                     try {
                       // Get upload URL
                       const uploadURL = await uploadLogoMutation.mutateAsync();
+                      console.log('🔍 [UPLOAD] Got upload URL:', uploadURL);
                       
-                      // Upload file directly
+                      // Upload file directly to Google Cloud Storage
                       const uploadResponse = await fetch(uploadURL, {
                         method: 'PUT',
                         body: file,
@@ -617,9 +618,15 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                         },
                       });
 
+                      console.log('🔍 [UPLOAD] Upload response status:', uploadResponse.status);
+
                       if (!uploadResponse.ok) {
-                        throw new Error('Upload failed');
+                        const errorText = await uploadResponse.text();
+                        console.error('🔍 [UPLOAD] Upload failed:', errorText);
+                        throw new Error(`Upload failed: ${uploadResponse.status}`);
                       }
+
+                      console.log('🔍 [UPLOAD] Upload successful, updating company...');
 
                       // Update company with logo URL
                       const updateResult = await updateLogoMutation.mutateAsync({
@@ -627,8 +634,10 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
                         logoURL: uploadURL,
                       }) as any;
 
-                      // Update preview and form
-                      const normalizedLogoUrl = updateResult.data?.logoUrl || uploadURL;
+                      console.log('🔍 [UPLOAD] Company update result:', updateResult);
+
+                      // Update preview and form with normalized URL
+                      const normalizedLogoUrl = updateResult.data?.logoUrl || updateResult.logoUrl;
                       setLogoPreview(normalizedLogoUrl);
                       form.setValue('logoUrl', normalizedLogoUrl || '');
 
