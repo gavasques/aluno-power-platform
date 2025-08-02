@@ -134,7 +134,6 @@ export const Header = memo(() => {
         </div>
         <div className="flex items-center space-x-4">
           <CreditDisplay />
-          <ThemeToggle />
           <UserNav />
         </div>
       </div>

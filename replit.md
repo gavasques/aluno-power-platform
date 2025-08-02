@@ -12,6 +12,8 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - **Dashboard Integration**: Added buttons to "Conecte-se Conosco" section with proper styling
   - **Layout Optimization**: Changed grid from 4 columns to 3 columns for better button arrangement
   - **Visual Consistency**: Maintained color scheme - yellow for "Nossos Cursos", emerald for "Ir para o Curso"
+  - **Theme Toggle Removal**: Removed dark/light theme toggle icon from header as requested
+  - **User Navigation Update**: Changed user avatar to simple "Eu" text button for cleaner interface
 - **CNPJ Field Addition**: Added CNPJ field to company registration system
   - **Database Update**: Added cnpj column to user_companies table
   - **Form Integration**: CNPJ field added to CompanyForm with validation

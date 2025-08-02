@@ -26,18 +26,8 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-9 w-9">
-            <AvatarImage src="/placeholder.svg" alt="Avatar" />
-            <AvatarFallback>
-              {(user?.name || "US")
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        <Button variant="ghost" className="relative h-10 px-3 font-medium">
+          Eu
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
