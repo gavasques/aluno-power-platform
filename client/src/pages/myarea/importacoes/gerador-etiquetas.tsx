@@ -268,103 +268,67 @@ export default function GeradorEtiquetas() {
       // Configurar bordas finas
       pdf.setLineWidth(0.3);
       pdf.rect(1, 1, 98, 58);
-      
-      // Linha divisória vertical entre colunas
-      pdf.setLineWidth(0.2);
-      pdf.line(40, 1, 40, 59);
 
-      // Coluna esquerda (40%)
-      const leftWidth = 39;
-      
       // Logo (se houver)
       if (logoDataUrl) {
-        pdf.addImage(logoDataUrl, "PNG", 3, 3, 34, 15);
+        pdf.addImage(logoDataUrl, "PNG", 3, 4, 30, 12);
       }
 
       // Texto "IMPORTADO E DISTRIBUÍDO POR:"
-      pdf.setFontSize(5);
+      pdf.setFontSize(6);
       pdf.setFont("helvetica", "bold");
-      const importadoLines = pdf.splitTextToSize("IMPORTADO E DISTRIBUÍDO POR:", 30);
-      let importY = 19;
-      importadoLines.forEach((line: string) => {
-        pdf.text(line, 3, importY);
-        importY += 2;
-      });
+      pdf.text("IMPORTADO E DISTRIBUÍDO POR:", 3, 19);
 
       // Dados da empresa
-      pdf.setFontSize(5);
+      pdf.setFontSize(6);
       pdf.setFont("helvetica", "normal");
       
-      // Renderizar cada linha de informação da empresa
-      let yPos = importY + 1;
-      
-      // Razão Social
-      const razaoLines = pdf.splitTextToSize(companyData.razaoSocial.toUpperCase(), 30);
-      razaoLines.forEach((line: string) => {
-        pdf.text(line, 3, yPos);
-        yPos += 2;
-      });
-      
-      // Endereço
-      const enderecoLines = pdf.splitTextToSize(companyData.endereco.toUpperCase(), 30);
-      enderecoLines.forEach((line: string) => {
-        pdf.text(line, 3, yPos);
-        yPos += 2;
-      });
-      
-      // Bairro e Cidade
-      const localLines = pdf.splitTextToSize(`${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`, 30);
-      localLines.forEach((line: string) => {
-        pdf.text(line, 3, yPos);
-        yPos += 2;
-      });
-      
-      // CEP
+      let yPos = 22;
+      pdf.text(companyData.razaoSocial.toUpperCase(), 3, yPos);
+      yPos += 3;
+      pdf.text(companyData.endereco.toUpperCase(), 3, yPos);
+      yPos += 3;
+      pdf.text(`${companyData.bairro.toUpperCase()}, ${companyData.cidade.toUpperCase()}`, 3, yPos);
+      yPos += 3;
       pdf.text(`CEP ${companyData.cep}`, 3, yPos);
-      yPos += 2;
-      
-      // CNPJ
+      yPos += 3;
       pdf.text(`CNPJ ${companyData.cnpj}`, 3, yPos);
 
       // Código de barras
       if (barcodeDataUrl) {
-        // Posicionar o código de barras garantindo que não ultrapasse a coluna
-        pdf.addImage(barcodeDataUrl, "PNG", 3, 44, 34, 13);
+        pdf.addImage(barcodeDataUrl, "PNG", 3, 38, 35, 18);
       }
 
-      // Coluna direita (60%)
-      const rightStartX = 45;
+      // Coluna direita
+      const rightStartX = 43;
       
       // Nome do produto
-      pdf.setFontSize(11);
+      pdf.setFontSize(12);
       pdf.setFont("helvetica", "normal");
-      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 52);
-      let productY = 12;
+      const productLines = pdf.splitTextToSize(productData.nomeProduto.toUpperCase(), 54);
+      let productY = 8;
       productLines.forEach((line: string, index: number) => {
         pdf.text(line, rightStartX, productY);
-        productY += 4;
+        productY += 5;
       });
 
       // Espaço após o nome do produto
-      productY += 3;
+      productY += 4;
 
-      // SKU - menor e mais discreto
-      pdf.setFontSize(11);
+      // SKU
+      pdf.setFontSize(12);
       pdf.setFont("helvetica", "bold");
       pdf.text(productData.sku.toUpperCase(), rightStartX, productY);
-      productY += 6;
+      productY += 7;
 
       // Conteúdo
-      pdf.setFontSize(10);  
+      pdf.setFontSize(11);  
       pdf.text("CONTÉM " + productData.conteudo.toUpperCase(), rightStartX, productY);
-      productY += 6;
+      productY += 8;
 
       // Informações adicionais
-      pdf.setFontSize(8);
+      pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
-      
-      // Espaço antes das informações adicionais
-      productY += 3;
       
       if (productData.cor) {
         pdf.text(`COR: ${productData.cor.toUpperCase()}`, rightStartX, productY);
@@ -830,22 +794,22 @@ export default function GeradorEtiquetas() {
                     {/* Coluna Direita (60%) */}
                     <div className="w-3/5 pl-3 flex flex-col">
                       {/* Nome do produto */}
-                      <div className="text-xs mb-3 leading-tight line-clamp-3 uppercase">
+                      <div className="text-sm mb-4 leading-tight line-clamp-3 uppercase">
                         {productData.nomeProduto || "Nome do Produto"}
                       </div>
                       
                       {/* SKU */}
-                      <div className="text-sm font-bold mb-2 uppercase">
+                      <div className="text-base font-bold mb-3 uppercase">
                         {productData.sku || "SKU001"}
                       </div>
                       
                       {/* Conteúdo */}
-                      <div className="text-xs font-semibold mb-3 uppercase">
+                      <div className="text-sm font-semibold mb-4 uppercase">
                         CONTÉM {productData.conteudo || "10 PEÇAS"}
                       </div>
                       
                       {/* Informações adicionais */}
-                      <div className="text-[9px] space-y-0.5 mt-auto">
+                      <div className="text-[10px] space-y-1 mt-auto">
                         {productData.cor && <div className="uppercase">COR: {productData.cor}</div>}
                         <div className="uppercase">VALIDADE: {productData.validade || "INDETERMINADA"}</div>
                         <div className="uppercase">PAÍS DE ORIGEM: {productData.paisOrigem || "CHINA"}</div>
