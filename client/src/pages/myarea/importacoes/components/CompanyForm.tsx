@@ -108,12 +108,14 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
   const updateLogoMutation = useMutation({
     mutationFn: async ({ companyId, logoURL }: { companyId: number; logoURL: string }) => {
       console.log('🔍 [FRONTEND] Updating logo for company:', { companyId, logoURL });
+      
+      // Check if we have a token
+      const token = localStorage.getItem('auth_token');
+      console.log('🔍 [FRONTEND] Auth token present:', !!token);
+      
       return apiRequest(`/api/user-companies/${companyId}/logo`, {
         method: 'PUT',
         body: JSON.stringify({ logoURL }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
     },
     onSuccess: (data) => {

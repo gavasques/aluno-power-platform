@@ -225,6 +225,9 @@ router.post('/upload-logo', requireAuth, async (req, res) => {
 
 // Update logo endpoint
 router.put('/:id/logo', requireAuth, async (req, res) => {
+  console.log('🔍 [LOGO_UPDATE] Route hit - Starting logo update');
+  console.log('🔍 [LOGO_UPDATE] Auth middleware passed:', !!req.user);
+  
   try {
     const companyId = parseInt(req.params.id);
     const { logoURL } = req.body;
@@ -233,6 +236,7 @@ router.put('/:id/logo', requireAuth, async (req, res) => {
       companyId, 
       logoURL: logoURL?.substring(0, 100) + '...', 
       userId: req.user?.id,
+      userEmail: req.user?.email,
       headers: {
         authorization: req.headers.authorization ? 'present' : 'missing',
         contentType: req.headers['content-type']
