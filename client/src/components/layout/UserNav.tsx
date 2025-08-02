@@ -26,7 +26,7 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 px-3 font-medium">
+        <Button variant="ghost" className="relative h-10 px-4 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-md">
           Eu
         </Button>
       </DropdownMenuTrigger>
