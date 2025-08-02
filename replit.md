@@ -45,7 +45,7 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - **Enhanced PDF Functions**: Refactored PDF generation with modular rendering functions for cleaner, dynamic field display
   - **Database Schema Update**: Added orderedByData field to schema with backward compatibility for existing documents
 - **Amazon Customer Service Webhook Migration**: Migrated from AI providers to webhook system
-  - Updated backend to use webhook: https://n8n.guivasques.app/webhook-test/amazon-cs-email-helper
+  - Updated backend to use webhook: https://n8n.guivasques.app/webhook-test/amazon-email-responde
   - Replaced Anthropic Claude integration with n8n webhook processing
   - **Payload Optimization**: Completely removed prompts and technical data - sends ONLY client email and user observations to webhook
   - Enhanced download functionality with timestamp naming: customer_service_YYYYMMDD_HHMMSS.txt

@@ -2088,7 +2088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Call webhook instead of AI provider
-      const webhookUrl = 'https://n8n.guivasques.app/webhook-test/amazon-cs-email-helper';
+      const webhookUrl = 'https://n8n.guivasques.app/webhook-test/amazon-email-responde';
       const webhookResponse = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
