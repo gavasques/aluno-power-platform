@@ -6,7 +6,7 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 ## User Preferences
 **Communication Style**: Simple, everyday language (user is non-technical)
 
-## Recent Changes (August 1-2, 2025)
+## Recent Changes (August 2, 2025)
 - **Header Navigation Reorganization**: Moved "Nossos Cursos" and "Ir para o Curso" buttons from header to dashboard
   - **Header Update**: Removed both buttons from main navigation menu for cleaner header layout
   - **Dashboard Integration**: Added buttons to "Conecte-se Conosco" section with proper styling
@@ -44,10 +44,13 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - **Ordered By Separation**: Full separation of "Ordered By" from "Sold To/Ship To" with independent data fields and PDF sections
   - **Enhanced PDF Functions**: Refactored PDF generation with modular rendering functions for cleaner, dynamic field display
   - **Database Schema Update**: Added orderedByData field to schema with backward compatibility for existing documents
-- **Amazon Customer Service Webhook Migration**: Migrated from AI providers to webhook system
-  - Updated backend to use webhook: https://n8n.guivasques.app/webhook-test/amazon-email-responde
-  - Replaced Anthropic Claude integration with n8n webhook processing
-  - **Payload Optimization**: Completely removed prompts and technical data - sends ONLY client email and user observations to webhook
+- **Amazon Customer Service Form Enhancement**: Complete restructuring of form fields for better data collection
+  - **New Required Fields**: Added "Nome do Comprador" and "Produto Comprado" as separate input fields
+  - **Field Reorganization**: "Email do Cliente" renamed to "Conteúdo do Email", "Informações do Usuário" updated to "Informações do Usuário" (análise)
+  - **Backend Integration**: Updated webhook payload with new structured data: customer_name, product_purchased, email_content, user_analysis
+  - **Webhook URL Update**: Migrated from n8n.guivasques.app to webhook.guivasques.app for improved reliability
+  - **Form Validation**: All 4 fields now required with comprehensive validation and error handling
+  - **Example Data**: Updated example button to populate all new fields with realistic test data
   - Enhanced download functionality with timestamp naming: customer_service_YYYYMMDD_HHMMSS.txt
   - Maintained copy and download features for generated email responses
   - Improved logging to track webhook-based generations
