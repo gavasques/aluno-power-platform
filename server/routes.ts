@@ -2062,14 +2062,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📦 [CUSTOMER_SERVICE] Received body:', req.body);
       const { sessionId, customerName, productPurchased, companyName, emailContent, userAnalysis, isUnderWarranty, shippingFormat } = req.body;
 
-      if (!sessionId || !emailContent || !userAnalysis) {
+      if (!sessionId || !emailContent) {
         console.log('❌ [CUSTOMER_SERVICE] Missing required fields:', { 
           hasSessionId: !!sessionId, 
           hasEmailContent: !!emailContent, 
           hasUserAnalysis: !!userAnalysis,
           body: req.body
         });
-        return res.status(400).json({ error: 'Campos obrigatórios: sessionId, emailContent, userAnalysis' });
+        return res.status(400).json({ error: 'Campos obrigatórios: sessionId, emailContent' });
       }
 
       // Get session data

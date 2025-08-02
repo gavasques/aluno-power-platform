@@ -50,14 +50,7 @@ const AmazonCustomerService = () => {
       return;
     }
 
-    if (!userAnalysis.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Por favor, insira sua análise sobre o caso",
-        variant: "destructive",
-      });
-      return;
-    }
+
 
     // Verificar créditos primeiro
     const creditCheck = await checkCredits(FEATURE_CODE);
@@ -228,7 +221,7 @@ João Silva`;
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="userAnalysis">Informações do Usuário *</Label>
+                <Label htmlFor="userAnalysis">Informações do Usuário</Label>
                 <Textarea
                   id="userAnalysis"
                   placeholder="Sua análise sobre o caso - explique o que ocorreu, contexto adicional, observações..."
@@ -270,7 +263,7 @@ João Silva`;
               <div className="flex gap-3">
                 <Button
                   onClick={handleSubmit}
-                  disabled={isProcessing || !emailContent.trim() || !userAnalysis.trim()}
+                  disabled={isProcessing || !emailContent.trim()}
                   className="flex-1"
                 >
                   {isProcessing ? (
