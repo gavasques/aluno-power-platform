@@ -55,7 +55,7 @@ const initialCompanyData: CompanyData = {
   endereco: "",
   bairro: "",
   cidade: "",
-  pais: "Brasil",
+  pais: "",
   cep: "",
   cnpj: ""
 };
@@ -76,6 +76,7 @@ export default function GeradorEtiquetas() {
   const [companyData, setCompanyData] = useState<CompanyData>(initialCompanyData);
   const [productData, setProductData] = useState<ProductData>(initialProductData);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string>("");
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>("");
@@ -87,46 +88,125 @@ export default function GeradorEtiquetas() {
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
   
   // Fetch user companies
-  const { data: companies = [] } = useQuery<UserCompany[]>({
+  const { data: companies = [], isLoading: isLoadingCompanies } = useQuery<UserCompany[]>({
     queryKey: ['/api/user-companies'],
     enabled: true,
   });
 
-  // Handle company selection
+  // Função para verificar se há dados editados manualmente
+  const hasManualEdits = useCallback((currentData: CompanyData, initialData: CompanyData): boolean => {
+    return Object.keys(currentData).some(key => {
+      const currentValue = currentData[key as keyof CompanyData];
+      const initialValue = initialData[key as keyof CompanyData];
+      return currentValue !== initialValue && currentValue !== "";
+    });
+  }, []);
+
+  // Função melhorada para carregar dados da empresa
+  const loadCompanyData = useCallback(async (companyId: string, forceLoad: boolean = false) => {
+    const company = companies?.find(c => c.id.toString() === companyId);
+    if (!company) return;
+
+    // Verifica se há edições manuais
+    const hasEdits = hasManualEdits(companyData, initialCompanyData);
+    
+    if (hasEdits && !forceLoad) {
+      // Mostra confirmação antes de sobrescrever
+      const shouldOverwrite = window.confirm(
+        "Você fez alterações manuais nos dados da empresa. " +
+        "Deseja substituir pelos dados da empresa selecionada? " +
+        "Esta ação não pode ser desfeita."
+      );
+      
+      if (!shouldOverwrite) {
+        // Reseta o seletor para não ficar inconsistente
+        setSelectedCompanyId("");
+        return;
+      }
+    }
+
+    // Carrega dados da empresa respeitando o país original
+    const newCompanyData: CompanyData = {
+      razaoSocial: company.corporateName,
+      endereco: company.address || "",
+      bairro: company.neighborhood || "",
+      cidade: company.city || "",
+      pais: company.country || "Brasil", // ✅ CORRIGIDO: Respeita o país da empresa
+      cep: company.postalCode || "",
+      cnpj: company.cnpj || ""
+    };
+
+    setCompanyData(newCompanyData);
+    
+    // Set logo if available
+    if (company.logoUrl) {
+      setLogoDataUrl(decodeHtmlEntities(company.logoUrl));
+    }
+    
+    // Fill SAC with company email if available
+    if (company.email) {
+      setProductData(prev => ({
+        ...prev,
+        sac: company.email || ""
+      }));
+    }
+    
+    toast({
+      title: "Dados carregados",
+      description: `Dados da empresa "${company.corporateName}" foram carregados com sucesso.`,
+    });
+  }, [companies, companyData, hasManualEdits, toast]);
+
+  // Função para mesclar dados da empresa com dados atuais
+  const mergeCompanyData = useCallback((companyId: string) => {
+    const company = companies?.find(c => c.id.toString() === companyId);
+    if (!company) return;
+
+    // Mescla apenas campos vazios
+    const mergedData: CompanyData = {
+      razaoSocial: companyData.razaoSocial || company.corporateName || "",
+      endereco: companyData.endereco || company.address || "",
+      bairro: companyData.bairro || company.neighborhood || "",
+      cidade: companyData.cidade || company.city || "",
+      pais: companyData.pais || company.country || "Brasil",
+      cep: companyData.cep || company.postalCode || "",
+      cnpj: companyData.cnpj || company.cnpj || ""
+    };
+
+    setCompanyData(mergedData);
+    
+    // Set logo if available and not already set
+    if (company.logoUrl && !logoDataUrl) {
+      setLogoDataUrl(decodeHtmlEntities(company.logoUrl));
+    }
+    
+    // Fill SAC with company email if available and not already set
+    if (company.email && !productData.sac) {
+      setProductData(prev => ({
+        ...prev,
+        sac: company.email || ""
+      }));
+    }
+    
+    toast({
+      title: "Dados mesclados",
+      description: "Dados da empresa foram mesclados com suas edições.",
+    });
+  }, [companies, companyData, logoDataUrl, productData.sac, toast]);
+
+  // Handle company selection (não carrega automaticamente)
   const handleCompanySelect = (companyId: string) => {
     if (companyId === "manual") {
       setSelectedCompany("");
+      setSelectedCompanyId("");
       setCompanyData(initialCompanyData);
       setLogoDataUrl("");
       return;
     }
     
-    const company = companies.find(c => c.id.toString() === companyId);
-    if (company) {
-      setSelectedCompany(companyId);
-      setCompanyData({
-        razaoSocial: company.corporateName,
-        endereco: company.address || "",
-        bairro: company.neighborhood || "",
-        cidade: company.city || "",
-        pais: company.country,
-        cep: company.postalCode || "",
-        cnpj: company.cnpj || ""
-      });
-      
-      // Set logo if available
-      if (company.logoUrl) {
-        setLogoDataUrl(decodeHtmlEntities(company.logoUrl));
-      }
-      
-      // Fill SAC with company email if available
-      if (company.email) {
-        setProductData(prev => ({
-          ...prev,
-          sac: company.email || ""
-        }));
-      }
-    }
+    setSelectedCompany(companyId);
+    setSelectedCompanyId(companyId);
+    // Não carrega automaticamente - deixa o usuário escolher
   };
 
   // Validação EAN-13
@@ -360,28 +440,18 @@ export default function GeradorEtiquetas() {
 
   // Limpar dados
   const clearData = () => {
-    setCompanyData({
-      razaoSocial: "",
-      endereco: "",
-      bairro: "",
-      cidade: "",
-      pais: "",
-      cep: "",    
-      cnpj: ""
-    });
-    setProductData({
-      nomeProduto: "",
-      sku: "",
-      conteudo: "",
-      cor: "",
-      validade: "",
-      paisOrigem: "",
-      sac: "",
-      eanCode: ""
-    });
+    setCompanyData(initialCompanyData);
+    setProductData(initialProductData);
+    setSelectedCompany("");
+    setSelectedCompanyId("");
     setLogoFile(null);
     setLogoDataUrl("");
     setBarcodeDataUrl("");
+    
+    toast({
+      title: "Dados limpos",
+      description: "Todos os dados foram resetados.",
+    });
   };
 
   // Carregar dados de exemplo
@@ -442,20 +512,66 @@ export default function GeradorEtiquetas() {
                         Dados da Empresa
                       </CardTitle>
                       
-                      {/* Company Selection Dropdown */}
-                      <Select value={selectedCompany} onValueChange={handleCompanySelect}>
-                        <SelectTrigger className="w-[300px]">
-                          <SelectValue placeholder="Selecionar empresa cadastrada" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="manual">Preencher manualmente</SelectItem>
-                          {companies.map((company) => (
-                            <SelectItem key={company.id} value={company.id.toString()}>
-                              {company.tradeName} - {company.corporateName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {/* Seletor de empresa melhorado */}
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Select
+                            value={selectedCompanyId}
+                            onValueChange={handleCompanySelect}
+                            disabled={isLoadingCompanies}
+                          >
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Selecione uma empresa..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="manual">Preencher manualmente</SelectItem>
+                              {companies.map((company) => (
+                                <SelectItem key={company.id} value={company.id.toString()}>
+                                  {company.tradeName} - {company.corporateName}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          
+                          {/* Botões de ação */}
+                          {selectedCompanyId && selectedCompanyId !== "manual" && (
+                            <div className="flex gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => loadCompanyData(selectedCompanyId, false)}
+                                title="Carregar dados (com confirmação se houver edições)"
+                              >
+                                Carregar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => mergeCompanyData(selectedCompanyId)}
+                                title="Mesclar dados (preenche apenas campos vazios)"
+                              >
+                                Mesclar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => loadCompanyData(selectedCompanyId, true)}
+                                title="Forçar carregamento (substitui tudo)"
+                              >
+                                Substituir
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {selectedCompanyId && selectedCompanyId !== "manual" && (
+                          <p className="text-sm text-muted-foreground">
+                            <strong>Carregar:</strong> Substitui dados (com confirmação) • 
+                            <strong>Mesclar:</strong> Preenche apenas campos vazios • 
+                            <strong>Substituir:</strong> Substitui tudo sem confirmação
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <CardDescription>
                       Informações da empresa que aparecerão na etiqueta
@@ -497,6 +613,15 @@ export default function GeradorEtiquetas() {
                           value={companyData.cidade}
                           onChange={(e) => setCompanyData(prev => ({ ...prev, cidade: e.target.value }))}
                           placeholder="Nome da cidade"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="pais">País *</Label>
+                        <Input
+                          id="pais"
+                          value={companyData.pais}
+                          onChange={(e) => setCompanyData(prev => ({ ...prev, pais: e.target.value }))}
+                          placeholder="Brasil"
                         />
                       </div>
                       <div>
