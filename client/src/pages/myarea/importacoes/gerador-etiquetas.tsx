@@ -179,9 +179,9 @@ export default function GeradorEtiquetas() {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // Redimensionar para caber no espaço da etiqueta
-        const maxWidth = 120;
-        const maxHeight = 40;
+        // Redimensionar para caber no espaço da etiqueta com melhor qualidade
+        const maxWidth = 200;
+        const maxHeight = 80;
         let { width, height } = img;
 
         if (width > maxWidth) {
@@ -197,7 +197,7 @@ export default function GeradorEtiquetas() {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
         
-        setLogoDataUrl(canvas.toDataURL());
+        setLogoDataUrl(canvas.toDataURL('image/png', 1.0));
       };
       img.src = e.target?.result as string;
     };
@@ -219,15 +219,15 @@ export default function GeradorEtiquetas() {
       const canvas = document.createElement("canvas");
       JsBarcode(canvas, productData.eanCode, {
         format: "EAN13",
-        width: 1.5,
-        height: 50,
+        width: 3,
+        height: 100,
         displayValue: true,
-        fontSize: 10,
-        textMargin: 2,
+        fontSize: 18,
+        textMargin: 0,
         background: "#ffffff",
         lineColor: "#000000"
       });
-      setBarcodeDataUrl(canvas.toDataURL());
+      setBarcodeDataUrl(canvas.toDataURL('image/png', 1.0));
     } catch (error) {
       toast({
         title: "Erro ao gerar código de barras",
@@ -257,33 +257,25 @@ export default function GeradorEtiquetas() {
         format: [100, 60] // 10cm x 6cm
       });
 
-      // Configurar bordas
-      pdf.setLineWidth(0.5);
-      pdf.rect(2, 2, 96, 56);
+      // Configurar bordas mais grossas
+      pdf.setLineWidth(1);
+      pdf.rect(1, 1, 98, 58);
 
       // Coluna esquerda (40%)
       const leftWidth = 38;
       
       // Logo (se houver)
       if (logoDataUrl) {
-        pdf.addImage(logoDataUrl, "PNG", 4, 4, 30, 12);
-      } else {
-        // Logo placeholder
-        pdf.setFillColor(0, 0, 0);
-        pdf.rect(4, 4, 30, 12, "F");
-        pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(10);
-        pdf.text("LOGO", 19, 11, { align: "center" });
-        pdf.setTextColor(0, 0, 0);
+        pdf.addImage(logoDataUrl, "PNG", 4, 4, 34, 14);
       }
 
       // Texto "IMPORTADO E DISTRIBUÍDO NO BRASIL POR:"
-      pdf.setFontSize(6);
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "bold");
-      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 4, 20);
+      pdf.text("IMPORTADO E DISTRIBUÍDO NO BRASIL POR:", 4, 21);
 
       // Dados da empresa
-      pdf.setFontSize(5);
+      pdf.setFontSize(6);
       pdf.setFont("helvetica", "normal");
       const companyInfo = [
         companyData.razaoSocial,
@@ -293,36 +285,36 @@ export default function GeradorEtiquetas() {
         `CNPJ: ${companyData.cnpj}`
       ];
       
-      let yPos = 23;
+      let yPos = 25;
       companyInfo.forEach((line) => {
         pdf.text(line, 4, yPos);
-        yPos += 2.5;
+        yPos += 3;
       });
 
-      // Código de barras
+      // Código de barras com melhor qualidade
       if (barcodeDataUrl) {
-        pdf.addImage(barcodeDataUrl, "PNG", 4, 40, 34, 15);
+        pdf.addImage(barcodeDataUrl, "PNG", 4, 38, 34, 18);
       }
 
       // Coluna direita (60%)
       const rightStartX = 42;
       
       // Nome do produto
-      pdf.setFontSize(12);
+      pdf.setFontSize(13);
       pdf.setFont("helvetica", "bold");
       const productLines = pdf.splitTextToSize(productData.nomeProduto, 54);
-      pdf.text(productLines, rightStartX, 8);
+      pdf.text(productLines, rightStartX, 10);
 
       // SKU
-      pdf.setFontSize(14);
-      pdf.text(productData.sku, rightStartX, 20);
+      pdf.setFontSize(16);
+      pdf.text(productData.sku, rightStartX, 24);
 
       // Conteúdo
-      pdf.setFontSize(10);  
-      pdf.text(productData.conteudo, rightStartX, 27);
+      pdf.setFontSize(11);  
+      pdf.text(productData.conteudo, rightStartX, 32);
 
       // Informações adicionais
-      pdf.setFontSize(6);
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "normal");
       const additionalInfo = [
         productData.cor ? `COR: ${productData.cor}` : "",
@@ -331,10 +323,10 @@ export default function GeradorEtiquetas() {
         `SAC: ${productData.sac}`
       ].filter(Boolean);
 
-      yPos = 40;
+      yPos = 42;
       additionalInfo.forEach((line) => {
         pdf.text(line, rightStartX, yPos);
-        yPos += 3;
+        yPos += 4;
       });
 
       // Salvar PDF
@@ -742,27 +734,29 @@ export default function GeradorEtiquetas() {
               </CardHeader>
               <CardContent>
                 {/* Preview Container */}
-                <div className="bg-white border-2 border-black p-2 mx-auto" style={{ width: '320px', height: '192px' }}>
-                  <div className="flex h-full">
+                <div className="bg-white border-4 border-gray-800 mx-auto shadow-lg" style={{ width: '400px', height: '240px' }}>
+                  <div className="flex h-full p-4">
                     {/* Coluna Esquerda (40%) */}
-                    <div className="w-2/5 pr-2 flex flex-col justify-between">
+                    <div className="w-2/5 pr-4 flex flex-col">
                       {/* Logo */}
-                      <div className="h-8 bg-black text-white text-xs flex items-center justify-center mb-2">
+                      <div className="mb-3">
                         {logoDataUrl ? (
-                          <img src={logoDataUrl} alt="Logo" className="max-h-full max-w-full object-contain" />
+                          <img src={logoDataUrl} alt="Logo" className="max-h-16 max-w-full object-contain" />
                         ) : (
-                          "LOGO"
+                          <div className="h-16 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
+                            Logo
+                          </div>
                         )}
                       </div>
                       
                       {/* Texto importado */}
-                      <div className="text-xs font-bold mb-1">
+                      <div className="text-xs font-bold mb-2 uppercase tracking-tight">
                         IMPORTADO E DISTRIBUÍDO NO BRASIL POR:
                       </div>
                       
                       {/* Dados da empresa */}
-                      <div className="text-xs space-y-0.5 mb-2 flex-1">
-                        <div>{companyData.razaoSocial || "Empresa Ltda"}</div>
+                      <div className="text-xs space-y-0.5 mb-3 flex-1">
+                        <div className="font-semibold">{companyData.razaoSocial || "Empresa Ltda"}</div>
                         <div>{companyData.endereco || "Endereço"}</div>
                         <div>{companyData.bairro || "Bairro"}, {companyData.cidade || "Cidade"}</div>
                         <div>CEP: {companyData.cep || "00000000"}</div>
@@ -770,40 +764,40 @@ export default function GeradorEtiquetas() {
                       </div>
                       
                       {/* Código de barras */}
-                      <div className="text-center">
+                      <div className="mt-auto">
                         {barcodeDataUrl ? (
-                          <img src={barcodeDataUrl} alt="Barcode" className="max-w-full h-auto" />
+                          <img src={barcodeDataUrl} alt="Barcode" className="w-full h-auto" style={{ maxHeight: '60px' }} />
                         ) : (
-                          <div className="text-xs bg-gray-100 p-1">
-                            Código de barras aparecerá aqui
+                          <div className="h-12 bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                            Código de barras
                           </div>
                         )}
                       </div>
                     </div>
                     
                     {/* Coluna Direita (60%) */}
-                    <div className="w-3/5 pl-2 flex flex-col">
+                    <div className="w-3/5 pl-4 flex flex-col border-l border-gray-300">
                       {/* Nome do produto */}
-                      <div className="text-sm font-bold mb-2 leading-tight">
+                      <div className="text-lg font-bold mb-3 leading-tight">
                         {productData.nomeProduto || "Nome do Produto"}
                       </div>
                       
                       {/* SKU */}
-                      <div className="text-lg font-bold mb-1">
+                      <div className="text-2xl font-black mb-2">
                         {productData.sku || "SKU001"}
                       </div>
                       
                       {/* Conteúdo */}
-                      <div className="text-xs font-bold mb-2">
-                        {productData.conteudo || "CONTÉM X PEÇA(S)"}
+                      <div className="text-base font-bold mb-4 uppercase">
+                        {productData.conteudo || "Contém 1 peça"}
                       </div>
                       
                       {/* Informações adicionais */}
-                      <div className="text-xs space-y-1 mt-auto">
-                        {productData.cor && <div>COR: {productData.cor}</div>}
-                        <div>VALIDADE: {productData.validade || "INDETERMINADA"}</div>
-                        <div>PAÍS DE ORIGEM: {productData.paisOrigem || "PAÍS"}</div>
-                        <div>SAC: {productData.sac || "contato@empresa.com"}</div>
+                      <div className="text-sm space-y-1 mt-auto">
+                        {productData.cor && <div><span className="font-semibold">COR:</span> {productData.cor}</div>}
+                        <div><span className="font-semibold">VALIDADE:</span> {productData.validade || "Indeterminada"}</div>
+                        <div><span className="font-semibold">PAÍS DE ORIGEM:</span> {productData.paisOrigem || "CHINA"}</div>
+                        <div><span className="font-semibold">SAC:</span> {productData.sac || "contato@empresa.com"}</div>
                       </div>
                     </div>
                   </div>
