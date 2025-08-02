@@ -130,7 +130,12 @@ router.put('/:id', requireAuth, async (req, res) => {
     // Debug logging to check validated data
     console.log('🔍 [USER_COMPANIES] Validated data:', validatedData);
     
-    const company = await storage.updateUserCompany(id, validatedData);
+    // Filter out null values for logoUrl to handle TypeScript type compatibility
+    const cleanData = Object.fromEntries(
+      Object.entries(validatedData).filter(([key, value]) => value !== null && value !== undefined)
+    ) as Partial<typeof validatedData>;
+    
+    const company = await storage.updateUserCompany(id, cleanData);
 
     res.json({
       success: true,
@@ -208,24 +213,40 @@ router.put('/:id/logo', requireAuth, async (req, res) => {
     const companyId = parseInt(req.params.id);
     const { logoURL } = req.body;
     
+    console.log('🔍 [LOGO_UPDATE] Request received:', { companyId, logoURL, userId: req.user?.id });
+    
     if (!logoURL) {
+      console.log('❌ [LOGO_UPDATE] Missing logoURL');
       return res.status(400).json({ error: 'logoURL é obrigatório' });
     }
 
     const userId = req.user?.id;
     if (!userId) {
+      console.log('❌ [LOGO_UPDATE] Missing userId');
       return res.status(401).json({ error: 'Não autorizado' });
+    }
+
+    // Verify company belongs to user
+    const existingCompany = await storage.getUserCompany(companyId);
+    if (!existingCompany) {
+      console.log('❌ [LOGO_UPDATE] Company not found:', companyId);
+      return res.status(404).json({ error: 'Empresa não encontrada' });
+    }
+
+    if (existingCompany.userId !== userId) {
+      console.log('❌ [LOGO_UPDATE] Access denied:', { companyUserId: existingCompany.userId, requestUserId: userId });
+      return res.status(403).json({ error: 'Acesso negado' });
     }
 
     const objectStorageService = new ObjectStorageService();
     const normalizedPath = objectStorageService.normalizeObjectEntityPath(logoURL);
+    
+    console.log('🔍 [LOGO_UPDATE] Normalized path:', normalizedPath);
 
     // Update company with logo URL
     const company = await storage.updateUserCompany(companyId, { logoUrl: normalizedPath });
     
-    if (!company) {
-      return res.status(404).json({ error: 'Empresa não encontrada' });
-    }
+    console.log('🔍 [LOGO_UPDATE] Update result:', company);
 
     res.json({
       success: true,
@@ -233,7 +254,7 @@ router.put('/:id/logo', requireAuth, async (req, res) => {
       message: 'Logo atualizado com sucesso'
     });
   } catch (error) {
-    console.error('Erro ao atualizar logo da empresa:', error);
+    console.error('❌ [LOGO_UPDATE] Error updating company logo:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

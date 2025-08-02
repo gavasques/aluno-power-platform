@@ -108,6 +108,7 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
   // Update logo mutation  
   const updateLogoMutation = useMutation({
     mutationFn: async ({ companyId, logoURL }: { companyId: number; logoURL: string }) => {
+      console.log('🔍 [FRONTEND] Updating logo for company:', { companyId, logoURL });
       return apiRequest(`/api/user-companies/${companyId}/logo`, {
         method: 'PUT',
         body: JSON.stringify({ logoURL }),
@@ -116,8 +117,12 @@ export function CompanyForm({ company, onSuccess, onCancel }: CompanyFormProps) 
         },
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🔍 [FRONTEND] Logo update successful:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/user-companies'] });
+    },
+    onError: (error) => {
+      console.error('🔍 [FRONTEND] Logo update failed:', error);
     },
   });
   
