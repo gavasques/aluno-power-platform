@@ -74,7 +74,7 @@ export const useLoginForm = (): UseLoginFormReturn => {
         description: "Bem-vindo de volta!",
       });
       
-      setLocation('/dashboard');
+      setLocation('/');
     } catch (error: any) {
       const errorMessage = error?.message || 'Erro ao fazer login';
       
