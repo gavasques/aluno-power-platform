@@ -34,9 +34,8 @@ interface SessionData {
 }
 
 const AmazonNegativeReviewsResult = () => {
-  // Get sessionId from URL query parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const sessionId = urlParams.get('sessionId');
+  // Get sessionId from URL path
+  const sessionId = window.location.pathname.split('/').pop();
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
