@@ -2422,7 +2422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send to webhook
-      const webhookUrl = 'https://n8n.guivasques.app/webhook-test/amazon-negative-feedback';
+      const webhookUrl = 'https://webhook.guivasques.app/webhook/amazon-negative-feedback';
       const webhookResponse = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
