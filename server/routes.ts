@@ -2456,22 +2456,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook callback for negative reviews response
   app.post('/api/agents/amazon-negative-reviews/webhook-callback', async (req, res) => {
     try {
-      // Extract sessionId and userId from query parameters (n8n sends these in URL)
-      let sessionId = req.body.sessionId || req.query.sessionId || req.headers['x-session-id'];
-      let userId = req.body.userId || req.query.userId || req.headers['x-user-id'];
-      let responseContent;
+      console.log('🔄 [NEGATIVE_REVIEWS] Raw body:', req.body);
       
-      // Handle array format (n8n sends arrays that Express converts to objects with numeric keys)
-      if (Array.isArray(req.body) && req.body.length > 0) {
-        const responseData = req.body[0];
-        responseContent = responseData.retorno || responseData.text || responseData.generatedContent;
-      } else if (req.body['0'] && typeof req.body['0'] === 'object') {
-        // Handle Express-converted array format  
+      let sessionId, userId, responseContent;
+      
+      // Simplified extraction - n8n sends data in req.body['0'] format
+      if (req.body['0']) {
         const responseData = req.body['0'];
+        console.log('🔄 [NEGATIVE_REVIEWS] Response data from req.body[0]:', responseData);
+        
         responseContent = responseData.retorno || responseData.text || responseData.generatedContent;
+        sessionId = responseData.sessionId;
+        userId = responseData.userId;
+        
+        console.log('🔄 [NEGATIVE_REVIEWS] Extracted from array format:', {
+          sessionId, userId, hasContent: !!responseContent
+        });
       } else {
-        // Handle standard object format  
+        // Fallback to direct body access
         responseContent = req.body.generatedContent || req.body.retorno;
+        sessionId = req.body.sessionId || req.query.sessionId;
+        userId = req.body.userId || req.query.userId;
+        
+        console.log('🔄 [NEGATIVE_REVIEWS] Extracted from direct body:', {
+          sessionId, userId, hasContent: !!responseContent
+        });
       }
       
       console.log('🔄 [NEGATIVE_REVIEWS] Callback recebido:', { 
@@ -2510,7 +2519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId,
             'agents.negative_reviews',
             'Processamento via webhook',
-            generatedContent || 'Resposta gerada',
+            responseContent || 'Resposta gerada',
             'webhook',
             'amazon-negative-reviews',
             0, 0, 0, 0,
