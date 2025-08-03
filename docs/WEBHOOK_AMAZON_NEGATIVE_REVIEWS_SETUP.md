@@ -7,7 +7,7 @@ O webhook não está retornando automaticamente a resposta para o sistema após 
 
 ### URL do Webhook (onde o n8n recebe os dados)
 ```
-https://webhook.guivasques.app/webhook/amazon-negative-reviews
+https://webhook.guivasques.app/webhook/amazon-negative-feedback
 ```
 
 ### URL de Callback (onde o n8n deve enviar a resposta)
@@ -18,7 +18,7 @@ https://aluno-power.replit.app/api/agents/amazon-negative-reviews/webhook-callba
 ## Estrutura do Webhook no n8n
 
 ### 1. Webhook Trigger
-- URL: `https://webhook.guivasques.app/webhook/amazon-negative-reviews`
+- URL: `https://webhook.guivasques.app/webhook/amazon-negative-feedback`
 - Método: POST
 - Recebe os dados do formulário
 
