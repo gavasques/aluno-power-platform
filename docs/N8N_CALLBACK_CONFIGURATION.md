@@ -18,6 +18,11 @@ O webhook n8n está funcionando perfeitamente e gerando respostas, mas **não es
 
 O workflow n8n precisa incluir um passo adicional para fazer callback:
 
+### URL Atualizada do Webhook N8N:
+```
+https://webhook.guivasques.app/webhook/amazon-negative-reviews
+```
+
 ### URL do Callback:
 ```
 https://seu-dominio.replit.app/api/agents/amazon-negative-reviews/webhook-callback

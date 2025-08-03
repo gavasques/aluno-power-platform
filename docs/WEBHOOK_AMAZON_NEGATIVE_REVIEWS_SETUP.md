@@ -102,7 +102,7 @@ GET /api/agents/amazon-negative-reviews/sessions/{sessionId}
 
 ### URL do Webhook:
 ```
-https://webhook.guivasques.app/webhook/amazon-negative-feedback
+https://webhook.guivasques.app/webhook/amazon-negative-reviews
 ```
 
 ### Payload para n8n:

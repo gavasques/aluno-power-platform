@@ -2409,7 +2409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         agentType: 'amazon-negative-reviews',
         status: 'processing',
         inputData: sessionData.input_data,
-        webhookUrl: 'https://webhook.guivasques.app/webhook/amazon-negative-feedback'
+        webhookUrl: 'https://webhook.guivasques.app/webhook/amazon-negative-reviews'
       });
 
       // Prepare webhook payload
@@ -2435,7 +2435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send to n8n webhook
       
       try {
-        const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon-negative-feedback', {
+        const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon-negative-reviews', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2713,7 +2713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('🧪 [TEST] Testando webhook n8n...');
 
-      const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon-negative-feedback', {
+      const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon-negative-reviews', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

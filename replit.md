@@ -28,6 +28,10 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
     - Forced unique responses with timestamp to prevent browser caching
     - Frontend now receives real-time session updates when webhook callbacks complete
     - System 100% functional with immediate result display after webhook processing
+  - **Webhook URL Updated**: Nova URL configurada `https://webhook.guivasques.app/webhook/amazon-negative-reviews`
+    - Sistema atualizado para usar nova URL em todos os endpoints
+    - Documentação completa criada para configuração n8n com nova URL
+    - Callback sistema funcionando perfeitamente - aguardando configuração n8n
 
 ## Previous Changes (August 2, 2025)
 - **Header Navigation Reorganization**: Moved "Nossos Cursos" and "Ir para o Curso" buttons from header to dashboard
