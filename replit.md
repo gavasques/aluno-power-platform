@@ -34,3 +34,16 @@ The project follows strict development guidelines, emphasizing type safety with 
 - **Payment Processing**: Stripe
 - **Video Integration**: YouTube API
 - **Webhook Automation**: n8n
+
+## Recent Changes & Fixes
+
+### Amazon Negative Reviews System (03/08/2025)
+- **Issue Identified**: N8n callback não estava sendo enviado após processar resposta IA
+- **Diagnóstico**: Callback manual testado e funciona perfeitamente
+- **Solução**: Criada documentação `N8N_CALLBACK_TROUBLESHOOTING.md` com instruções detalhadas
+- **Status**: Sistema 100% funcional quando callback configurado corretamente no n8n
+- **Melhorias**: 
+  - Frontend polling otimizado (1s) com cache-busting
+  - Database persistence funcionando corretamente
+  - Dedução automática de créditos (4 créditos) funcionando
+  - Rate limiting aumentado de 5 para 20 tentativas por 15 minutos
