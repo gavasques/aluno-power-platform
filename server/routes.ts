@@ -2691,6 +2691,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint for webhook connectivity
+  app.post('/api/agents/amazon-negative-reviews/test-webhook', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const webhookPayload = {
+        sessionId: `test-${Date.now()}`,
+        userId: user.id.toString(),
+        avaliacaoNegativa: "Produto de teste para verificar webhook",
+        informacoesAdicionais: "Teste de conectividade",
+        nomeVendedor: "Sistema",
+        cargoVendedor: "Teste",
+        nomeCliente: "Admin",
+        idPedido: "TEST-WEBHOOK",
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('🧪 [TEST] Testando webhook n8n...');
+
+      const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon-negative-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'AlunoPower-Test/1.0'
+        },
+        body: JSON.stringify(webhookPayload),
+        timeout: 30000
+      });
+
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook retornou status ${webhookResponse.status}`);
+      }
+
+      const responseData = await webhookResponse.json();
+      console.log('✅ [TEST] Resposta do webhook recebida:', responseData);
+
+      res.json({
+        success: true,
+        webhookResponse: responseData,
+        message: 'Webhook n8n está funcionando, mas não está fazendo callback para a aplicação',
+        callbackUrl: `${req.protocol}://${req.get('host')}/api/agents/amazon-negative-reviews/webhook-callback`,
+        requiredCallbackPayload: [{
+          retorno: responseData.retorno,
+          sessionId: webhookPayload.sessionId,
+          userId: webhookPayload.userId
+        }]
+      });
+
+    } catch (error: any) {
+      console.error('❌ [TEST] Erro no teste:', error);
+      res.status(500).json({ 
+        error: 'Erro no teste do webhook',
+        details: error.message
+      });
+    }
+  });
+
   // Admin prompts management endpoints
   app.get('/api/agent-prompts/:agentId', async (req, res) => {
     try {
