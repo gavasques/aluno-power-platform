@@ -18,16 +18,20 @@ export const apiRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
-// Strict rate limiting for authentication endpoints
+// Relaxed rate limiting for authentication endpoints to allow normal usage
 export const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 auth requests per windowMs
+  windowMs: 5 * 60 * 1000, // 5 minutes  
+  max: 50, // limit each IP to 50 auth requests per 5 minutes (10 per minute)
   message: {
-    error: 'Muitas tentativas de autenticação. Tente novamente em 15 minutos.',
+    error: 'Muitas tentativas de autenticação. Tente novamente em 5 minutos.',
     status: 429
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for /me endpoint (user status checks)
+    return req.path === '/api/auth/me';
+  }
 });
 
 // Rate limiting for simulator endpoints
