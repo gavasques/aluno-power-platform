@@ -192,8 +192,8 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   });
 
   const response = await fetch(url, {
-    headers,
     ...options,
+    headers,
     body,
   });
 

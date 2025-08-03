@@ -51,6 +51,9 @@ export class AuthService {
 
       const response = await apiRequest<any>(AuthService.ENDPOINTS.LOGIN, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(credentials),
       });
 
