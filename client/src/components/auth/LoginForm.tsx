@@ -13,8 +13,8 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('gavasques@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -23,14 +23,24 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     setError('');
     setIsSubmitting(true);
 
+    console.log('🔍 FORM - Login attempt with:', {
+      email: email,
+      password: password ? '[PROVIDED]' : '[MISSING]',
+      emailLength: email?.length,
+      passwordLength: password?.length
+    });
+
     try {
       const result = await login(email, password);
+      console.log('🔍 FORM - Login result:', result);
+      
       if (result.success) {
         onSuccess?.();
       } else {
         setError(result.error || 'Erro ao fazer login');
       }
     } catch (err) {
+      console.error('🔍 FORM - Login exception:', err);
       setError('Erro de conexão. Tente novamente.');
     } finally {
       setIsSubmitting(false);
