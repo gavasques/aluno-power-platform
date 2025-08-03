@@ -6,7 +6,18 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 ## User Preferences
 **Communication Style**: Simple, everyday language (user is non-technical)
 
-## Recent Changes (August 2, 2025)
+## Recent Changes (August 3, 2025)
+- **Amazon Negative Reviews Webhook System Fixed**: Resolved critical issue preventing webhook callbacks from updating frontend
+  - **Root Cause**: Global authentication middleware was intercepting webhook callbacks from external services
+  - **Solution**: Added webhook callback endpoints to public API whitelist in `enhancedAuth.ts` middleware
+  - **URL Migration**: Updated webhook URL from n8n.guivasques.app to webhook.guivasques.app/webhook/amazon-negative-reviews
+  - **Authentication Fix**: Webhook callbacks now bypass authentication as intended for external service integration
+  - **Response Formatting**: Improved frontend display with proper line break preservation using `whitespace-pre-wrap`
+  - **Credit System**: Confirmed credit deduction (4 credits) works correctly when webhook processes responses
+  - **Testing Verified**: Complete end-to-end workflow tested - form submission → webhook → callback → formatted display
+  - **Status Management**: Sessions correctly update from "processing" to "completed" when webhook returns responses
+
+## Previous Changes (August 2, 2025)
 - **Header Navigation Reorganization**: Moved "Nossos Cursos" and "Ir para o Curso" buttons from header to dashboard
   - **Header Update**: Removed both buttons from main navigation menu for cleaner header layout
   - **Dashboard Integration**: Added buttons to "Conecte-se Conosco" section with proper styling
