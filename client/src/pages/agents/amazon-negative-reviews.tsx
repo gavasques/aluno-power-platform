@@ -61,21 +61,26 @@ const AmazonNegativeReviews = () => {
     try {
       const sessionId = `nr-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
-      const response = await apiRequest("/api/agents/amazon-negative-reviews/process", {
+      const response = await apiRequest("/api/agents/amazon-negative-reviews/generate", {
         method: "POST",
         body: {
-          sessionId,
           negativeReview: negativeReview.trim(),
           userInfo: userInfo.trim() || "",
-          sellerName: sellerName.trim(),
-          sellerPosition: sellerPosition.trim(),
-          customerName: customerName.trim(),
-          orderId: orderId.trim()
+          sellerName: sellerName.trim() || "",
+          sellerPosition: sellerPosition.trim() || "",
+          customerName: customerName.trim() || "",
+          orderId: orderId.trim() || ""
         },
       });
 
       if (response.sessionId) {
+        toast({
+          title: "Processamento iniciado!",
+          description: "Sua resposta está sendo gerada. Você será redirecionado para ver o resultado.",
+        });
         setLocation(`/agentes/amazon-negative-reviews/resultado/${response.sessionId}`);
+      } else {
+        throw new Error('Erro ao iniciar processamento');
       }
     } catch (error: any) {
       console.error("Error processing review response:", error);

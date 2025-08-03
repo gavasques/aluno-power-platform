@@ -2360,7 +2360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
-  // AI AGENT: AMAZON NEGATIVE REVIEWS RESPONSE
+  // AI AGENT: AMAZON NEGATIVE REVIEWS RESPONSE (REFATORADO)
   // ========================================
 
   // Global storage for negative reviews sessions
@@ -2368,173 +2368,217 @@ export async function registerRoutes(app: Express): Promise<Server> {
     global.negativeReviewsSessions = new Map();
   }
 
-  // Process negative reviews response
-  app.post('/api/agents/amazon-negative-reviews/process', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
+  // Start negative reviews generation
+  app.post('/api/agents/amazon-negative-reviews/generate', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
     try {
       const user = req.user;
       if (!user) {
         return res.status(401).json({ error: 'Usuário não autenticado' });
       }
 
-      const { sessionId, negativeReview, userInfo, sellerName, sellerPosition, customerName, orderId } = req.body;
+      const { negativeReview, userInfo, sellerName, sellerPosition, customerName, orderId } = req.body;
 
-      if (!sessionId || !negativeReview) {
-        return res.status(400).json({ error: 'SessionId e avaliação negativa são obrigatórios' });
+      if (!negativeReview?.trim()) {
+        return res.status(400).json({ error: 'Avaliação negativa é obrigatória' });
       }
 
-      // Using webhook - no need for agent configuration or prompts
+      // Generate session ID
+      const sessionId = `nr-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
-      // Create session
+      // Create session data
       const sessionData = {
         id: sessionId,
         status: 'processing',
+        user_id: user.id,
         input_data: {
-          negativeReview,
-          userInfo: userInfo || '',
-          sellerName,
-          sellerPosition,
-          customerName,
-          orderId
+          negativeReview: negativeReview.trim(),
+          userInfo: userInfo?.trim() || '',
+          sellerName: sellerName?.trim() || '',
+          sellerPosition: sellerPosition?.trim() || '',
+          customerName: customerName?.trim() || '',
+          orderId: orderId?.trim() || ''
         },
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
+      // Store session
       global.negativeReviewsSessions.set(sessionId, sessionData);
 
-      // Prepare webhook payload - only user data, no prompts
+      // Prepare webhook payload
       const webhookPayload = {
         sessionId,
+        userId: user.id.toString(),
         avaliacaoNegativa: negativeReview.trim(),
         informacoesAdicionais: userInfo?.trim() || '',
-        nomeVendedor: sellerName.trim(),
-        cargoVendedor: sellerPosition.trim(),
-        nomeCliente: customerName.trim(),
-        idPedido: orderId.trim(),
-        userId: user.id,
+        nomeVendedor: sellerName?.trim() || 'Vendedor',
+        cargoVendedor: sellerPosition?.trim() || 'Atendimento',
+        nomeCliente: customerName?.trim() || 'Cliente',
+        idPedido: orderId?.trim() || 'N/A',
         timestamp: new Date().toISOString()
       };
 
-      console.log('🌐 [NEGATIVE_REVIEWS] Enviando dados para webhook:', {
+      console.log('🚀 [NEGATIVE_REVIEWS] Iniciando geração:', {
         sessionId,
-        cliente: customerName,
-        vendedor: sellerName,
-        pedido: orderId
+        userId: user.id,
+        hasReview: !!negativeReview,
+        customerName: customerName || 'N/A'
       });
 
-      // Send to webhook
+      // Send to n8n webhook
       const webhookUrl = 'https://webhook.guivasques.app/webhook/amazon-negative-feedback';
-      const webhookResponse = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookPayload),
+      
+      try {
+        const webhookResponse = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'AlunoPower-NegativeReviews/1.0'
+          },
+          body: JSON.stringify(webhookPayload),
+          timeout: 30000
+        });
+
+        if (!webhookResponse.ok) {
+          throw new Error(`Webhook retornou status ${webhookResponse.status}`);
+        }
+
+        console.log('✅ [NEGATIVE_REVIEWS] Webhook enviado com sucesso');
+        
+      } catch (webhookError: any) {
+        console.error('❌ [NEGATIVE_REVIEWS] Erro no webhook:', webhookError.message);
+        
+        // Update session with error
+        sessionData.status = 'error';
+        sessionData.error_message = `Erro no webhook: ${webhookError.message}`;
+        sessionData.updated_at = new Date().toISOString();
+        global.negativeReviewsSessions.set(sessionId, sessionData);
+        
+        return res.status(500).json({ error: 'Erro ao enviar para processamento. Tente novamente.' });
+      }
+
+      res.json({ 
+        sessionId, 
+        status: 'processing',
+        message: 'Processamento iniciado com sucesso'
       });
 
-      if (!webhookResponse.ok) {
-        throw new Error(`Webhook failed with status: ${webhookResponse.status}`);
-      }
-
-      console.log('✅ [NEGATIVE_REVIEWS] Webhook enviado com sucesso');
-
-      res.json({ sessionId, status: 'processing' });
     } catch (error: any) {
-      console.error('❌ [NEGATIVE_REVIEWS] Error processing:', error);
-      
-      // Update session with error
-      if (global.negativeReviewsSessions && global.negativeReviewsSessions.has(req.body.sessionId)) {
-        const sessionData = global.negativeReviewsSessions.get(req.body.sessionId);
-        sessionData.status = 'error';
-        sessionData.error_message = error.message;
-        global.negativeReviewsSessions.set(req.body.sessionId, sessionData);
-      }
-      
-      res.status(500).json({ error: error.message });
+      console.error('❌ [NEGATIVE_REVIEWS] Erro geral:', error);
+      res.status(500).json({ error: error.message || 'Erro interno do servidor' });
     }
   });
 
   // Webhook callback for negative reviews response
   app.post('/api/agents/amazon-negative-reviews/webhook-callback', async (req, res) => {
     try {
-      console.log('🔄 [NEGATIVE_REVIEWS] Raw body:', req.body);
+      console.log('📥 [NEGATIVE_REVIEWS] Callback recebido - Body:', JSON.stringify(req.body, null, 2));
       
       let sessionId, userId, responseContent;
       
-      // Simplified extraction - n8n sends data in req.body['0'] format
-      if (req.body['0']) {
-        const responseData = req.body['0'];
-        console.log('🔄 [NEGATIVE_REVIEWS] Response data from req.body[0]:', responseData);
-        
-        responseContent = responseData.retorno || responseData.text || responseData.generatedContent;
+      // Handle n8n array format: [{"retorno": "...", "userId": "2", "sessionId": "..."}]
+      if (Array.isArray(req.body) && req.body.length > 0) {
+        const responseData = req.body[0];
+        responseContent = responseData.retorno || responseData.text;
         sessionId = responseData.sessionId;
         userId = responseData.userId;
         
-        console.log('🔄 [NEGATIVE_REVIEWS] Extracted from array format:', {
+        console.log('✅ [NEGATIVE_REVIEWS] Dados extraídos do array:', {
           sessionId, userId, hasContent: !!responseContent
         });
-      } else {
-        // Fallback to direct body access
-        responseContent = req.body.generatedContent || req.body.retorno;
+      } 
+      // Handle Express converted array format: {"0": {"retorno": "...", "userId": "2", "sessionId": "..."}}
+      else if (req.body['0'] && typeof req.body['0'] === 'object') {
+        const responseData = req.body['0'];
+        responseContent = responseData.retorno || responseData.text;
+        sessionId = responseData.sessionId;
+        userId = responseData.userId;
+        
+        console.log('✅ [NEGATIVE_REVIEWS] Dados extraídos do objeto[0]:', {
+          sessionId, userId, hasContent: !!responseContent
+        });
+      }
+      // Handle direct object format: {"retorno": "...", "userId": "2", "sessionId": "..."}
+      else {
+        responseContent = req.body.retorno || req.body.text;
         sessionId = req.body.sessionId || req.query.sessionId;
         userId = req.body.userId || req.query.userId;
         
-        console.log('🔄 [NEGATIVE_REVIEWS] Extracted from direct body:', {
+        console.log('✅ [NEGATIVE_REVIEWS] Dados extraídos direto:', {
           sessionId, userId, hasContent: !!responseContent
         });
       }
-      
-      console.log('🔄 [NEGATIVE_REVIEWS] Callback recebido:', { 
-        sessionId, 
-        userId, 
-        hasContent: !!responseContent,
-        bodyType: Array.isArray(req.body) ? 'array' : 'object'
-      });
-      
-      if (!sessionId || !global.negativeReviewsSessions.has(sessionId)) {
+
+      // Validate required data
+      if (!sessionId) {
+        console.log('❌ [NEGATIVE_REVIEWS] SessionId não encontrado no payload');
+        return res.status(400).json({ error: 'SessionId é obrigatório' });
+      }
+
+      if (!responseContent) {
+        console.log('❌ [NEGATIVE_REVIEWS] Conteúdo da resposta não encontrado');
+        return res.status(400).json({ error: 'Conteúdo da resposta é obrigatório' });
+      }
+
+      // Check if session exists
+      if (!global.negativeReviewsSessions?.has(sessionId)) {
         console.log('❌ [NEGATIVE_REVIEWS] Sessão não encontrada:', sessionId);
+        console.log('🔍 [NEGATIVE_REVIEWS] Sessões ativas:', 
+          Array.from(global.negativeReviewsSessions?.keys() || [])
+        );
         return res.status(404).json({ error: 'Sessão não encontrada' });
       }
-      
+
       const sessionData = global.negativeReviewsSessions.get(sessionId);
       
-      // Update session with webhook response
+      // Update session with successful response
       sessionData.status = 'completed';
       sessionData.completed_at = new Date().toISOString();
+      sessionData.updated_at = new Date().toISOString();
       sessionData.result_data = {
-        response: responseContent || 'Resposta gerada pelo webhook',
+        response: responseContent,
         analysis: {
           sentiment: 'Negativo - Processado',
-          urgency: 'Definida pelo webhook',
-          keyIssues: ['Analisado via webhook']
+          urgency: 'Resolvido via IA',
+          keyIssues: ['Análise automática concluída']
         }
       };
       
       global.negativeReviewsSessions.set(sessionId, sessionData);
-      
-      // Log AI generation with credit deduction
+
+      // Log AI usage and deduct credits
       if (userId) {
         try {
           const { LoggingService } = await import('./services/loggingService');
           await LoggingService.saveAiLog(
-            userId,
+            parseInt(userId),
             'agents.negative_reviews',
-            'Processamento via webhook',
-            responseContent || 'Resposta gerada',
+            'Resposta para avaliação negativa processada',
+            responseContent,
             'webhook',
             'amazon-negative-reviews',
-            0, 0, 0, 0,
+            0, 0, 0, 0, // token counts (handled by webhook)
             0, // creditsUsed = 0 para dedução automática
-            1000 // Processing time estimate
+            2000 // processing time estimate
           );
-        } catch (logError) {
-          console.error('❌ [NEGATIVE_REVIEWS] Error logging webhook generation:', logError);
+          
+          console.log('✅ [NEGATIVE_REVIEWS] Log de usage salvo e créditos deduzidos');
+          
+        } catch (logError: any) {
+          console.error('❌ [NEGATIVE_REVIEWS] Erro ao salvar log:', logError.message);
         }
       }
+
+      console.log('🎉 [NEGATIVE_REVIEWS] Processamento concluído com sucesso:', sessionId);
       
-      res.json({ success: true });
+      res.json({ success: true, sessionId, status: 'completed' });
+      
     } catch (error: any) {
-      console.error('❌ [NEGATIVE_REVIEWS] Webhook callback error:', error);
-      res.status(500).json({ error: 'Erro ao processar callback' });
+      console.error('❌ [NEGATIVE_REVIEWS] Erro no callback:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        details: error.message
+      });
     }
   });
 
@@ -2542,20 +2586,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/agents/amazon-negative-reviews/sessions/:sessionId', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
     try {
       const { sessionId } = req.params;
+      const user = req.user;
+
+      if (!user) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
       
-      if (!global.negativeReviewsSessions || !global.negativeReviewsSessions.has(sessionId)) {
+      if (!global.negativeReviewsSessions?.has(sessionId)) {
         return res.status(404).json({ error: 'Sessão não encontrada' });
       }
       
       const sessionData = global.negativeReviewsSessions.get(sessionId);
       
-      // Remove sensitive data from response (keep for internal logs only)
-      const { tokens_used, cost, ...publicSessionData } = sessionData;
+      // Verify session belongs to user
+      if (sessionData.user_id !== user.id) {
+        return res.status(403).json({ error: 'Acesso negado' });
+      }
       
-      res.json(publicSessionData);
+      console.log('📊 [NEGATIVE_REVIEWS] Status da sessão consultado:', {
+        sessionId,
+        status: sessionData.status,
+        hasResult: !!sessionData.result_data
+      });
+      
+      res.json({
+        id: sessionData.id,
+        status: sessionData.status,
+        input_data: sessionData.input_data,
+        result_data: sessionData.result_data,
+        created_at: sessionData.created_at,
+        completed_at: sessionData.completed_at,
+        error_message: sessionData.error_message
+      });
+      
     } catch (error: any) {
-      console.error('❌ [NEGATIVE_REVIEWS] Error getting session:', error);
-      res.status(500).json({ error: error.message });
+      console.error('❌ [NEGATIVE_REVIEWS] Erro ao consultar sessão:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
 
