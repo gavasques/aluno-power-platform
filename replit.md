@@ -37,13 +37,18 @@ The project follows strict development guidelines, emphasizing type safety with 
 
 ## Recent Changes & Fixes
 
-### Amazon Negative Reviews System (03/08/2025)
-- **Issue Identified**: N8n callback não estava sendo enviado após processar resposta IA
-- **Diagnóstico**: Callback manual testado e funciona perfeitamente
-- **Solução**: Criada documentação `N8N_CALLBACK_TROUBLESHOOTING.md` com instruções detalhadas
-- **Status**: Sistema 100% funcional quando callback configurado corretamente no n8n
-- **Melhorias**: 
-  - Frontend polling otimizado (1s) com cache-busting
-  - Database persistence funcionando corretamente
-  - Dedução automática de créditos (4 créditos) funcionando
-  - Rate limiting aumentado de 5 para 20 tentativas por 15 minutos
+### Amazon Negative Reviews System - SOLUÇÃO FINAL (03/08/2025)
+- **Problema Principal**: Sistema assíncrono complexo com callback n8n não funcionando
+- **Custo da Solução**: 6 horas + $1+ USD de troubleshooting
+- **Solução Implementada**: **MUDANÇA ARQUITETURAL COMPLETA** para sistema síncrono
+- **Arquitetura Nova**: App → N8n (aguarda resposta) → IA → Retorno direto (120s timeout)
+- **Status**: ✅ **COMPLETAMENTE RESOLVIDO E FUNCIONANDO**
+- **Funcionalidades**:
+  - ✅ Processamento síncrono direto com n8n (120s timeout)
+  - ✅ Resposta imediata sem polling necessário
+  - ✅ Dedução automática de créditos (4 créditos)
+  - ✅ Persistência de sessões no banco de dados
+  - ✅ Compatibilidade com múltiplos formatos de resposta do n8n
+  - ✅ Sistema fallback assíncrono mantido para compatibilidade
+- **Documentação**: `AMAZON_NEGATIVE_REVIEWS_TROUBLESHOOTING_GUIDE.md` criado com solução completa
+- **Lição Aprendida**: Sempre preferir soluções síncronas simples ao invés de arquiteturas assíncronas complexas
