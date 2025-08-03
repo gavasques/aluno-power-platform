@@ -18,6 +18,11 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - **Multiple Format Support**: Suporte para formato array n8n `[{"retorno": "..."}]` e objeto direto
   - **Complete Testing**: Sistema testado end-to-end com webhook callback funcionando 100%
   - **Documentation**: Guia completo de configuração com todos os formatos suportados
+  - **HTTP Cache Fix**: Resolved critical HTTP 304 cache issue preventing frontend updates
+    - Added anti-cache headers to session endpoint (`Cache-Control`, `Pragma`, `Expires`)
+    - Forced unique responses with timestamp to prevent browser caching
+    - Frontend now receives real-time session updates when webhook callbacks complete
+    - System 100% functional with immediate result display after webhook processing
 
 ## Previous Changes (August 2, 2025)
 - **Header Navigation Reorganization**: Moved "Nossos Cursos" and "Ir para o Curso" buttons from header to dashboard

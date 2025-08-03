@@ -2609,6 +2609,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasResult: !!sessionData.result_data
       });
       
+      // FORCE NO CACHE - CRITICAL FIX
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'ETag': Math.random().toString()
+      });
+      
       res.json({
         id: sessionData.id,
         status: sessionData.status,
@@ -2616,7 +2624,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         result_data: sessionData.result_data,
         created_at: sessionData.created_at,
         completed_at: sessionData.completed_at,
-        error_message: sessionData.error_message
+        error_message: sessionData.error_message,
+        _timestamp: Date.now() // Force unique response
       });
       
     } catch (error: any) {
