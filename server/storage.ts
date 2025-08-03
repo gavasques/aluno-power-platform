@@ -40,6 +40,7 @@ import {
   agentGenerations,
   agentSessions,
   agentSessionFiles,
+  agentProcessingSessions,
   generatedImages,
   upscaledImages,
   aiImgGenerationLogs,

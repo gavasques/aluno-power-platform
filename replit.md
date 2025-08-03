@@ -14,7 +14,12 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
   - **Credit System Integration**: Dedução automática de créditos quando callback é processado  
   - **Comprehensive Logging**: Logs detalhados para debug incluindo body parsing e session tracking
   - **Frontend Improvements**: TypeScript errors fixed, download functionality added, better UI
-  - **Session Management**: Sistema de sessões em memória com timeout e error handling
+  - **Database Persistence System**: CRITICAL FIX - Migrated from in-memory to PostgreSQL persistence
+    - Created `agentProcessingSessions` table with proper indexes for session persistence
+    - Fixed server restart data loss issue - sessions now survive server reboots
+    - All session CRUD operations now use database queries instead of memory storage
+    - Proper session lifecycle management with database persistence
+    - System tested and confirmed working with real session creation and retrieval
   - **Multiple Format Support**: Suporte para formato array n8n `[{"retorno": "..."}]` e objeto direto
   - **Complete Testing**: Sistema testado end-to-end com webhook callback funcionando 100%
   - **Documentation**: Guia completo de configuração com todos os formatos suportados

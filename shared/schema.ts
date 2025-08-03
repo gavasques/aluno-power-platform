@@ -1310,6 +1310,28 @@ export const knowledgeBaseDocCollections = pgTable("knowledge_base_doc_collectio
   uniqueDocCollection: unique().on(table.docId, table.collectionId),
 }));
 
+// Agent Processing Sessions table for webhook-based operations like Amazon negative reviews
+export const agentProcessingSessions = pgTable("agent_processing_sessions", {
+  id: text("id").primaryKey(), // session ID like "nr-1754190297093-i8hy4hmkz"
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  agentType: text("agent_type").notNull(), // "amazon-negative-reviews", "bullet-points", etc
+  status: text("status").notNull().default("processing"), // "processing", "completed", "error"
+  inputData: jsonb("input_data").notNull(), // Original form input
+  resultData: jsonb("result_data"), // AI response and analysis
+  errorMessage: text("error_message"), // Error details if failed
+  webhookUrl: text("webhook_url"), // N8N webhook URL used
+  creditsUsed: integer("credits_used").default(0), // Credits consumed
+  processingTimeMs: integer("processing_time_ms"), // Time taken to process
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => ({
+  userIdx: index("agent_processing_sessions_user_idx").on(table.userId),
+  typeIdx: index("agent_processing_sessions_type_idx").on(table.agentType),
+  statusIdx: index("agent_processing_sessions_status_idx").on(table.status),
+  createdIdx: index("agent_processing_sessions_created_idx").on(table.createdAt),
+}));
+
 // AI Image Generation Logs - Specialized table for AI image generation tracking
 export const aiImgGenerationLogs = pgTable("ai_img_generation_logs", {
   id: serial("id").primaryKey(),
@@ -2297,6 +2319,15 @@ export type AgentSessionFile = typeof agentSessionFiles.$inferSelect;
 export type AgentSessionWithFiles = AgentSession & {
   files: AgentSessionFile[];
 };
+
+// Agent Processing Sessions schemas
+export const insertAgentProcessingSessionSchema = createInsertSchema(agentProcessingSessions).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAgentProcessingSession = z.infer<typeof insertAgentProcessingSessionSchema>;
+export type AgentProcessingSession = typeof agentProcessingSessions.$inferSelect;
 
 // Auth schemas
 export const insertUserSchema = createInsertSchema(users).omit({

@@ -123,7 +123,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth, requireRole } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { materials, partners, tools, toolTypes, suppliers, news, updates, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, categories } from '@shared/schema';
+import { materials, partners, tools, toolTypes, suppliers, news, updates, agents, agentPrompts, agentUsage, agentGenerations, users, products, brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, categories, agentProcessingSessions } from '@shared/schema';
 
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';
@@ -2402,8 +2402,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updated_at: new Date().toISOString()
       };
 
-      // Store session
-      global.negativeReviewsSessions.set(sessionId, sessionData);
+      // Store session in database
+      await db.insert(agentProcessingSessions).values({
+        id: sessionId,
+        userId: user.id,
+        agentType: 'amazon-negative-reviews',
+        status: 'processing',
+        inputData: sessionData.input_data,
+        webhookUrl: 'https://webhook.guivasques.app/webhook/amazon-negative-feedback'
+      });
 
       // Prepare webhook payload
       const webhookPayload = {
@@ -2426,10 +2433,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send to n8n webhook
-      const webhookUrl = 'https://webhook.guivasques.app/webhook/amazon-negative-feedback';
       
       try {
-        const webhookResponse = await fetch(webhookUrl, {
+        const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon-negative-feedback', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2448,11 +2454,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (webhookError: any) {
         console.error('❌ [NEGATIVE_REVIEWS] Erro no webhook:', webhookError.message);
         
-        // Update session with error
-        sessionData.status = 'error';
-        sessionData.error_message = `Erro no webhook: ${webhookError.message}`;
-        sessionData.updated_at = new Date().toISOString();
-        global.negativeReviewsSessions.set(sessionId, sessionData);
+        // Update session with error in database
+        await db.update(agentProcessingSessions)
+          .set({
+            status: 'error',
+            errorMessage: `Erro no webhook: ${webhookError.message}`,
+            updatedAt: new Date()
+          })
+          .where(eq(agentProcessingSessions.id, sessionId));
         
         return res.status(500).json({ error: 'Erro ao enviar para processamento. Tente novamente.' });
       }
@@ -2520,22 +2529,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Conteúdo da resposta é obrigatório' });
       }
 
-      // Check if session exists
-      if (!global.negativeReviewsSessions?.has(sessionId)) {
-        console.log('❌ [NEGATIVE_REVIEWS] Sessão não encontrada:', sessionId);
-        console.log('🔍 [NEGATIVE_REVIEWS] Sessões ativas:', 
-          Array.from(global.negativeReviewsSessions?.keys() || [])
-        );
+      // Get session from database
+      const sessionResult = await db.select()
+        .from(agentProcessingSessions)
+        .where(eq(agentProcessingSessions.id, sessionId))
+        .limit(1);
+        
+      if (!sessionResult.length) {
+        console.log('❌ [NEGATIVE_REVIEWS] Sessão não encontrada no banco:', sessionId);
         return res.status(404).json({ error: 'Sessão não encontrada' });
       }
-
-      const sessionData = global.negativeReviewsSessions.get(sessionId);
       
-      // Update session with successful response
-      sessionData.status = 'completed';
-      sessionData.completed_at = new Date().toISOString();
-      sessionData.updated_at = new Date().toISOString();
-      sessionData.result_data = {
+      const sessionData = sessionResult[0];
+      
+      // Update session with successful response in database
+      const resultData = {
         response: responseContent,
         analysis: {
           sentiment: 'Negativo - Processado',
@@ -2544,7 +2552,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       
-      global.negativeReviewsSessions.set(sessionId, sessionData);
+      await db.update(agentProcessingSessions)
+        .set({
+          status: 'completed',
+          resultData: resultData,
+          completedAt: new Date(),
+          updatedAt: new Date(),
+          processingTimeMs: Date.now() - new Date(sessionData.createdAt).getTime()
+        })
+        .where(eq(agentProcessingSessions.id, sessionId));
 
       // Log AI usage and deduct credits
       if (userId) {
@@ -2592,45 +2608,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Usuário não autenticado' });
       }
       
-      if (!global.negativeReviewsSessions?.has(sessionId)) {
+      // Get session from database
+      const sessionResult = await db.select()
+        .from(agentProcessingSessions)
+        .where(and(
+          eq(agentProcessingSessions.id, sessionId),
+          eq(agentProcessingSessions.userId, user.id)
+        ))
+        .limit(1);
+      
+      if (!sessionResult.length) {
+        console.log('📊 [NEGATIVE_REVIEWS] Sessão não encontrada:', sessionId);
         return res.status(404).json({ error: 'Sessão não encontrada' });
       }
       
-      const sessionData = global.negativeReviewsSessions.get(sessionId);
-      
-      // Verify session belongs to user
-      if (sessionData.user_id !== user.id) {
-        return res.status(403).json({ error: 'Acesso negado' });
-      }
-      
+      const session = sessionResult[0];
+
       console.log('📊 [NEGATIVE_REVIEWS] Status da sessão consultado:', {
         sessionId,
-        status: sessionData.status,
-        hasResult: !!sessionData.result_data
+        status: session.status,
+        hasResult: !!session.resultData
       });
-      
-      // FORCE NO CACHE - CRITICAL FIX
+
+      // Convert database format to frontend format
+      const responseData = {
+        id: session.id,
+        status: session.status,
+        input_data: session.inputData,
+        result_data: session.resultData,
+        error_message: session.errorMessage,
+        created_at: session.createdAt,
+        updated_at: session.updatedAt,
+        completed_at: session.completedAt,
+        _timestamp: Date.now()
+      };
+
+      // Set headers to prevent caching
       res.set({
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
-        'Expires': '0',
-        'ETag': Math.random().toString()
+        'Expires': '0'
       });
-      
-      res.json({
-        id: sessionData.id,
-        status: sessionData.status,
-        input_data: sessionData.input_data,
-        result_data: sessionData.result_data,
-        created_at: sessionData.created_at,
-        completed_at: sessionData.completed_at,
-        error_message: sessionData.error_message,
-        _timestamp: Date.now() // Force unique response
-      });
+
+      res.json(responseData);
       
     } catch (error: any) {
       console.error('❌ [NEGATIVE_REVIEWS] Erro ao consultar sessão:', error);
       res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Debug endpoint to check active sessions
+  app.get('/api/agents/amazon-negative-reviews/debug/sessions', requireAuth, async (req: AuthenticatedRequest, res: ExpressResponse) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      // Get sessions from database
+      const activeSessions = await db.select({
+        id: agentProcessingSessions.id,
+        status: agentProcessingSessions.status,
+        user_id: agentProcessingSessions.userId,
+        agent_type: agentProcessingSessions.agentType,
+        created_at: agentProcessingSessions.createdAt,
+        completed_at: agentProcessingSessions.completedAt
+      })
+      .from(agentProcessingSessions)
+      .where(eq(agentProcessingSessions.agentType, 'amazon-negative-reviews'))
+      .orderBy(desc(agentProcessingSessions.createdAt))
+      .limit(20);
+
+      res.json({
+        totalSessions: activeSessions.length,
+        sessions: activeSessions,
+        serverStartTime: process.uptime(),
+        databaseConnected: true
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
