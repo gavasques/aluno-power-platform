@@ -509,6 +509,13 @@ router.post('/reset-password', async (req, res) => {
 // POST /api/auth/login - Clean implementation using AuthService
 router.post('/login', async (req, res) => {
   try {
+    console.log('[AUTH] Raw login request:', {
+      body: req.body,
+      bodyType: typeof req.body,
+      contentType: req.get('content-type'),
+      headers: req.headers
+    });
+    
     const { email, password } = loginSchema.parse(req.body);
     
     // Use standardized authentication service

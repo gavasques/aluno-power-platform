@@ -50,6 +50,16 @@ app.use((req, res, next) => {
   if (req.path === '/api/temp-image/upload' && req.method === 'POST') {
     return next();
   }
+  // Debug log for JSON parsing
+  if (req.path === '/api/auth/login') {
+    console.log('🔍 [JSON PARSER] Processing login request:', {
+      path: req.path,
+      method: req.method,
+      contentType: req.get('content-type'),
+      bodyExists: !!req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : []
+    });
+  }
   // Apply JSON parsing for all other routes
   express.json({ limit: '50mb' })(req, res, next);
 });
