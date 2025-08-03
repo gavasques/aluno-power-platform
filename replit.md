@@ -10,7 +10,9 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 - **Amazon Negative Reviews Webhook System Fixed**: Resolved critical issue preventing webhook callbacks from updating frontend
   - **Root Cause**: Global authentication middleware was intercepting webhook callbacks from external services
   - **Solution**: Added webhook callback endpoints to public API whitelist in `enhancedAuth.ts` middleware
-  - **URL Migration**: Updated webhook URL from n8n.guivasques.app to webhook.guivasques.app/webhook/amazon-negative-reviews
+  - **URL Fix**: Corrected webhook URL to webhook.guivasques.app/webhook/amazon-negative-feedback (not amazon-negative-reviews)
+  - **Response Field Fix**: System now accepts both `generatedContent` and `retorno` fields from n8n webhook responses
+  - **n8n Configuration**: Webhook must send response in `retorno` field, not `generatedContent`
   - **Authentication Fix**: Webhook callbacks now bypass authentication as intended for external service integration
   - **Response Formatting**: Improved frontend display with proper line break preservation using `whitespace-pre-wrap`
   - **Credit System**: Confirmed credit deduction (4 credits) works correctly when webhook processes responses

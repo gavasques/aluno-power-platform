@@ -44,7 +44,7 @@ Após gerar a resposta, o n8n precisa fazer um POST para o callback:
 ```json
 {
   "sessionId": "{{ $json.sessionId }}",
-  "generatedContent": "{{ resposta gerada pelo ChatGPT }}",
+  "retorno": "{{ resposta gerada pelo ChatGPT }}",
   "userId": {{ $json.userId }}
 }
 ```
@@ -72,7 +72,7 @@ O callback espera receber:
 ```json
 {
   "sessionId": "nr-1754183221026-m2bjouq9m",
-  "generatedContent": "Olá [Nome],\n\nTexto da resposta...",
+  "retorno": "Olá [Nome],\n\nTexto da resposta...",
   "userId": 2
 }
 ```
@@ -86,7 +86,7 @@ curl -X POST "https://aluno-power.replit.app/api/agents/amazon-negative-reviews/
   -H "Content-Type: application/json" \
   -d '{
     "sessionId": "COLOQUE_O_SESSION_ID_AQUI",
-    "generatedContent": "Resposta de teste",
+    "retorno": "Resposta de teste",
     "userId": 2
   }'
 ```

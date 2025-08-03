@@ -2456,9 +2456,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook callback for negative reviews response
   app.post('/api/agents/amazon-negative-reviews/webhook-callback', async (req, res) => {
     try {
-      const { sessionId, generatedContent, userId } = req.body;
+      const { sessionId, generatedContent, retorno, userId } = req.body;
       
-      console.log('🔄 [NEGATIVE_REVIEWS] Callback recebido:', { sessionId, userId });
+      // Accept both 'generatedContent' and 'retorno' fields
+      const responseContent = generatedContent || retorno;
+      
+      console.log('🔄 [NEGATIVE_REVIEWS] Callback recebido:', { sessionId, userId, hasContent: !!responseContent });
       
       if (!sessionId || !global.negativeReviewsSessions.has(sessionId)) {
         console.log('❌ [NEGATIVE_REVIEWS] Sessão não encontrada:', sessionId);
@@ -2471,7 +2474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       sessionData.status = 'completed';
       sessionData.completed_at = new Date().toISOString();
       sessionData.result_data = {
-        response: generatedContent || 'Resposta gerada pelo webhook',
+        response: responseContent || 'Resposta gerada pelo webhook',
         analysis: {
           sentiment: 'Negativo - Processado',
           urgency: 'Definida pelo webhook',
