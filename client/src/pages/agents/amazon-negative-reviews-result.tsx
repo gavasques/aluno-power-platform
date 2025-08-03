@@ -40,13 +40,29 @@ const AmazonNegativeReviewsResult = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [pollingStartTime] = useState(Date.now());
+  const [isTimedOut, setIsTimedOut] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
   const fetchSessionData = async () => {
     if (!sessionId) return;
 
+    // Check for timeout (5 minutes)
+    const timeElapsed = Date.now() - pollingStartTime;
+    const timeoutMs = 5 * 60 * 1000; // 5 minutes
+    
+    if (timeElapsed > timeoutMs) {
+      console.warn('⏰ [FRONTEND] Polling timeout reached');
+      setIsTimedOut(true);
+      setIsLoading(false);
+      setError('Timeout: O processamento está demorando mais que o esperado. Tente recarregar a página em alguns minutos.');
+      return;
+    }
+
     try {
+      console.log(`🔄 [FRONTEND] Polling session ${sessionId} (${Math.round(timeElapsed/1000)}s elapsed)`);
+      
       const data = await apiRequest(`/api/agents/amazon-negative-reviews/sessions/${sessionId}`) as SessionData;
       setSessionData(data);
       setError(null);
@@ -55,12 +71,13 @@ const AmazonNegativeReviewsResult = () => {
         sessionId: data.id,
         status: data.status,
         hasResult: !!data.result_data,
-        hasResponse: !!data.result_data?.response
+        hasResponse: !!data.result_data?.response,
+        timeElapsed: `${Math.round(timeElapsed/1000)}s`
       });
 
-      // If still processing, continue polling
+      // If still processing, continue polling with longer interval
       if (data.status === 'processing') {
-        setTimeout(fetchSessionData, 500);
+        setTimeout(fetchSessionData, 2000); // Increased from 500ms to 2s
       }
     } catch (err: any) {
       console.error('❌ [FRONTEND] Error fetching session:', err);
@@ -119,6 +136,8 @@ const AmazonNegativeReviewsResult = () => {
   };
 
   if (isLoading) {
+    const timeElapsed = Math.round((Date.now() - pollingStartTime) / 1000);
+    
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -126,6 +145,9 @@ const AmazonNegativeReviewsResult = () => {
             <Clock className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Gerando resposta estratégica...</h2>
             <p className="text-gray-600">Analisando a avaliação negativa e criando resposta empática</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Tempo decorrido: {timeElapsed}s {timeElapsed > 120 && '(processamento em andamento...)'}
+            </p>
           </div>
         </div>
       </div>
@@ -138,12 +160,22 @@ const AmazonNegativeReviewsResult = () => {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Erro no processamento</h2>
+            <h2 className="text-xl font-semibold mb-2">
+              {isTimedOut ? 'Timeout no processamento' : 'Erro no processamento'}
+            </h2>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={goBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={goBack}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+              {isTimedOut && (
+                <Button onClick={() => window.location.reload()} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Recarregar
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
