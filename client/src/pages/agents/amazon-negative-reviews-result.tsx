@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, ArrowLeft, CheckCircle, Clock, Copy, MessageSquare, RefreshCw, Zap } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle, Clock, Copy, Download, MessageSquare, RefreshCw, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -47,16 +47,23 @@ const AmazonNegativeReviewsResult = () => {
     if (!sessionId) return;
 
     try {
-      const data = await apiRequest(`/api/agents/amazon-negative-reviews/sessions/${sessionId}`);
+      const data = await apiRequest(`/api/agents/amazon-negative-reviews/sessions/${sessionId}`) as SessionData;
       setSessionData(data);
       setError(null);
+
+      console.log('📊 [FRONTEND] Session data received:', {
+        sessionId: data.id,
+        status: data.status,
+        hasResult: !!data.result_data,
+        hasResponse: !!data.result_data?.response
+      });
 
       // If still processing, continue polling
       if (data.status === 'processing') {
         setTimeout(fetchSessionData, 2000);
       }
     } catch (err: any) {
-      console.error('Error fetching session:', err);
+      console.error('❌ [FRONTEND] Error fetching session:', err);
       setError(err.message || 'Erro ao carregar resultado');
     } finally {
       setIsLoading(false);
@@ -85,6 +92,26 @@ const AmazonNegativeReviewsResult = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const downloadResponse = () => {
+    if (!sessionData?.result_data?.response) return;
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const filename = `negative_response_${timestamp}.txt`;
+    
+    const element = document.createElement('a');
+    const file = new Blob([sessionData.result_data.response], { type: 'text/plain;charset=utf-8' });
+    element.href = URL.createObjectURL(file);
+    element.download = filename;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+
+    toast({
+      title: "Download iniciado!",
+      description: `Arquivo ${filename} baixado com sucesso`,
+    });
   };
 
   const goBack = () => {
@@ -184,19 +211,29 @@ const AmazonNegativeReviewsResult = () => {
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     Resposta Estratégica Gerada
                   </CardTitle>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={copyToClipboard}
-                    disabled={isCopied}
-                  >
-                    {isCopied ? (
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                    ) : (
-                      <Copy className="h-4 w-4 mr-2" />
-                    )}
-                    {isCopied ? "Copiado!" : "Copiar"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={copyToClipboard}
+                      disabled={isCopied}
+                    >
+                      {isCopied ? (
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                      ) : (
+                        <Copy className="h-4 w-4 mr-2" />
+                      )}
+                      {isCopied ? "Copiado!" : "Copiar"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={downloadResponse}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
                 </div>
                 <CardDescription>
                   Resposta empática e proativa para transformar a experiência negativa

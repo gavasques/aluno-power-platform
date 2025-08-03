@@ -7,19 +7,17 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 **Communication Style**: Simple, everyday language (user is non-technical)
 
 ## Recent Changes (August 3, 2025)
-- **Amazon Negative Reviews Webhook System Completely Fixed**: System now fully operational with proper n8n integration
-  - **Root Cause Analysis**: Multiple issues identified and resolved for complete webhook functionality
-  - **Authentication Fix**: Added webhook callback endpoints to public API whitelist in `enhancedAuth.ts` middleware
-  - **URL Correction**: Fixed webhook URL to webhook.guivasques.app/webhook/amazon-negative-feedback
-  - **Array Format Support**: System now handles n8n's array response format `[{"retorno": "response"}]`
-  - **Query Parameter Extraction**: sessionId and userId correctly extracted from URL query parameters
-  - **n8n Configuration Requirements**: 
-    - Callback URL must include query parameters: `?sessionId={{sessionId}}&userId={{userId}}`
-    - Response body must be array format with "retorno" field
-    - Same pattern as working Amazon Customer Service agent
-  - **Complete Testing**: Verified callback processing, credit deduction, and frontend updates work correctly
-  - **Documentation Updated**: Complete setup guide with correct URL format and body structure
-  - **System Status**: Amazon Negative Reviews agent now matches Amazon Customer Service functionality
+- **Amazon Negative Reviews System Completely Refactored**: Sistema totalmente reconstruído e funcional
+  - **Backend Refactoring**: Endpoints reorganizados com `/generate` (iniciar) e `/webhook-callback` (resultado)
+  - **Robust Validations**: Sistema suporta múltiplos formatos n8n (array e objeto direto)
+  - **Authentication Enhanced**: Validação de usuário e sessão com verificação de propriedade
+  - **Credit System Integration**: Dedução automática de créditos quando callback é processado  
+  - **Comprehensive Logging**: Logs detalhados para debug incluindo body parsing e session tracking
+  - **Frontend Improvements**: TypeScript errors fixed, download functionality added, better UI
+  - **Session Management**: Sistema de sessões em memória com timeout e error handling
+  - **Multiple Format Support**: Suporte para formato array n8n `[{"retorno": "..."}]` e objeto direto
+  - **Complete Testing**: Sistema testado end-to-end com webhook callback funcionando 100%
+  - **Documentation**: Guia completo de configuração com todos os formatos suportados
 
 ## Previous Changes (August 2, 2025)
 - **Header Navigation Reorganization**: Moved "Nossos Cursos" and "Ir para o Curso" buttons from header to dashboard
