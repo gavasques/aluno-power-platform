@@ -37,17 +37,17 @@ export function usePerformanceOptimization(): UsePerformanceOptimizationReturn {
     try {
       // Initialize optimization systems with graceful fallbacks
       if (config.enablePreloader) {
-        console.log('[PERFORMANCE] Background prefetch initialized');
+
       }
       
       if (config.enableMemoryOptimization) {
-        console.log('[PERFORMANCE] Memory optimization enabled');
+
       }
 
       // Mark as ready - using minimal initialization time
       setTimeout(() => setIsReady(true), 100);
     } catch (error) {
-      console.error('[PERFORMANCE] Failed to initialize optimizations:', error);
+
       // Still mark as ready to not block the app
       setIsReady(true);
     }

@@ -53,7 +53,7 @@ const AmazonNegativeReviewsResult = () => {
     const timeoutMs = 5 * 60 * 1000; // 5 minutes
     
     if (timeElapsed > timeoutMs) {
-      console.warn('⏰ [FRONTEND] Polling timeout reached');
+
       setIsTimedOut(true);
       setIsLoading(false);
       setError('Timeout: O processamento está demorando mais que o esperado. Tente recarregar a página em alguns minutos.');
@@ -61,26 +61,20 @@ const AmazonNegativeReviewsResult = () => {
     }
 
     try {
-      console.log(`🔄 [FRONTEND] Polling session ${sessionId} (${Math.round(timeElapsed/1000)}s elapsed)`);
+
       
       const data = await apiRequest(`/api/agents/amazon-negative-reviews/sessions/${sessionId}`) as SessionData;
       setSessionData(data);
       setError(null);
 
-      console.log('📊 [FRONTEND] Session data received:', {
-        sessionId: data.id,
-        status: data.status,
-        hasResult: !!data.result_data,
-        hasResponse: !!data.result_data?.response,
-        timeElapsed: `${Math.round(timeElapsed/1000)}s`
-      });
+
 
       // If still processing, continue polling with longer interval
       if (data.status === 'processing') {
         setTimeout(fetchSessionData, 2000); // Increased from 500ms to 2s
       }
     } catch (err: any) {
-      console.error('❌ [FRONTEND] Error fetching session:', err);
+
       setError(err.message || 'Erro ao carregar resultado');
     } finally {
       setIsLoading(false);
