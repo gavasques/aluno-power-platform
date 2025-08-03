@@ -29,7 +29,7 @@ https://aluno-power.replit.app/api/agents/amazon-negative-reviews/webhook-callba
 ### 3. HTTP Request (IMPORTANTE - Este passo está faltando!)
 Após gerar a resposta, o n8n precisa fazer um POST para o callback:
 
-**URL:** `https://aluno-power.replit.app/api/agents/amazon-negative-reviews/webhook-callback`
+**URL:** `https://aluno-power.replit.app/api/agents/amazon-negative-reviews/webhook-callback?sessionId={{ $json.sessionId }}&userId={{ $json.userId }}`
 
 **Método:** POST
 
@@ -40,14 +40,16 @@ Após gerar a resposta, o n8n precisa fazer um POST para o callback:
 }
 ```
 
-**Body (JSON):**
+**Body (JSON - Formato Array):**
 ```json
-{
-  "sessionId": "{{ $json.sessionId }}",
-  "retorno": "{{ resposta gerada pelo ChatGPT }}",
-  "userId": {{ $json.userId }}
-}
+[
+  {
+    "retorno": "{{ resposta gerada pelo ChatGPT }}"
+  }
+]
 ```
+
+**IMPORTANTE:** O sessionId e userId devem ser enviados como query parameters na URL, não no body!
 
 ## Dados Recebidos pelo Webhook
 
@@ -69,12 +71,16 @@ O webhook recebe os seguintes dados:
 ## Exemplo de Resposta Esperada
 
 O callback espera receber:
+
+**URL:** `https://aluno-power.replit.app/api/agents/amazon-negative-reviews/webhook-callback?sessionId=nr-1754183221026-m2bjouq9m&userId=2`
+
+**Body:**
 ```json
-{
-  "sessionId": "nr-1754183221026-m2bjouq9m",
-  "retorno": "Olá [Nome],\n\nTexto da resposta...",
-  "userId": 2
-}
+[
+  {
+    "retorno": "Olá [Nome],\n\nTexto da resposta..."
+  }
+]
 ```
 
 ## Teste Manual
@@ -82,13 +88,13 @@ O callback espera receber:
 Para testar se o callback está funcionando, você pode usar este comando curl:
 
 ```bash
-curl -X POST "https://aluno-power.replit.app/api/agents/amazon-negative-reviews/webhook-callback" \
+curl -X POST "https://aluno-power.replit.app/api/agents/amazon-negative-reviews/webhook-callback?sessionId=COLOQUE_O_SESSION_ID_AQUI&userId=2" \
   -H "Content-Type: application/json" \
-  -d '{
-    "sessionId": "COLOQUE_O_SESSION_ID_AQUI",
-    "retorno": "Resposta de teste",
-    "userId": 2
-  }'
+  -d '[
+    {
+      "retorno": "Resposta de teste"
+    }
+  ]'
 ```
 
 ## Resumo

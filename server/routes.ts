@@ -2456,12 +2456,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook callback for negative reviews response
   app.post('/api/agents/amazon-negative-reviews/webhook-callback', async (req, res) => {
     try {
-      const { sessionId, generatedContent, retorno, userId } = req.body;
+      // Extract sessionId and userId from query parameters (n8n sends these in URL)
+      let sessionId = req.body.sessionId || req.query.sessionId || req.headers['x-session-id'];
+      let userId = req.body.userId || req.query.userId || req.headers['x-user-id'];
+      let responseContent;
       
-      // Accept both 'generatedContent' and 'retorno' fields
-      const responseContent = generatedContent || retorno;
+      // Handle array format (n8n sends arrays that Express converts to objects with numeric keys)
+      if (Array.isArray(req.body) && req.body.length > 0) {
+        const responseData = req.body[0];
+        responseContent = responseData.retorno || responseData.text || responseData.generatedContent;
+      } else if (req.body['0'] && typeof req.body['0'] === 'object') {
+        // Handle Express-converted array format  
+        const responseData = req.body['0'];
+        responseContent = responseData.retorno || responseData.text || responseData.generatedContent;
+      } else {
+        // Handle standard object format  
+        responseContent = req.body.generatedContent || req.body.retorno;
+      }
       
-      console.log('🔄 [NEGATIVE_REVIEWS] Callback recebido:', { sessionId, userId, hasContent: !!responseContent });
+      console.log('🔄 [NEGATIVE_REVIEWS] Callback recebido:', { 
+        sessionId, 
+        userId, 
+        hasContent: !!responseContent,
+        bodyType: Array.isArray(req.body) ? 'array' : 'object'
+      });
       
       if (!sessionId || !global.negativeReviewsSessions.has(sessionId)) {
         console.log('❌ [NEGATIVE_REVIEWS] Sessão não encontrada:', sessionId);

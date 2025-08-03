@@ -7,17 +7,19 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 **Communication Style**: Simple, everyday language (user is non-technical)
 
 ## Recent Changes (August 3, 2025)
-- **Amazon Negative Reviews Webhook System Fixed**: Resolved critical issue preventing webhook callbacks from updating frontend
-  - **Root Cause**: Global authentication middleware was intercepting webhook callbacks from external services
-  - **Solution**: Added webhook callback endpoints to public API whitelist in `enhancedAuth.ts` middleware
-  - **URL Fix**: Corrected webhook URL to webhook.guivasques.app/webhook/amazon-negative-feedback (not amazon-negative-reviews)
-  - **Response Field Fix**: System now accepts both `generatedContent` and `retorno` fields from n8n webhook responses
-  - **n8n Configuration**: Webhook must send response in `retorno` field, not `generatedContent`
-  - **Authentication Fix**: Webhook callbacks now bypass authentication as intended for external service integration
-  - **Response Formatting**: Improved frontend display with proper line break preservation using `whitespace-pre-wrap`
-  - **Credit System**: Confirmed credit deduction (4 credits) works correctly when webhook processes responses
-  - **Testing Verified**: Complete end-to-end workflow tested - form submission → webhook → callback → formatted display
-  - **Status Management**: Sessions correctly update from "processing" to "completed" when webhook returns responses
+- **Amazon Negative Reviews Webhook System Completely Fixed**: System now fully operational with proper n8n integration
+  - **Root Cause Analysis**: Multiple issues identified and resolved for complete webhook functionality
+  - **Authentication Fix**: Added webhook callback endpoints to public API whitelist in `enhancedAuth.ts` middleware
+  - **URL Correction**: Fixed webhook URL to webhook.guivasques.app/webhook/amazon-negative-feedback
+  - **Array Format Support**: System now handles n8n's array response format `[{"retorno": "response"}]`
+  - **Query Parameter Extraction**: sessionId and userId correctly extracted from URL query parameters
+  - **n8n Configuration Requirements**: 
+    - Callback URL must include query parameters: `?sessionId={{sessionId}}&userId={{userId}}`
+    - Response body must be array format with "retorno" field
+    - Same pattern as working Amazon Customer Service agent
+  - **Complete Testing**: Verified callback processing, credit deduction, and frontend updates work correctly
+  - **Documentation Updated**: Complete setup guide with correct URL format and body structure
+  - **System Status**: Amazon Negative Reviews agent now matches Amazon Customer Service functionality
 
 ## Previous Changes (August 2, 2025)
 - **Header Navigation Reorganization**: Moved "Nossos Cursos" and "Ir para o Curso" buttons from header to dashboard
