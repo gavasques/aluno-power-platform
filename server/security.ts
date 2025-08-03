@@ -59,7 +59,7 @@ export const apiLimiter = createRateLimit(
 // Authentication rate limiting (stricter)
 export const authLimiter = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  5, // 5 login attempts per window
+  20, // 20 login attempts per window (increased for development)
   'Too many login attempts from this IP, please try again later'
 );
 
