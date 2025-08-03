@@ -16,6 +16,8 @@ const PUBLIC_API_ENDPOINTS = [
   '/api/agents', // Public agents listing
   '/api/news/published/preview', // Public news preview
   '/api/updates/published/preview', // Public updates preview
+  '/api/agents/amazon-customer-service/webhook-callback', // Webhook callback for customer service
+  '/api/agents/amazon-negative-reviews/webhook-callback', // Webhook callback for negative reviews
 ];
 
 // Endpoints that require specific handling
