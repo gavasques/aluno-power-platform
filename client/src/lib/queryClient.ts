@@ -156,14 +156,7 @@ export const queryClient = new QueryClient({
 
 // Enhanced API request helper with automatic auth headers
 export async function apiRequest<T>(url: string, options?: RequestInit): Promise<T> {
-  // Debug log incoming request
-  console.log('🔍 API REQUEST - Incoming:', {
-    url,
-    method: options?.method,
-    body: options?.body,
-    bodyType: typeof options?.body,
-    headers: options?.headers
-  });
+
 
   // Get token from localStorage for authenticated requests
   const token = localStorage.getItem('auth_token');
@@ -184,12 +177,7 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
     }
   }
 
-  console.log('🔍 API REQUEST - Final payload:', {
-    url,
-    headers,
-    body,
-    finalBodyType: typeof body
-  });
+
 
   const response = await fetch(url, {
     ...options,

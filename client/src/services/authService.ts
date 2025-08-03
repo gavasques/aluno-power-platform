@@ -41,13 +41,7 @@ export class AuthService {
 
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      // Debug log to see what's being sent
-      console.log('🔍 FRONTEND - Sending login request:', {
-        email: credentials.email,
-        password: credentials.password ? '[PROVIDED]' : '[MISSING]',
-        emailLength: credentials.email?.length,
-        passwordLength: credentials.password?.length
-      });
+
 
       const response = await apiRequest<any>(AuthService.ENDPOINTS.LOGIN, {
         method: 'POST',
@@ -57,7 +51,7 @@ export class AuthService {
         body: JSON.stringify(credentials),
       });
 
-      console.log('🔍 FRONTEND - Login response received:', response);
+
 
       // Check if response has the expected structure
       if (response.success && response.user && response.token) {
@@ -78,7 +72,6 @@ export class AuthService {
 
       throw new Error('Formato de resposta inválido');
     } catch (error) {
-      console.error('🔍 FRONTEND - Login error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro no login',
