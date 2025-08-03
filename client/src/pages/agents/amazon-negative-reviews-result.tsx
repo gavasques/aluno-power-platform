@@ -48,30 +48,26 @@ const AmazonNegativeReviewsResult = () => {
   const fetchSessionData = async () => {
     if (!sessionId) return;
 
-    // Check for timeout (5 minutes)
-    const timeElapsed = Date.now() - pollingStartTime;
-    const timeoutMs = 5 * 60 * 1000; // 5 minutes
-    
-    if (timeElapsed > timeoutMs) {
-
-      setIsTimedOut(true);
-      setIsLoading(false);
-      setError('Timeout: O processamento está demorando mais que o esperado. Tente recarregar a página em alguns minutos.');
-      return;
-    }
-
     try {
-
-      
       const data = await apiRequest(`/api/agents/amazon-negative-reviews/sessions/${sessionId}?_t=${Date.now()}`) as SessionData;
       setSessionData(data);
       setError(null);
 
-
-
-      // If still processing, continue polling with shorter interval
+      // Since we now have synchronous processing, most sessions should be completed immediately
+      // Only poll if status is still processing (fallback for legacy or slow responses)
       if (data.status === 'processing') {
-        setTimeout(fetchSessionData, 1000); // 1 second for faster updates
+        // Check for timeout (2 minutes for rare cases)
+        const timeElapsed = Date.now() - pollingStartTime;
+        const timeoutMs = 2 * 60 * 1000; // 2 minutes
+        
+        if (timeElapsed > timeoutMs) {
+          setIsTimedOut(true);
+          setIsLoading(false);
+          setError('Timeout: O processamento está demorando mais que o esperado. Tente recarregar a página.');
+          return;
+        }
+        
+        setTimeout(fetchSessionData, 2000); // 2 seconds polling for rare async cases
       }
     } catch (err: any) {
 

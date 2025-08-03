@@ -59,8 +59,6 @@ const AmazonNegativeReviews = () => {
     setIsProcessing(true);
 
     try {
-      const sessionId = `nr-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
       const response = await apiRequest("/api/agents/amazon-negative-reviews/generate", {
         method: "POST",
         body: {
@@ -73,14 +71,22 @@ const AmazonNegativeReviews = () => {
         },
       });
 
-      if (response.sessionId) {
+      if (response.status === 'completed' && response.result) {
+        // Synchronous response - redirect immediately to result page
+        toast({
+          title: "Resposta gerada com sucesso!",
+          description: "Sua resposta personalizada foi criada.",
+        });
+        setLocation(`/agentes/amazon-negative-reviews/resultado/${response.sessionId}`);
+      } else if (response.sessionId) {
+        // Fallback to async mode if needed
         toast({
           title: "Processamento iniciado!",
           description: "Sua resposta está sendo gerada. Você será redirecionado para ver o resultado.",
         });
         setLocation(`/agentes/amazon-negative-reviews/resultado/${response.sessionId}`);
       } else {
-        throw new Error('Erro ao iniciar processamento');
+        throw new Error('Erro ao processar resposta');
       }
     } catch (error: any) {
       console.error("Error processing review response:", error);
