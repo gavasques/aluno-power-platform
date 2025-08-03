@@ -59,7 +59,7 @@ const AmazonCustomerServiceResult = () => {
 
       // If still processing, continue polling
       if (data.status === 'processing') {
-        setTimeout(fetchSessionData, 2000);
+        setTimeout(fetchSessionData, 500);
       }
     } catch (err: any) {
       console.error('Error fetching session:', err);

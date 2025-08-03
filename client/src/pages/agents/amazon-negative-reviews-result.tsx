@@ -60,7 +60,7 @@ const AmazonNegativeReviewsResult = () => {
 
       // If still processing, continue polling
       if (data.status === 'processing') {
-        setTimeout(fetchSessionData, 2000);
+        setTimeout(fetchSessionData, 500);
       }
     } catch (err: any) {
       console.error('❌ [FRONTEND] Error fetching session:', err);
