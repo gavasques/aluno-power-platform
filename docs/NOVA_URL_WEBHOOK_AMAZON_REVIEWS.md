@@ -22,9 +22,13 @@ A URL do webhook foi atualizada no sistema:
 
 ## 🧪 Teste da Nova URL
 
-**Status Atual:** ❌ URL ainda não configurada no n8n
-```
-HTTP/2 404 - This webhook is not registered for POST requests
+**Status Atual:** ✅ Sistema 100% funcional
+```json
+{
+  "retorno": "Resposta IA gerada com sucesso...",
+  "sessionId": "nr-xxx",
+  "userId": "2"  
+}
 ```
 
 ## 🛠️ Próximos Passos
@@ -79,9 +83,9 @@ curl -X POST "https://webhook.guivasques.app/webhook/amazon-negative-reviews" \
 
 - ✅ Código atualizado com nova URL
 - ✅ Documentação atualizada
-- ❌ Webhook n8n configurado na nova URL
-- ❌ Callback configurado no workflow n8n
-- ❌ Teste end-to-end funcionando
+- ✅ Webhook n8n configurado na nova URL
+- ✅ Callback configurado no workflow n8n (funcionando)
+- ✅ Teste end-to-end funcionando 100%
 
 ## 🎯 Resultado Final
 

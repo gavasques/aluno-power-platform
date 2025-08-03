@@ -63,15 +63,15 @@ const AmazonNegativeReviewsResult = () => {
     try {
 
       
-      const data = await apiRequest(`/api/agents/amazon-negative-reviews/sessions/${sessionId}`) as SessionData;
+      const data = await apiRequest(`/api/agents/amazon-negative-reviews/sessions/${sessionId}?_t=${Date.now()}`) as SessionData;
       setSessionData(data);
       setError(null);
 
 
 
-      // If still processing, continue polling with longer interval
+      // If still processing, continue polling with shorter interval
       if (data.status === 'processing') {
-        setTimeout(fetchSessionData, 2000); // Increased from 500ms to 2s
+        setTimeout(fetchSessionData, 1000); // 1 second for faster updates
       }
     } catch (err: any) {
 
