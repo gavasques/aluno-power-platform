@@ -3833,7 +3833,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Specific Amazon Listings Optimizer endpoint with enhanced processing
+  // Specific Amazon Listings Optimizer endpoint with webhook processing
   app.post('/api/agents/amazon-listings-optimizer/process', requireAuth, async (req, res) => {
     try {
       // Validate request method
@@ -3844,6 +3844,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Validate and sanitize inputs
       const {
         productName,
+        brand,
         category,
         keywords,
         longTailKeywords,
@@ -3857,21 +3858,41 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (!productName?.trim()) {
         return res.status(400).json({ error: 'Product name is required' });
       }
+      if (!brand?.trim()) {
+        return res.status(400).json({ error: 'Brand is required' });
+      }
       if (!category?.trim()) {
         return res.status(400).json({ error: 'Category is required' });
-      }
-      if (!keywords?.trim()) {
-        return res.status(400).json({ error: 'Keywords are required' });
       }
       if (!reviewsData?.trim()) {
         return res.status(400).json({ error: 'Reviews data is required' });
       }
 
+      // Get authenticated user
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Verificar créditos antes de processar
+      const FEATURE_CODE = 'agents.amazon_listing';
+      try {
+        const creditsUsed = await CreditService.deductCredits(user.id, FEATURE_CODE);
+        console.log(`💳 [CREDITS] Deducted ${creditsUsed} credits for user ${user.id}`);
+      } catch (creditError) {
+        console.error('❌ [CREDITS] Failed to deduct credits:', creditError);
+        return res.status(402).json({ 
+          error: 'Insufficient credits',
+          details: creditError instanceof Error ? creditError.message : String(creditError)
+        });
+      }
+
       // Sanitize inputs
       const sanitizedData = {
         productName: productName.trim(),
+        brand: brand.trim(),
         category: category.trim(),
-        keywords: keywords.trim(),
+        keywords: keywords?.trim() || '',
         longTailKeywords: longTailKeywords?.trim() || '',
         features: features?.trim() || '',
         targetAudience: targetAudience?.trim() || '',
@@ -3879,30 +3900,111 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         format
       };
 
-      // Get authenticated user
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: 'Authentication required' });
-      }
+      console.log(`🚀 [AMAZON_LISTING_OPTIMIZER] Iniciando processamento via webhook para usuário: ${user.id} (${user.name})`);
       
-      const agentId = "agent-amazon-listings";
-
-      console.log(`🚀 [AMAZON_LISTING_OPTIMIZER] Iniciando processamento para usuário: ${user.id} (${user.name})`);
-      
-      const result = await openaiService.processAmazonListing({
-        agentId,
-        userId: user.id.toString(),
+      // Preparar dados para envio ao webhook n8n
+      const webhookData = {
+        userId: user.id,
         userName: user.name || user.username,
-        productName: sanitizedData.productName,
-        productInfo: `Categoria: ${sanitizedData.category}, Keywords: ${sanitizedData.keywords}, Long Tail Keywords: ${sanitizedData.longTailKeywords}, Características: ${sanitizedData.features}, Público Alvo: ${sanitizedData.targetAudience}`,
+        userEmail: user.email,
+        productData: {
+          productName: sanitizedData.productName,
+          brand: sanitizedData.brand,
+          category: sanitizedData.category,
+          keywords: sanitizedData.keywords,
+          longTailKeywords: sanitizedData.longTailKeywords,
+          features: sanitizedData.features,
+          targetAudience: sanitizedData.targetAudience
+        },
         reviewsData: sanitizedData.reviewsData,
+        timestamp: new Date().toISOString(),
+        sessionId: `amazon-listing-${user.id}-${Date.now()}`,
         format: sanitizedData.format
-      });
+      };
 
-      res.json({
-        success: true,
-        ...result
-      });
+      // Configurar timeout de 2 minutos (120 segundos)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+      try {
+        console.log('📡 [WEBHOOK] Enviando dados para n8n webhook...');
+        
+        const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/amazon_listing_optimizer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Aluno-Power-Platform/1.0'
+          },
+          body: JSON.stringify(webhookData),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!webhookResponse.ok) {
+          throw new Error(`Webhook returned status ${webhookResponse.status}: ${webhookResponse.statusText}`);
+        }
+
+        const result = await webhookResponse.json();
+        
+        console.log('✅ [WEBHOOK] Resposta recebida do n8n:', {
+          status: webhookResponse.status,
+          hasResult: !!result,
+          resultKeys: Object.keys(result || {})
+        });
+
+        // Log da geração para o sistema
+        try {
+          const logData = {
+            userId: user.id,
+            provider: result.provider || 'openai',
+            model: result.model || 'gpt-4o',
+            prompt: JSON.stringify(webhookData).substring(0, 5000),
+            response: JSON.stringify(result).substring(0, 10000),
+            promptCharacters: JSON.stringify(webhookData).length,
+            responseCharacters: JSON.stringify(result).length,
+            inputTokens: result.tokensUsed?.input || 0,
+            outputTokens: result.tokensUsed?.output || 0,
+            totalTokens: result.tokensUsed?.total || 0,
+            cost: (result.cost || 0).toString(),
+            creditsUsed: '10',
+            duration: 0,
+            feature: FEATURE_CODE
+          };
+          
+          await db.insert(aiGenerationLogs).values(logData);
+          console.log(`💾 [AI_LOG] Amazon Listing Optimizer logged for user ${user.id}`);
+        } catch (logError) {
+          console.error('❌ [LOG] Failed to log AI generation:', logError);
+        }
+
+        res.json({
+          success: true,
+          provider: result.provider || 'n8n-webhook',
+          model: result.model || 'gpt-4o',
+          content: result.content || result.data,
+          tokensUsed: result.tokensUsed || { input: 0, output: 0, total: 0 },
+          cost: result.cost || 0,
+          sessionId: webhookData.sessionId,
+          timestamp: webhookData.timestamp,
+          ...result
+        });
+
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        
+        if (error.name === 'AbortError') {
+          console.error('⏰ [WEBHOOK] Request timeout after 120 seconds');
+          return res.status(408).json({ 
+            error: 'Processing timeout - the request took too long to complete',
+            details: 'The webhook processing exceeded the 2-minute timeout limit'
+          });
+        }
+        
+        console.error('❌ [WEBHOOK] Error calling n8n webhook:', error);
+        throw error;
+      }
+
     } catch (error: any) {
       console.error('Amazon Listings Optimizer processing error:', error);
       res.status(500).json({ 
