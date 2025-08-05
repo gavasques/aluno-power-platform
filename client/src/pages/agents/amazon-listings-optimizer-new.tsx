@@ -389,7 +389,7 @@ Comentário: ${comment}
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(submitData),
-        signal: AbortSignal.timeout(180000) // 3 minutos timeout no frontend
+        signal: AbortSignal.timeout(300000) // 5 minutos timeout no frontend
       });
 
       if (!apiResponse.ok) {

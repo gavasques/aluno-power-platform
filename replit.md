@@ -40,10 +40,10 @@ The project follows strict development guidelines, emphasizing type safety with 
 ### Amazon Listing Optimizer - Webhook N8N Configurado (05/08/2025)
 - **Mudança**: Sistema configurado para aguardar resposta do webhook n8n
 - **Endpoint**: `https://n8n.guivasques.app/webhook-test/amazon_listing_optimizer`
-- **Arquitetura**: App → N8n Webhook (aguarda resposta) → IA → Retorno direto (180s timeout)
+- **Arquitetura**: App → N8n Webhook (aguarda resposta) → IA → Retorno direto (300s timeout)
 - **Funcionalidades**:
   - ✅ Processamento síncrono via webhook n8n
-  - ✅ Timeout de 3 minutos (180 segundos) servidor e cliente
+  - ✅ Timeout de 5 minutos (300 segundos) servidor e cliente
   - ✅ Dedução automática de créditos (8 créditos)
   - ✅ Validação de campos obrigatórios (productName, brand, category, reviewsData)
   - ✅ Tratamento de erros e timeouts

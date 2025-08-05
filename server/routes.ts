@@ -3892,9 +3892,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         format: sanitizedData.format
       };
 
-      // Configurar timeout de 3 minutos (180 segundos) para aguardar processamento completo
+      // Configurar timeout de 5 minutos (300 segundos) para aguardar processamento completo
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 180000);
+      const timeoutId = setTimeout(() => controller.abort(), 300000);
 
       try {
         console.log('📡 [WEBHOOK] Enviando dados para n8n webhook...');
@@ -3966,10 +3966,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         clearTimeout(timeoutId);
         
         if (webhookError.name === 'AbortError') {
-          console.error('⏰ [WEBHOOK] Request timeout after 180 seconds');
+          console.error('⏰ [WEBHOOK] Request timeout after 300 seconds');
           return res.status(408).json({ 
             error: 'Processing timeout - the request took too long to complete',
-            details: 'The webhook processing exceeded the 3-minute timeout limit'
+            details: 'The webhook processing exceeded the 5-minute timeout limit'
           });
         }
         
