@@ -71,9 +71,11 @@ export default function AmazonImageProcessing() {
     index: number, 
     type: 'target' | 'base'
   ) => {
+    console.log(`🚀 [UPLOAD] Processing: ${type} slot ${index} - ${file.name}`);
     const error = validateFile(file);
     
     if (error) {
+      console.log(`❌ [UPLOAD] Validation error: ${error}`);
       const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
       updateFunction(prev => {
         const newImages = [...prev];
@@ -85,6 +87,7 @@ export default function AmazonImageProcessing() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
+      console.log(`✅ [UPLOAD] File loaded: ${type} slot ${index}`);
       const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
       updateFunction(prev => {
         const newImages = [...prev];
@@ -93,6 +96,7 @@ export default function AmazonImageProcessing() {
           preview: e.target?.result as string,
           error: null
         };
+        console.log(`📦 [UPLOAD] State updated: ${type} slot ${index}`, { hasFile: !!file, hasPreview: !!e.target?.result });
         return newImages;
       });
     };
@@ -106,6 +110,7 @@ export default function AmazonImageProcessing() {
     type: 'target' | 'base'
   ) => {
     const file = e.target.files?.[0];
+    console.log(`📎 [UPLOAD] Input change: ${type} slot ${index}`, file?.name);
     if (file) {
       handleFileUpload(file, index, type);
     }
@@ -336,7 +341,19 @@ export default function AmazonImageProcessing() {
           {required && <Badge variant="destructive" className="text-xs">Obrigatória</Badge>}
         </Label>
         
-        <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors bg-gray-50 hover:bg-gray-100">
+        <div 
+          className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors bg-gray-50 hover:bg-gray-100 relative"
+          onDrop={(e) => {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files);
+            console.log(`🎯 [DROP] Files dropped on ${type} slot ${index}:`, files.map(f => f.name));
+            if (files.length > 0) {
+              handleFileUpload(files[0], index, type);
+            }
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          onDragEnter={(e) => e.preventDefault()}
+        >
           {slot.preview ? (
             <div className="relative">
               <img 
@@ -372,6 +389,7 @@ export default function AmazonImageProcessing() {
             accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={(e) => handleInputChange(e, index, type)}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            data-slot={`${type}-${index}`}
           />
         </div>
         
