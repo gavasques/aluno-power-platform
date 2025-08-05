@@ -44,7 +44,7 @@ The project follows strict development guidelines, emphasizing type safety with 
 - **Funcionalidades**:
   - ✅ Processamento síncrono via webhook n8n
   - ✅ Timeout de 2 minutos (120 segundos)
-  - ✅ Dedução automática de créditos (10 créditos)
+  - ✅ Dedução automática de créditos (8 créditos)
   - ✅ Validação de campos obrigatórios (productName, brand, category, reviewsData)
   - ✅ Logging completo de AI generation
   - ✅ Tratamento de erros e timeouts

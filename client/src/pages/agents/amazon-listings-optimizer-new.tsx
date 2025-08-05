@@ -470,7 +470,7 @@ Comentário: ${comment}
         <Alert className="border-orange-200 bg-orange-50">
           <AlertCircle className="h-4 w-4 text-orange-600" />
           <AlertDescription className="text-orange-800">
-            <strong>Custo:</strong> Este agente consome <strong>10 créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
+            <strong>Custo:</strong> Este agente consome <strong>8 créditos</strong> por otimização. Verifique seu saldo antes de prosseguir.
           </AlertDescription>
         </Alert>
 
@@ -889,7 +889,7 @@ Comentário: ${comment}
                       ) : (
                         <>
                           <Sparkles className="h-4 w-4 mr-2" />
-                          Otimizar Listagem (10 créditos)
+                          Otimizar Listagem (8 créditos)
                         </>
                       )}
                     </Button>
