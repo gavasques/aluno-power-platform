@@ -3759,12 +3759,65 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           processingTime * 1000
         );
 
+        // Prepare data for webhook
+        const webhookData = {
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email,
+          agentType: 'main_image_editor',
+          originalFileName: fileName,
+          originalImage: `data:image/jpeg;base64,${base64Image}`,
+          processedImage: generatedImageUrl,
+          prompt: systemPrompt.content,
+          processingTime,
+          cost: realCost,
+          model: 'gpt-image-1',
+          provider: 'openai',
+          usage: response.usage,
+          timestamp: new Date().toISOString(),
+          success: true
+        };
+
+        // Send data to webhook
+        try {
+          console.log('🔄 [WEBHOOK] Sending data to N8N webhook for main image editor...');
+          
+          const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/editor-imagem-principal', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'AI-Platform-Webhook/1.0'
+            },
+            body: JSON.stringify(webhookData)
+          });
+
+          if (webhookResponse.ok) {
+            const webhookResult = await webhookResponse.text();
+            console.log('✅ [WEBHOOK] Data sent successfully to N8N:', {
+              status: webhookResponse.status,
+              statusText: webhookResponse.statusText,
+              response: webhookResult
+            });
+          } else {
+            console.error('❌ [WEBHOOK] Failed to send data to N8N:', {
+              status: webhookResponse.status,
+              statusText: webhookResponse.statusText
+            });
+          }
+        } catch (webhookError: any) {
+          console.error('❌ [WEBHOOK] Error sending data to N8N:', {
+            error: webhookError.message,
+            stack: webhookError.stack
+          });
+        }
+
         // Return result
         res.json({
           originalImage: `data:image/jpeg;base64,${base64Image}`,
           processedImage: generatedImageUrl,
           processingTime,
-          cost: realCost
+          cost: realCost,
+          webhookSent: true
         });
 
       } finally {
@@ -3794,6 +3847,58 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         });
       } catch (logError) {
         console.error('❌ [PRODUCT_PHOTOGRAPHY] Error saving error log:', logError);
+      }
+
+      // Send error data to webhook
+      try {
+        const user = req.user;
+        const errorDuration = Date.now() - (startTime || Date.now());
+        
+        const webhookErrorData = {
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email,
+          agentType: 'main_image_editor',
+          originalFileName: req.file?.originalname || 'unknown',
+          error: error.message,
+          errorType: error.name || 'UnknownError',
+          processingTime: Math.round(errorDuration / 1000),
+          cost: 0,
+          model: 'gpt-image-1',
+          provider: 'openai',
+          timestamp: new Date().toISOString(),
+          success: false
+        };
+
+        console.log('🔄 [WEBHOOK] Sending error data to N8N webhook for main image editor...');
+        
+        const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/editor-imagem-principal', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'AI-Platform-Webhook/1.0'
+          },
+          body: JSON.stringify(webhookErrorData)
+        });
+
+        if (webhookResponse.ok) {
+          const webhookResult = await webhookResponse.text();
+          console.log('✅ [WEBHOOK] Error data sent successfully to N8N:', {
+            status: webhookResponse.status,
+            statusText: webhookResponse.statusText,
+            response: webhookResult
+          });
+        } else {
+          console.error('❌ [WEBHOOK] Failed to send error data to N8N:', {
+            status: webhookResponse.status,
+            statusText: webhookResponse.statusText
+          });
+        }
+      } catch (webhookError: any) {
+        console.error('❌ [WEBHOOK] Error sending error data to N8N:', {
+          error: webhookError.message,
+          stack: webhookError.stack
+        });
       }
       
       res.status(500).json({ 

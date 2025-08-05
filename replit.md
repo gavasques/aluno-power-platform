@@ -68,6 +68,19 @@ The project follows strict development guidelines, emphasizing type safety with 
 - **Proteção PermissionGuard**: ✅ Verificada em 30+ componentes
 - **Status**: ✅ **SISTEMA DE PERMISSÕES 100% CONFIGURADO E PROTEGIDO**
 
+### Editor de Imagem Principal - Integração N8N Webhook ✅ CONCLUÍDA (05/08/2025)
+- **Objetivo**: Substituir o fluxo do provedor de IA para envio de dados ao webhook N8N
+- **Implementações Realizadas**:
+  - ✅ **Webhook Integration**: Adicionada integração com webhook `https://n8n.guivasques.app/webhook-test/editor-imagem-principal`
+  - ✅ **Dados de Sucesso**: Envio completo de dados incluindo imagens, custos, tempo de processamento e metadados do usuário
+  - ✅ **Dados de Erro**: Envio de dados de erro com informações detalhadas para troubleshooting
+  - ✅ **Logging Robusto**: Logs detalhados para monitoramento do envio de webhook
+  - ✅ **Backward Compatibility**: Mantida compatibilidade com frontend existente
+- **Estrutura dos Dados Enviados**:
+  - 📤 **Sucesso**: userId, userName, userEmail, agentType, originalImage, processedImage, prompt, processingTime, cost, usage, timestamp
+  - 📤 **Erro**: userId, userName, userEmail, agentType, error, errorType, processingTime, timestamp, success: false
+- **Status**: ✅ **WEBHOOK INTEGRATION ATIVA E FUNCIONAL**
+
 ### Sistema de Créditos - Ferramentas - Auditoria ✅ EM ANDAMENTO (05/08/2025)
 - **Problema**: Inconsistências críticas no sistema de créditos das ferramentas
 - **Inconsistências Identificadas**:
