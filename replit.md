@@ -53,6 +53,21 @@ The project follows strict development guidelines, emphasizing type safety with 
   - ✅ **Editor Lifestyle com Modelo**: `agents.lifestyle_model` (15 créditos)
 - **Status**: ✅ **TODOS OS 10 AGENTES COM FEATURE NAMES ÚNICOS E CONSISTENTES**
 
+### Sistema de Permissões - Auditoria Completa ✅ FINALIZADA (05/08/2025)
+- **Problema**: Inconsistências críticas nas permissões dos grupos de usuários para acesso aos agentes
+- **Correções Executadas**:
+  - ✅ **Grupo Pagantes**: Adicionadas 6 permissões em falta (main_image_editor, lifestyle_model, infographic_editor, advanced_infographic, customer_service, negative_reviews)
+  - ✅ **Grupos Mentorados e Admin**: Adicionada permissão em falta (amazon_image_processing)
+  - ✅ **Copiador de Fotos (amazon-image-processing.tsx)**: Adicionado PermissionGuard para proteção adequada
+- **Estrutura de Permissões Final**:
+  - ✅ **Gratuito**: 0/10 agentes (sem acesso aos agentes IA)
+  - ✅ **Pagantes**: 10/10 agentes (acesso completo)
+  - ✅ **Alunos**: 10/10 agentes (acesso completo)
+  - ✅ **Mentorados**: 10/10 agentes (acesso completo)
+  - ✅ **Admin**: 10/10 agentes (acesso completo)
+- **Proteção PermissionGuard**: ✅ Verificada em 30+ componentes
+- **Status**: ✅ **SISTEMA DE PERMISSÕES 100% CONFIGURADO E PROTEGIDO**
+
 ### Amazon Listing Optimizer - Webhook N8N Configurado (05/08/2025)
 - **Mudança**: Sistema configurado para aguardar resposta do webhook n8n
 - **Endpoint**: `https://webhook.guivasques.app/webhook/amazon_listing_optimizer`

@@ -11,6 +11,7 @@ import { Loader2, Upload, X, Download, RotateCcw, Image as ImageIcon, Target, Pa
 import { useLocation } from 'wouter';
 import { CreditCostButton, CreditCostBadge } from '@/components/CreditCostButton';
 import { useUserCreditBalance } from '@/hooks/useUserCredits';
+import { PermissionGuard } from '@/components/guards/PermissionGuard';
 
 interface FileSlot {
   file: File | null;
@@ -479,7 +480,12 @@ export default function AmazonImageProcessing() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
+    <PermissionGuard 
+      featureCode="agents.amazon_image_processing"
+      showMessage={true}
+      message="Você não tem permissão para usar o Copiador de Fotos Amazon."
+    >
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
       <div className="mb-8">
         <Button 
           variant="ghost" 
@@ -700,6 +706,7 @@ export default function AmazonImageProcessing() {
           <strong>Tempo de processamento:</strong> O processamento pode levar até 10 minutos dependendo da complexidade das imagens. Mantenha a página aberta durante o processo.
         </AlertDescription>
       </Alert>
-    </div>
+      </div>
+    </PermissionGuard>
   );
 }
