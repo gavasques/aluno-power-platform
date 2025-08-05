@@ -51,7 +51,7 @@ const colorTones = [
   { value: 'Red', label: 'Vermelho' }
 ];
 
-const FEATURE_CODE = 'tools.logo_generation';
+const FEATURE_CODE = 'tools.logo_generation_pro';
 
 export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({ 
   onLogoGenerated, 
@@ -79,8 +79,8 @@ export const LogoGeneratorTool: React.FC<LogoGeneratorToolProps> = ({
   });
 
   const logoGenerationCostPerLogo = featureCosts?.data?.byCategory?.['Ferramentas']?.find(
-    (item: any) => item.featureName === 'tools.logo_generation'
-  )?.costPerUse || 10;
+    (item: any) => item.featureName === 'tools.logo_generation_pro'
+  )?.costPerUse || 12;
   
   const totalCost = logoGenerationCostPerLogo * formData.count;
 

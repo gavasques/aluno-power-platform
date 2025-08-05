@@ -68,6 +68,32 @@ The project follows strict development guidelines, emphasizing type safety with 
 - **Proteção PermissionGuard**: ✅ Verificada em 30+ componentes
 - **Status**: ✅ **SISTEMA DE PERMISSÕES 100% CONFIGURADO E PROTEGIDO**
 
+### Sistema de Créditos - Ferramentas - Auditoria ✅ EM ANDAMENTO (05/08/2025)
+- **Problema**: Inconsistências críticas no sistema de créditos das ferramentas
+- **Inconsistências Identificadas**:
+  - ❌ **Custos Indefinidos**: 4 ferramentas sem custo na tabela `feature_costs`
+  - ❌ **Feature Codes Inconsistentes**: Diferenças entre componente vs. banco
+  - ❌ **Cards Desatualizados**: Informações hardcoded nos headers das páginas
+- **Correções Executadas**:
+  - ✅ **Custos Adicionados**: tools.ultra_enhance_pro (8), tools.picsart_background_removal (6), tools.logo_generation_pro (12)
+  - ✅ **Feature Codes Corrigidos**: logo_generation → logo_generation_pro, background_removal → picsart_background_removal
+  - ✅ **Cards Atualizados**: UltraMelhoradorPro (4→8 créditos), LogoGeneratorPro (dinamizado)
+- **Ferramentas Verificadas**:
+  - ✅ **Upscale PRO**: tools.upscale_pro (4 créditos) - Consistente
+  - ✅ **Logo Generator PRO**: tools.logo_generation_pro (12 créditos) - Corrigido
+  - ✅ **Background Removal PRO**: tools.picsart_background_removal (6 créditos) - Corrigido
+  - ✅ **Ultra Melhorador PRO**: tools.ultra_enhance_pro (8 créditos) - Card corrigido
+- **Status**: ✅ **SISTEMA DE CRÉDITOS FERRAMENTAS 100% CONFIGURADO**
+
+### Sistema Ultra Melhorador PRO - Integração de Créditos ✅ CONCLUÍDO (05/08/2025)
+- **Problema**: Ultra Melhorador PRO não estava integrado ao sistema de créditos
+- **Correções Executadas**:
+  - ✅ **Frontend**: Adicionado hook useCreditSystem no UltraEnhanceContainer
+  - ✅ **Backend**: Corrigido feature code de 'ultra_enhance' → 'ultra_enhance_pro'
+  - ✅ **Verificação Créditos**: Implementada verificação antes do processamento
+  - ✅ **Card Atualizado**: Corrigido de 4→8 créditos no componente Presentation
+- **Status**: ✅ **ULTRA MELHORADOR PRO TOTALMENTE INTEGRADO**
+
 ### Amazon Listing Optimizer - Webhook N8N Configurado (05/08/2025)
 - **Mudança**: Sistema configurado para aguardar resposta do webhook n8n
 - **Endpoint**: `https://webhook.guivasques.app/webhook/amazon_listing_optimizer`

@@ -25,8 +25,8 @@ const LogoGeneratorPro: React.FC = () => {
   });
 
   const logoGenerationCost = featureCosts?.data?.byCategory?.['Ferramentas']?.find(
-    (item: any) => item.featureName === 'tools.logo_generation'
-  )?.costPerUse || 10;
+    (item: any) => item.featureName === 'tools.logo_generation_pro'
+  )?.costPerUse || 12;
 
   return (
     <>

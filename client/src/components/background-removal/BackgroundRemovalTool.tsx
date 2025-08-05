@@ -53,7 +53,7 @@ interface ProcessingResult {
   totalTime: number;
 }
 
-const FEATURE_CODE = 'tools.background_removal';
+const FEATURE_CODE = 'tools.picsart_background_removal';
 
 const BackgroundRemovalTool: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string>('');

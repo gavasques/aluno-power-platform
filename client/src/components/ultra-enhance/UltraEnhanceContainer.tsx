@@ -1,8 +1,12 @@
 import { useUltraEnhanceState } from './hooks/useUltraEnhanceState';
 import { useUltraEnhanceAPI } from './hooks/useUltraEnhanceAPI';
 import { UltraEnhancePresentation } from './UltraEnhancePresentation';
+import { useCreditSystem } from '@/hooks/useCreditSystem';
+
+const FEATURE_CODE = 'tools.ultra_enhance_pro';
 
 export const UltraEnhanceContainer = () => {
+  const { checkCredits, showInsufficientCreditsToast } = useCreditSystem();
   // Hooks para gerenciamento de estado e operações
   const {
     selectedFile,
@@ -28,6 +32,13 @@ export const UltraEnhanceContainer = () => {
 
   const handleProcessImage = async () => {
     if (!selectedFile) return;
+    
+    // Verificar créditos antes de processar
+    const hasCredits = await checkCredits(FEATURE_CODE);
+    if (!hasCredits) {
+      showInsufficientCreditsToast();
+      return;
+    }
     
     await processImage(
       selectedFile,

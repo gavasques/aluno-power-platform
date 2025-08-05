@@ -27,7 +27,7 @@ export default function UltraMelhoradorPro() {
             <div className="flex items-center gap-2">
               <Badge variant="secondary">
                 <CreditCard className="w-3 h-3 mr-1" />
-                4 créditos por uso
+                8 créditos por uso
               </Badge>
             </div>
           </div>

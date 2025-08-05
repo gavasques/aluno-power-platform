@@ -851,7 +851,7 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
     const { upscale_factor, format } = validation.data;
     
     // Get tool configuration for cost
-    const toolConfig = await picsartService.getToolConfig('ultra_enhance');
+    const toolConfig = await picsartService.getToolConfig('ultra_enhance_pro');
     if (!toolConfig) {
       return res.status(500).json({
         success: false,
@@ -913,7 +913,7 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
         userId,
         provider: 'picsart',
         model: 'ultra-enhance-v1',
-        feature: 'ultra_enhance',
+        feature: 'ultra_enhance_pro',
         originalImageName: req.file.originalname,
         generatedImageUrl: result.processedImageUrl,
         prompt: `Ultra enhance - upscale factor: ${upscale_factor}, format: ${format}`,
@@ -955,7 +955,7 @@ router.post('/ultra-enhance', requireAuth, upload.single('image'), async (req, r
     // Refund credits on failure
     if (userId) {
       try {
-        const toolConfig = await picsartService.getToolConfig('ultra_enhance');
+        const toolConfig = await picsartService.getToolConfig('ultra_enhance_pro');
         if (toolConfig) {
           const creditsToRefund = parseFloat(toolConfig.costPerUse);
           
