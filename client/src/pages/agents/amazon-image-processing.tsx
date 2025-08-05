@@ -65,8 +65,57 @@ export default function AmazonImageProcessing() {
     return null;
   };
 
+  // Compressão automática de imagem
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calcular dimensões mantendo aspect ratio
+        const maxSize = 1024;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Desenhar imagem comprimida
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Converter para JPEG com 85% de qualidade
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+            console.log(`🗜️ [COMPRESS] ${file.name}: ${(file.size/1024).toFixed(1)}KB → ${(compressedFile.size/1024).toFixed(1)}KB`);
+            resolve(compressedFile);
+          } else {
+            resolve(file);
+          }
+        }, 'image/jpeg', 0.85);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   // Handle upload de arquivo
-  const handleFileUpload = (
+  const handleFileUpload = async (
     file: File, 
     index: number, 
     type: 'target' | 'base'
@@ -85,22 +134,44 @@ export default function AmazonImageProcessing() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      console.log(`✅ [UPLOAD] File loaded: ${type} slot ${index}`);
-      const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
-      updateFunction(prev => {
-        const newImages = [...prev];
-        newImages[index] = {
-          file,
-          preview: e.target?.result as string,
-          error: null
-        };
-        console.log(`📦 [UPLOAD] State updated: ${type} slot ${index}`, { hasFile: !!file, hasPreview: !!e.target?.result });
-        return newImages;
-      });
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Comprimir imagem automaticamente
+      const compressedFile = await compressImage(file);
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        console.log(`✅ [UPLOAD] File loaded and compressed: ${type} slot ${index}`);
+        const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
+        updateFunction(prev => {
+          const newImages = [...prev];
+          newImages[index] = {
+            file: compressedFile,
+            preview: e.target?.result as string,
+            error: null
+          };
+          console.log(`📦 [UPLOAD] State updated: ${type} slot ${index}`, { hasFile: !!compressedFile, hasPreview: !!e.target?.result });
+          return newImages;
+        });
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (compressionError) {
+      console.error('❌ [COMPRESS] Error compressing image:', compressionError);
+      // Fallback: usar arquivo original
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
+        updateFunction(prev => {
+          const newImages = [...prev];
+          newImages[index] = {
+            file,
+            preview: e.target?.result as string,
+            error: null
+          };
+          return newImages;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Handle input change
@@ -335,14 +406,14 @@ export default function AmazonImageProcessing() {
     
     return (
       <div key={index} className="space-y-2">
-        <Label className="flex items-center gap-2">
-          {type === 'target' ? <Target className="w-4 h-4" /> : <Package className="w-4 h-4" />}
+        <Label className="flex items-center gap-2 text-xs font-medium text-gray-700">
+          {type === 'target' ? <Target className="w-3 h-3" /> : <Package className="w-3 h-3" />}
           {label}
-          {required && <Badge variant="destructive" className="text-xs">Obrigatória</Badge>}
+          {required && <Badge variant="destructive" className="text-xs ml-1">Obrigatória</Badge>}
         </Label>
         
         <div 
-          className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors bg-gray-50 hover:bg-gray-100 relative"
+          className="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center hover:border-blue-400 transition-colors bg-gray-50 hover:bg-gray-100 relative aspect-square"
           onDrop={(e) => {
             e.preventDefault();
             const files = Array.from(e.dataTransfer.files);
@@ -355,26 +426,26 @@ export default function AmazonImageProcessing() {
           onDragEnter={(e) => e.preventDefault()}
         >
           {slot.preview ? (
-            <div className="relative">
+            <div className="relative w-full h-full">
               <img 
                 src={slot.preview} 
                 alt={label}
-                className="w-full h-32 object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
               />
               <Button
                 type="button"
                 variant="destructive"
                 size="sm"
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600"
+                className="absolute top-1 right-1 h-6 w-6 p-0 bg-red-500 hover:bg-red-600"
                 onClick={() => removeFile(index, type)}
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3" />
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
-              <Upload className="w-8 h-8 mx-auto text-blue-400" />
-              <div className="text-sm text-gray-600 font-medium">
+            <div className="flex flex-col items-center justify-center h-full space-y-1">
+              <Upload className="w-6 h-6 text-blue-400" />
+              <div className="text-xs text-gray-600 font-medium">
                 Clique ou arraste
               </div>
               <div className="text-xs text-gray-400">
@@ -432,19 +503,23 @@ export default function AmazonImageProcessing() {
               Imagens Target para Análise
             </CardTitle>
             <CardDescription className="text-sm text-gray-600">
-              Faça upload de imagens que servirão como referência para a IA analisar e aplicar o estilo. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 5MB cada)
+              Faça upload de imagens que servirão como referência para a IA analisar e aplicar o estilo. A primeira imagem é obrigatória. 
+              <br />
+              <span className="text-green-600 font-medium">✅ Compressão automática (85% qualidade, conversão JPEG)</span>
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {targetImages.map((slot, index) => 
-              renderImageSlot(
-                slot, 
-                index, 
-                'target', 
-                `Análise ${index + 1}`, 
-                index === 0
-              )
-            )}
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              {targetImages.map((slot, index) => 
+                renderImageSlot(
+                  slot, 
+                  index, 
+                  'target', 
+                  `Análise ${index + 1}`, 
+                  index === 0
+                )
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -455,19 +530,23 @@ export default function AmazonImageProcessing() {
               Imagens Base do Produto
             </CardTitle>
             <CardDescription className="text-sm text-gray-600">
-              Envie até 4 imagens do produto em diferentes ângulos que serão editadas pela IA. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 5MB cada)
+              Envie até 4 imagens do produto em diferentes ângulos que serão editadas pela IA. A primeira imagem é obrigatória.
+              <br />
+              <span className="text-green-600 font-medium">✅ Compressão automática (85% qualidade, conversão JPEG)</span>
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {baseImages.map((slot, index) => 
-              renderImageSlot(
-                slot, 
-                index, 
-                'base', 
-                `Ângulo ${index + 1}`, 
-                index === 0
-              )
-            )}
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              {baseImages.map((slot, index) => 
+                renderImageSlot(
+                  slot, 
+                  index, 
+                  'base', 
+                  `Ângulo ${index + 1}`, 
+                  index === 0
+                )
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
