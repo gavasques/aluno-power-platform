@@ -275,21 +275,13 @@ export default function AmazonImageProcessing() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutos
 
-      const token = localStorage.getItem('token');
-      console.log('🔑 [AUTH] Token status:', token ? 'Present' : 'Missing');
-      console.log('🔑 [AUTH] Token preview:', token ? token.substring(0, 20) + '...' : 'null');
-      
       const response = await fetch('/api/agents/amazon-image-processing/process', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData,
         signal: controller.signal
       });
       
       console.log('📡 [HTTP] Response status:', response.status);
-      console.log('📡 [HTTP] Response headers:', Object.fromEntries(response.headers.entries()));
 
       clearTimeout(timeoutId);
 

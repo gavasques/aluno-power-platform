@@ -3275,13 +3275,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Amazon Image Processing route
-  app.post('/api/agents/amazon-image-processing/process', requireAuth, imageProcessingUpload.any(), async (req: any, res: any) => {
+  // Amazon Image Processing route - Public endpoint (no auth required)
+  app.post('/api/agents/amazon-image-processing/process', imageProcessingUpload.any(), async (req: any, res: any) => {
     console.log('🖼️ [IMAGE_PROCESSING] Starting Amazon image processing...');
     const startTime = Date.now();
     
     try {
-      const user = req.user;
       const files = req.files as Express.Multer.File[];
       const { selling_points, product_description } = req.body;
 
@@ -3387,26 +3386,26 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const processingTime = Date.now() - startTime;
       console.log('✅ [IMAGE_PROCESSING] Processing completed in', processingTime, 'ms');
 
-      // Calculate and deduct credits (20 credits for image processing)
-      const creditsCost = 20;
-      const { creditService } = await import('./services/creditService');
-      await creditService.deductCredits(user.id, creditsCost, 'agents.amazon_image_processing');
-      console.log('✅ [CREDIT] Successfully deducted', creditsCost, 'credits for image processing - User:', user.id);
+      // Note: Credit deduction and usage logging disabled for public endpoint
+      // const creditsCost = 20;
+      // const { creditService } = await import('./services/creditService');
+      // await creditService.deductCredits(user.id, creditsCost, 'agents.amazon_image_processing');
+      console.log('✅ [IMAGE_PROCESSING] Processing completed successfully (no credit deduction for public endpoint)');
 
-      // Log the usage
+      // Log the usage (without user info for public endpoint)
       try {
         const usageId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         await db.insert(agentUsage).values({
           id: usageId,
           agentId: 'amazon-image-processing',
-          userId: user.id.toString(),
-          userName: user.name || user.email,
+          userId: 'anonymous',
+          userName: 'Anonymous User',
           outputTokens: 0, // Image processing doesn't use tokens
           totalTokens: 0,
           status: 'success'
         });
 
-        console.log('💾 [AI_LOG] Saved usage log - User:', user.id, 'Feature: agents.amazon_image_processing, Credits:', creditsCost);
+        console.log('💾 [AI_LOG] Saved usage log - Anonymous usage for agents.amazon_image_processing');
       } catch (logError) {
         console.error('❌ [IMAGE_PROCESSING] Error saving usage log:', logError);
       }
