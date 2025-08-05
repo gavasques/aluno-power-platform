@@ -76,8 +76,20 @@ app.use((req, res, next) => {
 // Apply body sanitization after parsing but before route handlers
 app.use(sanitizeBody);
 
-// Apply enhanced authentication to all API routes
-app.use(enhancedAuth);
+// Apply enhanced authentication to all API routes except public endpoints
+app.use((req, res, next) => {
+  // Skip auth for public endpoints
+  const publicEndpoints = [
+    '/api/agents/amazon-image-processing/process'
+  ];
+  
+  if (publicEndpoints.includes(req.path)) {
+    return next();
+  }
+  
+  // Apply enhanced auth for all other routes
+  enhancedAuth(req, res, next);
+});
 
 // CSRF protection disabled for development
 // app.use(enhancedCSRF);
