@@ -381,18 +381,30 @@ Comentário: ${comment}
 
       console.log('Enviando dados para processamento:', submitData);
       
-      // Fazer chamada direta da API
+      // Fazer chamada direta da API com timeout estendido
       const apiResponse = await fetch('/api/agents/amazon-listings-optimizer/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(submitData)
+        body: JSON.stringify(submitData),
+        signal: AbortSignal.timeout(180000) // 3 minutos timeout no frontend
       });
 
       if (!apiResponse.ok) {
         const errorData = await apiResponse.json().catch(() => ({}));
+        
+        // Tratar erro 503 (webhook indisponível) de forma especial
+        if (apiResponse.status === 503 && errorData.webhookStatus === 'not_registered') {
+          toast({
+            title: "Webhook temporariamente indisponível",
+            description: errorData.details || "O sistema de processamento está temporariamente indisponível. Tente novamente em alguns minutos.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
         throw new Error(errorData.error || `Erro HTTP ${apiResponse.status}`);
       }
 

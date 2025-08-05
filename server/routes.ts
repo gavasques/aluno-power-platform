@@ -3892,9 +3892,9 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         format: sanitizedData.format
       };
 
-      // Configurar timeout de 2 minutos (120 segundos)
+      // Configurar timeout de 3 minutos (180 segundos) para aguardar processamento completo
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      const timeoutId = setTimeout(() => controller.abort(), 180000);
 
       try {
         console.log('📡 [WEBHOOK] Enviando dados para n8n webhook...');
@@ -3912,6 +3912,8 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         clearTimeout(timeoutId);
 
         if (!webhookResponse.ok) {
+          const errorText = await webhookResponse.text();
+          console.log(`❌ [WEBHOOK] Webhook failed with status ${webhookResponse.status}: ${errorText}`);
           throw new Error(`Webhook returned status ${webhookResponse.status}: ${webhookResponse.statusText}`);
         }
 
@@ -3960,23 +3962,32 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           ...result
         });
 
-      } catch (error: any) {
+      } catch (webhookError: any) {
         clearTimeout(timeoutId);
         
-        if (error.name === 'AbortError') {
-          console.error('⏰ [WEBHOOK] Request timeout after 120 seconds');
+        if (webhookError.name === 'AbortError') {
+          console.error('⏰ [WEBHOOK] Request timeout after 180 seconds');
           return res.status(408).json({ 
             error: 'Processing timeout - the request took too long to complete',
-            details: 'The webhook processing exceeded the 2-minute timeout limit'
+            details: 'The webhook processing exceeded the 3-minute timeout limit'
           });
         }
         
-        console.error('❌ [WEBHOOK] Error calling n8n webhook:', error);
-        throw error;
+        console.error('❌ [WEBHOOK] Error calling n8n webhook:', webhookError);
+        console.log('ℹ️ [FALLBACK] Webhook n8n não está disponível no momento');
+        
+        return res.status(503).json({
+          error: 'Webhook n8n temporariamente indisponível',
+          details: 'O webhook precisa ser ativado no n8n. Clique em "Execute workflow" no canvas do n8n e tente novamente.',
+          webhookStatus: 'not_registered',
+          hint: 'Entre em contato com o administrador para ativar o webhook amazon_listing_optimizer',
+          fallbackUsed: false,
+          creditsRefunded: false // Os créditos já foram deduzidos
+        });
       }
 
     } catch (error: any) {
-      console.error('Amazon Listings Optimizer processing error:', error);
+      console.error('❌ [FINAL_ERROR] Amazon Listings Optimizer processing error:', error);
       res.status(500).json({ 
         error: error.message || 'Failed to process listing optimization',
         details: process.env.NODE_ENV === 'development' ? error.stack : null
