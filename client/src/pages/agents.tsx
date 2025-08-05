@@ -101,9 +101,10 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
   const IconComponent = categoryInfo.icon;
   const { balance: userBalance } = useUserCreditBalance();
   
-  // Verificar se é um agente novo ou beta
+  // Verificar se é um agente novo, beta ou premium
   const isNew = agent.createdAt && new Date(agent.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
   const isBeta = agent.name.toLowerCase().includes('beta') || agent.description?.toLowerCase().includes('beta');
+  const isPremium = agent.id === 'agent-amazon-listings';
   
   return (
     <Card className="group relative overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white">
@@ -127,6 +128,11 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
               {isBeta && (
                 <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs px-2 py-0.5">
                   Beta
+                </Badge>
+              )}
+              {isPremium && (
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs px-2 py-0.5 font-semibold shadow-sm">
+                  ⭐ Premium
                 </Badge>
               )}
             </div>
