@@ -371,8 +371,8 @@ export default function AmazonImageProcessing() {
             <ImageIcon className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">Processamento de Imagens Amazon</h1>
-            <p className="text-gray-600">Processe imagens com IA para criar versões otimizadas</p>
+            <h1 className="text-3xl font-bold">Copiador de Fotos</h1>
+            <p className="text-gray-600">Copie e recrie fotos com IA para criar versões otimizadas</p>
           </div>
         </div>
       </div>
