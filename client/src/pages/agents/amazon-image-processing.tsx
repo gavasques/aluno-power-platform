@@ -148,12 +148,20 @@ export default function AmazonImageProcessing() {
     const hasBaseImage = baseImages.some(slot => slot.file);
 
     if (!hasTargetImage) {
-      toast.error('Pelo menos uma imagem de análise é obrigatória');
+      toast({
+        title: "Erro",
+        description: 'Pelo menos uma imagem de análise é obrigatória',
+        variant: "destructive"
+      });
       return;
     }
 
     if (!hasBaseImage) {
-      toast.error('Pelo menos uma imagem do produto é obrigatória');
+      toast({
+        title: "Erro", 
+        description: 'Pelo menos uma imagem do produto é obrigatória',
+        variant: "destructive"
+      });
       return;
     }
 
@@ -231,35 +239,49 @@ export default function AmazonImageProcessing() {
 
       if (result.body?.data?.url) {
         processedUrl = result.body.data.url;
-        resultData = { url: processedUrl, id: result.body.data.id, status: 'success' };
+        resultData = { url: processedUrl || undefined, id: result.body.data.id, status: 'success' };
       } else if (result.data?.url) {
         processedUrl = result.data.url;
-        resultData = { url: processedUrl, id: result.data.id, status: 'success' };
+        resultData = { url: processedUrl || undefined, id: result.data.id, status: 'success' };
       } else if (result.url) {
         processedUrl = result.url;
-        resultData = { url: processedUrl, status: 'success' };
+        resultData = { url: processedUrl || undefined, status: 'success' };
       } else if (result.body?.status === 'success') {
         resultData = { status: 'success', message: 'Processamento concluído com sucesso' };
       } else if (typeof result === 'string' && result.startsWith('http')) {
         processedUrl = result;
-        resultData = { url: processedUrl, status: 'success' };
+        resultData = { url: processedUrl || undefined, status: 'success' };
       }
 
       setProcessedResult(resultData);
 
       if (processedUrl) {
-        toast.success('Imagem processada com sucesso!');
+        toast({
+          title: "Sucesso",
+          description: 'Imagem processada com sucesso!'
+        });
       } else {
-        toast.success('Processamento concluído!');
+        toast({
+          title: "Sucesso", 
+          description: 'Processamento concluído!'
+        });
       }
 
     } catch (error: any) {
       console.error('❌ [IMAGE_PROCESSING] Erro:', error);
       
       if (error.name === 'AbortError') {
-        toast.error('Timeout: Processamento demorou mais que 10 minutos');
+        toast({
+          title: "Timeout",
+          description: 'Processamento demorou mais que 10 minutos',
+          variant: "destructive"
+        });
       } else {
-        toast.error(error.message || 'Erro no processamento');
+        toast({
+          title: "Erro",
+          description: error.message || 'Erro no processamento',
+          variant: "destructive"
+        });
       }
     } finally {
       setIsProcessing(false);
@@ -283,9 +305,16 @@ export default function AmazonImageProcessing() {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       
-      toast.success('Download iniciado!');
+      toast({
+        title: "Sucesso",
+        description: 'Download iniciado!'
+      });
     } catch (error) {
-      toast.error('Erro no download');
+      toast({
+        title: "Erro",
+        description: 'Erro no download',
+        variant: "destructive"
+      });
     }
   };
 
@@ -307,7 +336,7 @@ export default function AmazonImageProcessing() {
           {required && <Badge variant="destructive" className="text-xs">Obrigatória</Badge>}
         </Label>
         
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-yellow-400 transition-colors">
+        <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors bg-gray-50 hover:bg-gray-100">
           {slot.preview ? (
             <div className="relative">
               <img 
@@ -319,7 +348,7 @@ export default function AmazonImageProcessing() {
                 type="button"
                 variant="destructive"
                 size="sm"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600"
                 onClick={() => removeFile(index, type)}
               >
                 <X className="w-4 h-4" />
@@ -327,12 +356,12 @@ export default function AmazonImageProcessing() {
             </div>
           ) : (
             <div className="space-y-2">
-              <Upload className="w-8 h-8 mx-auto text-gray-400" />
-              <div className="text-sm text-gray-500">
-                Clique ou arraste uma imagem
+              <Upload className="w-8 h-8 mx-auto text-blue-400" />
+              <div className="text-sm text-gray-600 font-medium">
+                Clique ou arraste
               </div>
               <div className="text-xs text-gray-400">
-                JPG, PNG, WEBP • Máx. 5MB
+                {required ? 'Obrigatório' : 'Opcional'}
               </div>
             </div>
           )}
@@ -367,7 +396,7 @@ export default function AmazonImageProcessing() {
         </Button>
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-gradient-to-br from-yellow-400 to-emerald-500 rounded-lg">
+          <div className="p-3 bg-blue-600 rounded-lg">
             <ImageIcon className="w-8 h-8 text-white" />
           </div>
           <div>
@@ -378,15 +407,14 @@ export default function AmazonImageProcessing() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Imagens Target (Análise) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-yellow-500" />
-              Imagens Target (Análise)
+        {/* Imagens Target para Análise */}
+        <Card className="border-gray-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              Imagens Target para Análise
             </CardTitle>
-            <CardDescription>
-              Imagens de referência para a IA analisar e usar como base
+            <CardDescription className="text-sm text-gray-600">
+              Faça upload de imagens que servirão como referência para a IA analisar e aplicar o estilo. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 5MB cada)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -402,15 +430,14 @@ export default function AmazonImageProcessing() {
           </CardContent>
         </Card>
 
-        {/* Imagens Base (Produto) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5 text-emerald-500" />
-              Imagens Base (Produto)
+        {/* Imagens Base do Produto */}
+        <Card className="border-gray-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              Imagens Base do Produto
             </CardTitle>
-            <CardDescription>
-              Imagens do produto que serão editadas pela IA
+            <CardDescription className="text-sm text-gray-600">
+              Envie até 4 imagens do produto em diferentes ângulos que serão editadas pela IA. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 5MB cada)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -427,42 +454,66 @@ export default function AmazonImageProcessing() {
         </Card>
       </div>
 
-      {/* Campos de Texto */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Informações Adicionais</CardTitle>
-          <CardDescription>
-            Dados opcionais para melhorar o processamento da IA
+      {/* Descrição do Produto */}
+      <Card className="mt-8 border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Descrição do Produto
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-600">
+            Descreva o que é o produto para ajudar a IA a identificá-lo corretamente (recomendado para produtos específicos)
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="selling-points">Pontos de Venda (máx. 500 caracteres)</Label>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
             <Textarea
-              id="selling-points"
-              placeholder="Ex: Resistente à água, design moderno, fácil instalação..."
-              value={sellingPoints}
-              onChange={(e) => setSellingPoints(e.target.value.slice(0, 500))}
-              className="mt-2"
+              id="product-description"
+              placeholder="Ex: Cadeira de escritório ergonômica, smartphone Android, tênis de corrida, luminária LED..."
+              value={productDescription}
+              onChange={(e) => setProductDescription(e.target.value.slice(0, 500))}
+              className="min-h-[100px] resize-none border-gray-200"
             />
-            <div className="text-xs text-gray-500 mt-1">
-              {sellingPoints.length}/500 caracteres
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span className="text-xs text-gray-600">
+                Campo opcional - máximo 500 caracteres - recomendado para melhor identificação
+              </span>
+              <span className="text-xs text-gray-400 ml-auto">
+                {productDescription.length}/500
+              </span>
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="product-description">Descrição do Produto (máx. 500 caracteres)</Label>
-            <Textarea
-              id="product-description"
-              placeholder="Ex: Suporte para cabeça automotivo com ajuste universal..."
-              value={productDescription}
-              onChange={(e) => setProductDescription(e.target.value.slice(0, 500))}
-              className="mt-2"
-            />
-            <div className="text-xs text-gray-500 mt-1">
-              {productDescription.length}/500 caracteres
-            </div>
-          </div>
+          <Card className="border-gray-200">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                Selling Points do Produto
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-600">
+                Opcionalmente, descreva os pontos de venda principais do produto que devem ser destacados na edição
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Textarea
+                  id="selling-points"
+                  placeholder="Ex: Produto premium, durabilidade excepcional, design moderno, eco-friendly, garantia vitalícia..."
+                  value={sellingPoints}
+                  onChange={(e) => setSellingPoints(e.target.value.slice(0, 500))}
+                  className="min-h-[120px] resize-none border-gray-200"
+                />
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-xs text-gray-600">
+                    Campo opcional - máximo 500 caracteres - recomendado para melhor identificação
+                  </span>
+                  <span className="text-xs text-gray-400 ml-auto">
+                    {sellingPoints.length}/500
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
 
@@ -506,7 +557,7 @@ export default function AmazonImageProcessing() {
         <Button
           onClick={processImages}
           disabled={isProcessing}
-          className="flex-1 bg-gradient-to-r from-yellow-500 to-emerald-600 hover:from-yellow-600 hover:to-emerald-700"
+          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
         >
           {isProcessing ? (
             <>
@@ -525,6 +576,7 @@ export default function AmazonImageProcessing() {
           onClick={resetAll}
           variant="outline"
           disabled={isProcessing}
+          className="border-gray-300 text-gray-700 hover:bg-gray-50"
         >
           <RotateCcw className="w-4 h-4 mr-2" />
           Limpar Tudo
