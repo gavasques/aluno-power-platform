@@ -3275,10 +3275,11 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // Amazon Image Processing route - Public endpoint (no auth required)
-  app.post('/api/agents/amazon-image-processing/process', imageProcessingUpload.any(), async (req: any, res: any) => {
+  // Amazon Image Processing route - Requires authentication and 15 credits
+  app.post('/api/agents/amazon-image-processing/process', requireAuth, imageProcessingUpload.any(), async (req: any, res: any) => {
     console.log('🖼️ [IMAGE_PROCESSING] Starting Amazon image processing...');
     const startTime = Date.now();
+    const user = (req as any).user;
     
     try {
       const files = req.files as Express.Multer.File[];
@@ -3386,28 +3387,28 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const processingTime = Date.now() - startTime;
       console.log('✅ [IMAGE_PROCESSING] Processing completed in', processingTime, 'ms');
 
-      // Note: Credit deduction and usage logging disabled for public endpoint
-      // const creditsCost = 20;
-      // const { creditService } = await import('./services/creditService');
-      // await creditService.deductCredits(user.id, creditsCost, 'agents.amazon_image_processing');
-      console.log('✅ [IMAGE_PROCESSING] Processing completed successfully (no credit deduction for public endpoint)');
-
-      // Log the usage (without user info for public endpoint)
+      // Save AI log with automatic credit deduction (15 credits)
       try {
-        const usageId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        await db.insert(agentUsage).values({
-          id: usageId,
-          agentId: 'amazon-image-processing',
-          userId: 'anonymous',
-          userName: 'Anonymous User',
-          outputTokens: 0, // Image processing doesn't use tokens
-          totalTokens: 0,
-          status: 'success'
-        });
+        const { LoggingService } = await import('./services/loggingService');
+        await LoggingService.saveAiLog(
+          user.id,
+          'agents.amazon_image_processing', // Feature code for 15 credits deduction
+          `Amazon Image Processing: ${targetImages.length} target images, ${baseImages.length} base images`,
+          'Processamento de imagens Amazon realizado com sucesso via webhook',
+          'webhook',
+          'guivasques-image-processing',
+          0, // Image processing doesn't use tokens
+          0, // Image processing doesn't use tokens
+          0, // Image processing doesn't use tokens
+          0.00, // No direct cost from webhook
+          0, // creditsUsed = 0 for automatic deduction based on feature code
+          processingTime
+        );
 
-        console.log('💾 [AI_LOG] Saved usage log - Anonymous usage for agents.amazon_image_processing');
+        console.log('✅ [CREDIT] Successfully deducted 15 credits for agents.amazon_image_processing - User:', user.id);
       } catch (logError) {
-        console.error('❌ [IMAGE_PROCESSING] Error saving usage log:', logError);
+        console.error('❌ [IMAGE_PROCESSING] Error saving AI log and deducting credits:', logError);
+        // Continue processing but log the error
       }
 
       return res.json(responseData);
