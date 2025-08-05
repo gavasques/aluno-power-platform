@@ -277,6 +277,7 @@ export default function AmazonImageProcessing() {
 
       const token = localStorage.getItem('token');
       console.log('🔑 [AUTH] Token status:', token ? 'Present' : 'Missing');
+      console.log('🔑 [AUTH] Token preview:', token ? token.substring(0, 20) + '...' : 'null');
       
       const response = await fetch('/api/agents/amazon-image-processing/process', {
         method: 'POST',
@@ -286,6 +287,9 @@ export default function AmazonImageProcessing() {
         body: formData,
         signal: controller.signal
       });
+      
+      console.log('📡 [HTTP] Response status:', response.status);
+      console.log('📡 [HTTP] Response headers:', Object.fromEntries(response.headers.entries()));
 
       clearTimeout(timeoutId);
 
