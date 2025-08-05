@@ -3680,28 +3680,35 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         throw new Error(`N8N webhook error: ${webhookResponse.status} ${webhookResponse.statusText}`);
       }
 
-      // Handle different response types from N8N
+      // Handle webhook response - prioritize binary image response
       const contentType = webhookResponse.headers.get('content-type');
       let responseData: any;
+      let processedImageUrl: string | null = null;
 
-      if (contentType?.includes('application/json')) {
-        responseData = await webhookResponse.json();
-        console.log('📋 [PRODUCT_PHOTOGRAPHY] JSON response received from N8N');
-      } else if (contentType?.includes('image/')) {
-        // Handle binary image response
+      if (contentType?.includes('image/')) {
+        // Handle binary image response (primary expected response)
         const imageBuffer = await webhookResponse.arrayBuffer();
         const imageBase64 = Buffer.from(imageBuffer).toString('base64');
-        const imageUrl = `data:${contentType};base64,${imageBase64}`;
-        responseData = { processedImage: imageUrl };
-        console.log('🖼️ [PRODUCT_PHOTOGRAPHY] Binary image response received from N8N');
+        processedImageUrl = `data:${contentType};base64,${imageBase64}`;
+        responseData = { 
+          processedImage: processedImageUrl,
+          contentType: contentType,
+          size: imageBuffer.byteLength
+        };
+        console.log(`🖼️ [PRODUCT_PHOTOGRAPHY] Binary image response received from webhook - Size: ${Math.round(imageBuffer.byteLength / 1024)}KB`);
+      } else if (contentType?.includes('application/json')) {
+        responseData = await webhookResponse.json();
+        processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+        console.log('📋 [PRODUCT_PHOTOGRAPHY] JSON response received from webhook');
       } else {
-        // Handle text response
+        // Handle text response as fallback
         const textResponse = await webhookResponse.text();
-        console.log('📝 [PRODUCT_PHOTOGRAPHY] Text response received from N8N:', textResponse.substring(0, 100));
+        console.log('📝 [PRODUCT_PHOTOGRAPHY] Text response received from webhook:', textResponse.substring(0, 100));
         
         // Try to parse as JSON
         try {
           responseData = JSON.parse(textResponse);
+          processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
         } catch {
           responseData = { message: textResponse };
         }
@@ -3731,16 +3738,23 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         console.error('❌ [PRODUCT_PHOTOGRAPHY] Error saving AI log:', logError);
       }
 
-      // Return the original image as base64 and processed result from N8N
+      // Return the original image as base64 and processed result from webhook
       const originalImageBase64 = req.file.buffer.toString('base64');
       
       res.json({
+        success: true,
         originalImage: `data:${req.file.mimetype};base64,${originalImageBase64}`,
-        processedImage: responseData?.processedImage || responseData?.url || null,
+        processedImage: processedImageUrl,
         processingTime,
         cost: 0.17147500000000002,
+        credits: 8, // Credits deducted for this operation
         webhookSent: true,
-        webhookResponse: responseData
+        webhookResponse: {
+          contentType: contentType,
+          hasProcessedImage: !!processedImageUrl,
+          responseType: contentType?.includes('image/') ? 'binary_image' : 'json',
+          ...responseData
+        }
       });
     } catch (error: any) {
       console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
