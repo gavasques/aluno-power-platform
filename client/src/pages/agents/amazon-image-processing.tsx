@@ -278,6 +278,9 @@ export default function AmazonImageProcessing() {
       const response = await fetch('/api/agents/amazon-image-processing/process', {
         method: 'POST',
         body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
         signal: controller.signal
       });
       
