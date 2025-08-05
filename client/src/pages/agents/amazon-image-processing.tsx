@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, X, Download, RotateCcw, Image as ImageIcon, Target, Package } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { CreditCostButton, CreditCostBadge } from '@/components/CreditCostButton';
+import { useUserCreditBalance } from '@/hooks/useUserCredits';
 
 interface FileSlot {
   file: File | null;
@@ -26,6 +28,7 @@ interface ProcessedResult {
 export default function AmazonImageProcessing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { balance: userBalance } = useUserCreditBalance();
   
   // State para slots de imagens
   const [targetImages, setTargetImages] = useState<FileSlot[]>(
@@ -486,14 +489,20 @@ export default function AmazonImageProcessing() {
           ← Voltar para Agentes
         </Button>
         
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-blue-600 rounded-lg">
-            <ImageIcon className="w-8 h-8 text-white" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-600 rounded-lg">
+              <ImageIcon className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Copiador de Fotos</h1>
+              <p className="text-gray-600">Copie e recrie fotos com IA para criar versões otimizadas</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">Copiador de Fotos</h1>
-            <p className="text-gray-600">Copie e recrie fotos com IA para criar versões otimizadas</p>
-          </div>
+          <CreditCostBadge 
+            featureName="agents.amazon_image_processing"
+            className="text-sm"
+          />
         </div>
       </div>
 
@@ -653,10 +662,13 @@ export default function AmazonImageProcessing() {
 
       {/* Botões de Ação */}
       <div className="flex gap-4 mt-8">
-        <Button
-          onClick={processImages}
+        <CreditCostButton
+          featureName="agents.amazon_image_processing"
+          userBalance={userBalance}
+          onProcess={processImages}
           disabled={isProcessing}
           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+          showCreditsInButton={false}
         >
           {isProcessing ? (
             <>
@@ -669,7 +681,7 @@ export default function AmazonImageProcessing() {
               Processar Imagens
             </>
           )}
-        </Button>
+        </CreditCostButton>
 
         <Button
           onClick={resetAll}

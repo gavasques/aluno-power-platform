@@ -34,7 +34,8 @@ const AGENT_FEATURE_MAP: Record<string, string> = {
   "agent-infographic-generator": "agents.infographic_editor", 
   "advanced-infographic-generator": "agents.advanced_infographic",
   "amazon-customer-service": "agents.customer_service",
-  "amazon-negative-reviews": "agents.negative_reviews"
+  "amazon-negative-reviews": "agents.negative_reviews",
+  "amazon-image-processing": "agents.amazon_image_processing"
 };
 
 // Configuração das cores e ícones das categorias - padrão Lovable/DeepSeek
