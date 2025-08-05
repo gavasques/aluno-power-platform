@@ -82,6 +82,7 @@ const lazyComponents = {
   AmazonCustomerServiceResult: lazy(() => import('../../pages/agents/amazon-customer-service-result')),
   AmazonNegativeReviews: lazy(() => import('../../pages/agents/amazon-negative-reviews')),
   AmazonNegativeReviewsResult: lazy(() => import('../../pages/agents/amazon-negative-reviews-result')),
+  AmazonImageProcessing: lazy(() => import('../../pages/agents/amazon-image-processing')),
   
   // My Area
   MyArea: lazy(() => import('../../pages/MyArea')),
@@ -224,7 +225,8 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/agents/amazon-negative-reviews', component: lazyComponents.AmazonNegativeReviews, isProtected: true },
       { path: '/agents/amazon-negative-reviews/result', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true },
       { path: '/agentes/amazon-negative-reviews', component: lazyComponents.AmazonNegativeReviews, isProtected: true },
-      { path: '/agentes/amazon-negative-reviews/resultado/:sessionId', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true }
+      { path: '/agentes/amazon-negative-reviews/resultado/:sessionId', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true },
+      { path: '/agentes/amazon-image-processing', component: lazyComponents.AmazonImageProcessing, isProtected: true }
     ],
     
     // My Area Routes (Protected)

@@ -3258,6 +3258,183 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Amazon Image Processing - webhook based with multiple images
+  const imageProcessingUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { 
+      fileSize: 5 * 1024 * 1024, // 5MB per file
+      files: 8 // max 8 files (4 target + 4 base)
+    },
+    fileFilter: (req, file, cb) => {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (validTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only JPG, JPEG, PNG, WEBP files are allowed'), false);
+      }
+    }
+  });
+
+  // Amazon Image Processing route
+  app.post('/api/agents/amazon-image-processing/process', requireAuth, imageProcessingUpload.any(), async (req: any, res: any) => {
+    console.log('🖼️ [IMAGE_PROCESSING] Starting Amazon image processing...');
+    const startTime = Date.now();
+    
+    try {
+      const user = req.user;
+      const files = req.files as Express.Multer.File[];
+      const { selling_points, product_description } = req.body;
+
+      console.log('🖼️ [IMAGE_PROCESSING] Files received:', {
+        totalFiles: files?.length || 0,
+        sellingPoints: !!selling_points,
+        productDescription: !!product_description
+      });
+
+      if (!files || files.length === 0) {
+        console.log('❌ [IMAGE_PROCESSING] No files received');
+        return res.status(400).json({ error: 'Pelo menos uma imagem é obrigatória' });
+      }
+
+      // Validate we have required images (at least one target and one base)
+      const targetImages = files.filter(file => file.fieldname.startsWith('target_image_'));
+      const baseImages = files.filter(file => file.fieldname.startsWith('base_image_'));
+
+      if (targetImages.length === 0) {
+        return res.status(400).json({ error: 'Pelo menos uma imagem de análise é obrigatória' });
+      }
+
+      if (baseImages.length === 0) {
+        return res.status(400).json({ error: 'Pelo menos uma imagem do produto é obrigatória' });
+      }
+
+      console.log('📊 [IMAGE_PROCESSING] Image distribution:', {
+        targetImages: targetImages.length,
+        baseImages: baseImages.length,
+        totalSize: files.reduce((sum, file) => sum + file.size, 0)
+      });
+
+      // Prepare FormData for webhook
+      const formData = new FormData();
+
+      // Add target images
+      targetImages.forEach((file) => {
+        const blob = new Blob([file.buffer], { type: file.mimetype });
+        formData.append(file.fieldname, blob, file.originalname);
+      });
+
+      // Add base images
+      baseImages.forEach((file) => {
+        const blob = new Blob([file.buffer], { type: file.mimetype });
+        formData.append(file.fieldname, blob, file.originalname);
+      });
+
+      // Add text fields if provided
+      if (selling_points?.trim()) {
+        formData.append('selling_points', selling_points.trim());
+      }
+      if (product_description?.trim()) {
+        formData.append('product_description', product_description.trim());
+      }
+
+      console.log('🚀 [IMAGE_PROCESSING] Sending to webhook...');
+
+      // Send to webhook with 10-minute timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutes
+
+      const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/imagem-amazon', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      console.log('📥 [IMAGE_PROCESSING] Webhook response status:', webhookResponse.status);
+
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook error: ${webhookResponse.status} ${webhookResponse.statusText}`);
+      }
+
+      // Handle different response types
+      const contentType = webhookResponse.headers.get('content-type');
+      let responseData: any;
+
+      if (contentType?.includes('application/json')) {
+        responseData = await webhookResponse.json();
+        console.log('📋 [IMAGE_PROCESSING] JSON response received');
+      } else if (contentType?.includes('image/')) {
+        // Handle binary image response
+        const imageBuffer = await webhookResponse.arrayBuffer();
+        const imageBase64 = Buffer.from(imageBuffer).toString('base64');
+        const imageUrl = `data:${contentType};base64,${imageBase64}`;
+        responseData = { url: imageUrl };
+        console.log('🖼️ [IMAGE_PROCESSING] Binary image response received');
+      } else {
+        // Handle text response
+        const textResponse = await webhookResponse.text();
+        console.log('📝 [IMAGE_PROCESSING] Text response received:', textResponse.substring(0, 100));
+        
+        // Try to parse as URL
+        if (textResponse.startsWith('http')) {
+          responseData = { url: textResponse };
+        } else {
+          responseData = { message: textResponse };
+        }
+      }
+
+      const processingTime = Date.now() - startTime;
+      console.log('✅ [IMAGE_PROCESSING] Processing completed in', processingTime, 'ms');
+
+      // Calculate and deduct credits (20 credits for image processing)
+      const creditsCost = 20;
+      const { creditService } = await import('./services/creditService');
+      await creditService.deductCredits(user.id, creditsCost, 'agents.amazon_image_processing');
+      console.log('✅ [CREDIT] Successfully deducted', creditsCost, 'credits for image processing - User:', user.id);
+
+      // Log the usage
+      try {
+        const usageId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        await db.insert(agentUsage).values({
+          id: usageId,
+          agentId: 'amazon-image-processing',
+          userId: user.id.toString(),
+          userName: user.name || user.email,
+          outputTokens: 0, // Image processing doesn't use tokens
+          totalTokens: 0,
+          status: 'success'
+        });
+
+        console.log('💾 [AI_LOG] Saved usage log - User:', user.id, 'Feature: agents.amazon_image_processing, Credits:', creditsCost);
+      } catch (logError) {
+        console.error('❌ [IMAGE_PROCESSING] Error saving usage log:', logError);
+      }
+
+      return res.json(responseData);
+
+    } catch (error: any) {
+      const processingTime = Date.now() - startTime;
+      console.error('❌ [IMAGE_PROCESSING] Error:', error);
+      
+      // Handle specific errors
+      let errorMessage = 'Erro no processamento de imagens';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Timeout: Processamento demorou mais que 10 minutos';
+      } else if (error.message?.includes('Webhook error')) {
+        errorMessage = 'Erro no serviço de processamento de imagens';
+      } else if (error.message?.includes('files are allowed')) {
+        errorMessage = 'Tipo de arquivo não suportado. Use JPG, PNG ou WEBP';
+      }
+
+      return res.status(500).json({ 
+        error: errorMessage,
+        details: error.message
+      });
+    }
+  });
+
   // Amazon Product Photography - specific route (must be before generic)
   const photographyUpload = multer({ 
     storage: multer.memoryStorage(),
