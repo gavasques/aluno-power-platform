@@ -215,6 +215,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/agents/bullet-point-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
       { path: '/agents/bullet-points-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
       { path: '/agents/agent-amazon-product-photography', component: lazyComponents.AmazonProductPhotography, isProtected: true },
+      { path: '/agentes/agent-amazon-product-photography', component: lazyComponents.AmazonProductPhotography, isProtected: true },
       { path: '/agents/lifestyle-with-model', component: lazyComponents.LifestyleWithModel, isProtected: true },
       { path: '/agents/infographic-generator', component: lazyComponents.InfographicGenerator, isProtected: true },
       { path: '/agents/advanced-infographic-generator', component: lazyComponents.AdvancedInfographicGenerator, isProtected: true },
