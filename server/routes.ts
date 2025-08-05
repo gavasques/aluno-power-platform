@@ -3803,36 +3803,6 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
-  // OpenAI Processing route (generic) - MOVED BELOW SPECIFIC ROUTES
-  app.post('/api/agents/:agentId/process', async (req, res) => {
-    try {
-      const { productName, productInfo, reviewsData, format } = req.body;
-      const agentId = req.params.agentId;
-      
-      // TODO: Get from authenticated user session
-      const userId = "user-1";
-      const userName = "Demo User";
-
-      const result = await openaiService.processAmazonListing({
-        agentId,
-        userId,
-        userName,
-        productName,
-        productInfo,
-        reviewsData,
-        format: format || 'text'
-      });
-
-      res.json(result);
-    } catch (error: any) {
-      console.error('OpenAI processing error:', error);
-      res.status(500).json({ 
-        error: error.message || 'Failed to process listing',
-        details: error.response?.data || null
-      });
-    }
-  });
-
   // Specific Amazon Listings Optimizer endpoint with webhook processing
   app.post('/api/agents/amazon-listings-optimizer/process', requireAuth, async (req, res) => {
     try {
@@ -4014,7 +3984,35 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // OpenAI Processing route (generic) - MOVED BELOW SPECIFIC ROUTES
+  app.post('/api/agents/:agentId/process', async (req, res) => {
+    try {
+      const { productName, productInfo, reviewsData, format } = req.body;
+      const agentId = req.params.agentId;
+      
+      // TODO: Get from authenticated user session
+      const userId = "user-1";
+      const userName = "Demo User";
 
+      const result = await openaiService.processAmazonListing({
+        agentId,
+        userId,
+        userName,
+        productName,
+        productInfo,
+        reviewsData,
+        format: format || 'text'
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('OpenAI processing error:', error);
+      res.status(500).json({ 
+        error: error.message || 'Failed to process listing',
+        details: error.response?.data || null
+      });
+    }
+  });
 
   // Save AI generation log
   app.post('/api/ai-generation-logs', async (req, res) => {
