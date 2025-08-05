@@ -68,18 +68,19 @@ The project follows strict development guidelines, emphasizing type safety with 
 - **Proteção PermissionGuard**: ✅ Verificada em 30+ componentes
 - **Status**: ✅ **SISTEMA DE PERMISSÕES 100% CONFIGURADO E PROTEGIDO**
 
-### Editor de Imagem Principal - Integração N8N Webhook ✅ CONCLUÍDA (05/08/2025)
-- **Objetivo**: Substituir o fluxo do provedor de IA para envio de dados ao webhook N8N
+### Editor de Imagem Principal - Webhook N8N Direto ✅ MIGRAÇÃO CONCLUÍDA (05/08/2025)
+- **Problema**: Sistema ainda processava via OpenAI antes de enviar ao webhook N8N
+- **Objetivo**: Enviar imagens DIRETAMENTE para webhook N8N sem processamento IA
 - **Implementações Realizadas**:
-  - ✅ **Webhook Integration**: Adicionada integração com webhook `https://n8n.guivasques.app/webhook-test/editor-imagem-principal`
-  - ✅ **Dados de Sucesso**: Envio completo de dados incluindo imagens, custos, tempo de processamento e metadados do usuário
-  - ✅ **Dados de Erro**: Envio de dados de erro com informações detalhadas para troubleshooting
-  - ✅ **Logging Robusto**: Logs detalhados para monitoramento do envio de webhook
-  - ✅ **Backward Compatibility**: Mantida compatibilidade com frontend existente
-- **Estrutura dos Dados Enviados**:
-  - 📤 **Sucesso**: userId, userName, userEmail, agentType, originalImage, processedImage, prompt, processingTime, cost, usage, timestamp
-  - 📤 **Erro**: userId, userName, userEmail, agentType, error, errorType, processingTime, timestamp, success: false
-- **Status**: ✅ **WEBHOOK INTEGRATION ATIVA E FUNCIONAL**
+  - ✅ **Envio Direto**: Removido processamento OpenAI, imagens enviadas direto via FormData
+  - ✅ **FormData Structure**: Arquivo de imagem + metadados (userId, userName, userEmail, agentType, timestamp)
+  - ✅ **Timeout 5min**: Configurado timeout de 300 segundos para aguardar processamento N8N
+  - ✅ **Response Handling**: Suporte a JSON, imagem binária e texto do webhook
+  - ✅ **Credit System**: Mantida dedução de 8 créditos via LoggingService
+  - ✅ **Error Handling**: Tratamento completo de erros com logs estruturados
+- **Arquitetura Nova**: Frontend → Express → N8N Webhook (processamento IA) → Resposta direta
+- **Webhook URL**: `https://n8n.guivasques.app/webhook-test/editor-imagem-principal`
+- **Status**: ✅ **MIGRAÇÃO COMPLETA - AGUARDANDO ATIVAÇÃO N8N WEBHOOK**
 
 ### Sistema de Créditos - Ferramentas - Auditoria ✅ EM ANDAMENTO (05/08/2025)
 - **Problema**: Inconsistências críticas no sistema de créditos das ferramentas

@@ -3631,278 +3631,141 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       const user = req.user;
-      const originalImageBuffer = req.file.buffer;
       const fileName = req.file.originalname;
 
-      console.log('📸 [PRODUCT_PHOTOGRAPHY] Processing image:', {
+      console.log('📸 [PRODUCT_PHOTOGRAPHY] Processing image via N8N webhook:', {
         fileName,
         fileSize: req.file.size,
         userId: user.id
       });
 
-      // Convert image to base64
-      const base64Image = originalImageBuffer.toString('base64');
-
-      // Get agent configuration
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for agent:', 'agent-amazon-product-photography');
-      const agent = await storage.getAgentById('agent-amazon-product-photography');
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Agent found:', !!agent);
-      if (!agent) {
-        return res.status(404).json({ error: 'Agente não encontrado' });
-      }
-
-      // Get system prompt
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Looking for prompt:', 'agent-amazon-product-photography', 'system');
-      const systemPrompt = await storage.getAgentPrompt('agent-amazon-product-photography', 'system');
-      console.log('🔍 [PRODUCT_PHOTOGRAPHY] Prompt found:', !!systemPrompt);
-      if (!systemPrompt) {
-        return res.status(404).json({ error: 'Prompt do agente não encontrado' });
-      }
-
-      console.log('🤖 [PRODUCT_PHOTOGRAPHY] Using model:', agent.model);
-
-      // Call OpenAI GPT-Image-1 API for image editing
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      // Prepare FormData for N8N webhook
+      const formData = new FormData();
       
-      const mimeType = req.file.mimetype;
+      // Add the image file as blob
+      const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
+      formData.append('image', blob, fileName);
       
-      console.log('📁 [PRODUCT_PHOTOGRAPHY] Image processing:', {
-        fileName,
-        mimeType,
-        fileSize: originalImageBuffer.length
+      // Add user data
+      formData.append('userId', user.id.toString());
+      formData.append('userName', user.name || '');
+      formData.append('userEmail', user.email || '');
+      formData.append('agentType', 'main_image_editor');
+      formData.append('timestamp', new Date().toISOString());
+
+      console.log('🚀 [PRODUCT_PHOTOGRAPHY] Sending to N8N webhook...');
+
+      // Send to N8N webhook with 5-minute timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
+
+      const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/editor-imagem-principal', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'AI-Platform-Webhook/1.0'
+        }
       });
-      
+
+      clearTimeout(timeoutId);
+
+      console.log('📥 [PRODUCT_PHOTOGRAPHY] N8N webhook response status:', webhookResponse.status);
+
+      if (!webhookResponse.ok) {
+        throw new Error(`N8N webhook error: ${webhookResponse.status} ${webhookResponse.statusText}`);
+      }
+
+      // Handle different response types from N8N
+      const contentType = webhookResponse.headers.get('content-type');
+      let responseData: any;
+
+      if (contentType?.includes('application/json')) {
+        responseData = await webhookResponse.json();
+        console.log('📋 [PRODUCT_PHOTOGRAPHY] JSON response received from N8N');
+      } else if (contentType?.includes('image/')) {
+        // Handle binary image response
+        const imageBuffer = await webhookResponse.arrayBuffer();
+        const imageBase64 = Buffer.from(imageBuffer).toString('base64');
+        const imageUrl = `data:${contentType};base64,${imageBase64}`;
+        responseData = { processedImage: imageUrl };
+        console.log('🖼️ [PRODUCT_PHOTOGRAPHY] Binary image response received from N8N');
+      } else {
+        // Handle text response
+        const textResponse = await webhookResponse.text();
+        console.log('📝 [PRODUCT_PHOTOGRAPHY] Text response received from N8N:', textResponse.substring(0, 100));
+        
+        // Try to parse as JSON
+        try {
+          responseData = JSON.parse(textResponse);
+        } catch {
+          responseData = { message: textResponse };
+        }
+      }
+
+      const processingTime = Math.round((Date.now() - startTime) / 1000);
+      console.log('✅ [PRODUCT_PHOTOGRAPHY] N8N processing completed in', processingTime, 's');
+
+      // Save AI log with automatic credit deduction (8 credits)
       try {
-        // Import toFile from OpenAI library
-        const { toFile } = await import('openai');
-        
-        // Create file object using OpenAI's toFile utility
-        const imageFile = await toFile(originalImageBuffer, fileName, { type: mimeType });
-        
-        const response = await openai.images.edit({
-          model: 'gpt-image-1',
-          image: imageFile,
-          prompt: systemPrompt.content,
-          n: 1,
-          size: '1024x1024',
-          quality: 'high'
-        });
-
-        const endTime = Date.now();
-        const processingTime = Math.round((endTime - startTime) / 1000);
-        
-        // Get real cost from OpenAI response usage (gpt-image-1 pricing)
-        // Text input: $5.00/1M, Image input: $10.00/1M, Image output: $40.00/1M
-        let realCost = 5.167; // Default fallback
-        
-        if (response.usage) {
-          const textInputTokens = response.usage.input_tokens_details?.text_tokens || 0;
-          const imageInputTokens = response.usage.input_tokens_details?.image_tokens || 0;
-          const imageOutputTokens = response.usage.output_tokens || 0;
-          
-          realCost = (textInputTokens * 0.000005) + (imageInputTokens * 0.00001) + (imageOutputTokens * 0.00004);
-        }
-
-        console.log('💰 [PRODUCT_PHOTOGRAPHY] Cost calculation details:', {
-          textTokens: response.usage?.input_tokens_details?.text_tokens || 0,
-          imageTokens: response.usage?.input_tokens_details?.image_tokens || 0,
-          outputTokens: response.usage?.output_tokens || 0,
-          textCost: ((response.usage?.input_tokens_details?.text_tokens || 0) * 0.000005).toFixed(6),
-          imageCost: ((response.usage?.input_tokens_details?.image_tokens || 0) * 0.00001).toFixed(6),
-          outputCost: ((response.usage?.output_tokens || 0) * 0.00004).toFixed(6),
-          totalCost: realCost.toFixed(6)
-        });
-
-        console.log('✅ [PRODUCT_PHOTOGRAPHY] Processing completed:', {
-          processingTime: `${processingTime}s`,
-          cost: `$${realCost.toFixed(6)}`,
-          usage: response.usage
-        });
-
-        // Debug: Log the OpenAI response structure
-        console.log('🔍 [PRODUCT_PHOTOGRAPHY] OpenAI response structure:', {
-          hasData: !!response.data,
-          dataLength: response.data?.length,
-          firstItem: response.data?.[0] ? Object.keys(response.data[0]) : 'none',
-          responseKeys: Object.keys(response),
-          usage: response.usage
-        });
-
-        // Extract generated image from response - images.edit can return base64 or URL
-        // Try base64 first, then URL as fallback
-        const imageBase64 = response.data?.[0]?.b64_json;
-        const imageUrl = response.data?.[0]?.url;
-        
-        if (!imageBase64 && !imageUrl) {
-          throw new Error('No image data received from OpenAI');
-        }
-        
-        // Convert to data URL if we got base64, otherwise use URL directly
-        const generatedImageUrl = imageBase64 
-          ? (imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`)
-          : imageUrl;
-        
-        // Save to ai_generation_logs with AUTOMATIC CREDIT DEDUCTION
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.main_image_editor', // Feature code para dedução de créditos
-          systemPrompt.content,
-          'Imagem gerada com sucesso via GPT-Image-1',
-          'openai',
-          'gpt-image-1',
-          response.usage?.input_tokens || 0,
-          response.usage?.output_tokens || 0,
-          response.usage?.total_tokens || 0,
-          realCost,
-          0, // creditsUsed = 0 para dedução automática
+          'agents.main_image_editor', // Feature code for 8 credits deduction
+          'Processamento de imagem para fotografia profissional de produto Amazon',
+          'Imagem processada com sucesso',
+          'amazon-product-photography',
+          'product-photography-ai',
+          0, // No tokens for webhook
+          0,
+          0,
+          0.17147500000000002, // Fixed cost estimation
+          0, // creditsUsed = 0 for automatic deduction
           processingTime * 1000
         );
-
-        // Prepare data for webhook
-        const webhookData = {
-          userId: user.id,
-          userName: user.name,
-          userEmail: user.email,
-          agentType: 'main_image_editor',
-          originalFileName: fileName,
-          originalImage: `data:image/jpeg;base64,${base64Image}`,
-          processedImage: generatedImageUrl,
-          prompt: systemPrompt.content,
-          processingTime,
-          cost: realCost,
-          model: 'gpt-image-1',
-          provider: 'openai',
-          usage: response.usage,
-          timestamp: new Date().toISOString(),
-          success: true
-        };
-
-        // Send data to webhook
-        try {
-          console.log('🔄 [WEBHOOK] Sending data to N8N webhook for main image editor...');
-          
-          const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/editor-imagem-principal', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'User-Agent': 'AI-Platform-Webhook/1.0'
-            },
-            body: JSON.stringify(webhookData)
-          });
-
-          if (webhookResponse.ok) {
-            const webhookResult = await webhookResponse.text();
-            console.log('✅ [WEBHOOK] Data sent successfully to N8N:', {
-              status: webhookResponse.status,
-              statusText: webhookResponse.statusText,
-              response: webhookResult
-            });
-          } else {
-            console.error('❌ [WEBHOOK] Failed to send data to N8N:', {
-              status: webhookResponse.status,
-              statusText: webhookResponse.statusText
-            });
-          }
-        } catch (webhookError: any) {
-          console.error('❌ [WEBHOOK] Error sending data to N8N:', {
-            error: webhookError.message,
-            stack: webhookError.stack
-          });
-        }
-
-        // Return result
-        res.json({
-          originalImage: `data:image/jpeg;base64,${base64Image}`,
-          processedImage: generatedImageUrl,
-          processingTime,
-          cost: realCost,
-          webhookSent: true
-        });
-
-      } finally {
-        // No cleanup needed - using buffer directly
+      } catch (logError: any) {
+        console.error('❌ [PRODUCT_PHOTOGRAPHY] Error saving AI log:', logError);
       }
+
+      // Return the original image as base64 and processed result from N8N
+      const originalImageBase64 = req.file.buffer.toString('base64');
+      
+      res.json({
+        originalImage: `data:${req.file.mimetype};base64,${originalImageBase64}`,
+        processedImage: responseData?.processedImage || responseData?.url || null,
+        processingTime,
+        cost: 0.17147500000000002,
+        webhookSent: true,
+        webhookResponse: responseData
+      });
     } catch (error: any) {
       console.error('❌ [PRODUCT_PHOTOGRAPHY] Error:', error);
       
+      const processingTime = Math.round((Date.now() - startTime) / 1000);
+      
       // Save error log to ai_generation_logs
       try {
-        const errorDuration = Date.now() - startTime;
-        await db.insert(aiGenerationLogs).values({
-          userId: user.id,
-          provider: 'openai',
-          model: 'gpt-image-1',
-          prompt: 'Erro no processamento da imagem',
-          response: `Erro: ${error.message}`,
-          promptCharacters: 0,
-          responseCharacters: error.message?.length || 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          totalTokens: 0,
-          cost: '0.00',
-          duration: errorDuration,
-          feature: 'agents.main_image_editor',
-          createdAt: new Date()
-        });
-      } catch (logError) {
+        const { LoggingService } = await import('./services/loggingService');
+        await LoggingService.saveAiLog(
+          user.id,
+          'agents.main_image_editor',
+          'Erro no processamento da imagem via N8N webhook',
+          `Erro: ${error.message}`,
+          'amazon-product-photography',
+          'product-photography-ai',
+          0, // No tokens for webhook
+          0,
+          0,
+          0, // No cost for failed processing
+          0, // No credits deducted for errors
+          processingTime * 1000
+        );
+      } catch (logError: any) {
         console.error('❌ [PRODUCT_PHOTOGRAPHY] Error saving error log:', logError);
-      }
-
-      // Send error data to webhook
-      try {
-        const user = req.user;
-        const errorDuration = Date.now() - (startTime || Date.now());
-        
-        const webhookErrorData = {
-          userId: user.id,
-          userName: user.name,
-          userEmail: user.email,
-          agentType: 'main_image_editor',
-          originalFileName: req.file?.originalname || 'unknown',
-          error: error.message,
-          errorType: error.name || 'UnknownError',
-          processingTime: Math.round(errorDuration / 1000),
-          cost: 0,
-          model: 'gpt-image-1',
-          provider: 'openai',
-          timestamp: new Date().toISOString(),
-          success: false
-        };
-
-        console.log('🔄 [WEBHOOK] Sending error data to N8N webhook for main image editor...');
-        
-        const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/editor-imagem-principal', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'AI-Platform-Webhook/1.0'
-          },
-          body: JSON.stringify(webhookErrorData)
-        });
-
-        if (webhookResponse.ok) {
-          const webhookResult = await webhookResponse.text();
-          console.log('✅ [WEBHOOK] Error data sent successfully to N8N:', {
-            status: webhookResponse.status,
-            statusText: webhookResponse.statusText,
-            response: webhookResult
-          });
-        } else {
-          console.error('❌ [WEBHOOK] Failed to send error data to N8N:', {
-            status: webhookResponse.status,
-            statusText: webhookResponse.statusText
-          });
-        }
-      } catch (webhookError: any) {
-        console.error('❌ [WEBHOOK] Error sending error data to N8N:', {
-          error: webhookError.message,
-          stack: webhookError.stack
-        });
       }
       
       res.status(500).json({ 
-        error: 'Erro no processamento da imagem',
+        error: 'Erro no processamento da imagem via N8N webhook',
         details: error.message
       });
     }
