@@ -113,6 +113,79 @@ export default function AmazonListingsOptimizerResult() {
     });
   };
 
+  const formatPromocionaisText = (promocionaisJson: string) => {
+    if (!promocionaisJson) return 'Elementos promocionais não disponíveis';
+    
+    try {
+      // Remove markdown code blocks se existirem
+      const cleanJson = promocionaisJson.replace(/```json\n?|\n?```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+      
+      let formatted = '';
+      
+      if (parsed.headlines_impacto) {
+        formatted += '🎯 HEADLINES DE IMPACTO:\n';
+        parsed.headlines_impacto.forEach((headline: string, index: number) => {
+          formatted += `${index + 1}. ${headline}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      if (parsed.callouts_numericos) {
+        formatted += '📊 CALLOUTS NUMÉRICOS:\n';
+        parsed.callouts_numericos.forEach((callout: string, index: number) => {
+          formatted += `${index + 1}. ${callout}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      if (parsed.badges_qualidade) {
+        formatted += '🏆 BADGES DE QUALIDADE:\n';
+        parsed.badges_qualidade.forEach((badge: string, index: number) => {
+          formatted += `${index + 1}. ${badge}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      if (parsed.urgencia_escassez) {
+        formatted += '⚡ ELEMENTOS DE URGÊNCIA/ESCASSEZ:\n';
+        parsed.urgencia_escassez.forEach((elemento: string, index: number) => {
+          formatted += `${index + 1}. ${elemento}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      if (parsed.beneficios_unicos) {
+        formatted += '✨ BENEFÍCIOS ÚNICOS:\n';
+        parsed.beneficios_unicos.forEach((beneficio: string, index: number) => {
+          formatted += `${index + 1}. ${beneficio}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      if (parsed.social_proof) {
+        formatted += '👥 PROVA SOCIAL:\n';
+        parsed.social_proof.forEach((prova: string, index: number) => {
+          formatted += `${index + 1}. ${prova}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      if (parsed.garantias) {
+        formatted += '🛡️ GARANTIAS:\n';
+        parsed.garantias.forEach((garantia: string, index: number) => {
+          formatted += `${index + 1}. ${garantia}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      return formatted.trim() || promocionaisJson;
+    } catch (error) {
+      // Se não conseguir parsear como JSON, retorna o texto original formatado
+      return promocionaisJson;
+    }
+  };
+
   const formatCompleteResult = () => {
     if (!resultData) return '';
     
@@ -150,16 +223,12 @@ ${output.keywords || 'Não disponível'}
 =================================================
 ELEMENTOS PROMOCIONAIS
 =================================================
-${output.elementos_promocionais || 'Não disponível'}
+${formatPromocionaisText(output.elementos_promocionais || '')}
 
 =================================================
 INFORMAÇÕES TÉCNICAS
 =================================================
-Provedor: ${output.provider}
-Modelo: ${output.model}
-Tokens Usados: ${output.tokensUsed?.total || 0}
-Custo: R$ ${(output.cost || 0).toFixed(4)}
-ID da Sessão: ${output.sessionId}
+Processado pelo Sistema de IA
 
 ---
 Gerado em ${date} pelo Sistema de IA Amazon Listing Optimizer
@@ -319,9 +388,9 @@ Gerado em ${date} pelo Sistema de IA Amazon Listing Optimizer
               </CardHeader>
               <CardContent>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-900 leading-relaxed">
+                  <h2 className="text-lg font-semibold text-gray-900 leading-relaxed">
                     {output.titulo || 'Título não disponível'}
-                  </p>
+                  </h2>
                 </div>
               </CardContent>
             </Card>
@@ -464,14 +533,14 @@ Gerado em ${date} pelo Sistema de IA Amazon Listing Optimizer
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(output.elementos_promocionais || '', 'Elementos Promocionais')}
+                    onClick={() => copyToClipboard(formatPromocionaisText(output.elementos_promocionais || ''), 'Elementos Promocionais')}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => downloadAsText(output.elementos_promocionais || '', `promocionais-${Date.now()}.txt`)}
+                    onClick={() => downloadAsText(formatPromocionaisText(output.elementos_promocionais || ''), `promocionais-${Date.now()}.txt`)}
                   >
                     <Download className="h-4 w-4" />
                   </Button>
@@ -480,7 +549,7 @@ Gerado em ${date} pelo Sistema de IA Amazon Listing Optimizer
               <CardContent>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <pre className="text-gray-900 leading-relaxed whitespace-pre-wrap font-sans">
-                    {output.elementos_promocionais || 'Elementos promocionais não disponíveis'}
+                    {formatPromocionaisText(output.elementos_promocionais || '')}
                   </pre>
                 </div>
               </CardContent>
@@ -488,34 +557,11 @@ Gerado em ${date} pelo Sistema de IA Amazon Listing Optimizer
           </TabsContent>
         </Tabs>
 
-        {/* Technical Info */}
+        {/* Processing Info */}
         <Card className="border-gray-200">
-          <CardHeader>
-            <CardTitle className="text-sm text-gray-600">Informações Técnicas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="font-semibold text-gray-600">Provedor:</p>
-                <Badge variant="outline">{output.provider}</Badge>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-600">Modelo:</p>
-                <Badge variant="outline">{output.model}</Badge>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-600">Tokens:</p>
-                <Badge variant="outline">{output.tokensUsed?.total || 0}</Badge>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-600">Custo:</p>
-                <Badge variant="outline">R$ {(output.cost || 0).toFixed(4)}</Badge>
-              </div>
-            </div>
-            <Separator className="my-4" />
-            <div className="text-xs text-gray-500">
+          <CardContent className="pt-6">
+            <div className="text-center text-sm text-gray-500">
               <p>Processado em: {new Date(resultData.timestamp).toLocaleString('pt-BR')}</p>
-              <p>Session ID: {output.sessionId}</p>
             </div>
           </CardContent>
         </Card>
