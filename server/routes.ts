@@ -2795,6 +2795,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('🧪 [TEST] Testando webhook n8n...');
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
       const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon-negative-reviews', {
         method: 'POST',
         headers: {
@@ -2802,8 +2805,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'User-Agent': 'AlunoPower-Test/1.0'
         },
         body: JSON.stringify(webhookPayload),
-        timeout: 30000
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!webhookResponse.ok) {
         throw new Error(`Webhook retornou status ${webhookResponse.status}`);
@@ -3270,7 +3275,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (validTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
-        cb(new Error('Only JPG, JPEG, PNG, WEBP files are allowed'), false);
+        cb(new Error('Only JPG, JPEG, PNG, WEBP files are allowed'));
       }
     }
   });
@@ -3443,7 +3448,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       if (file.mimetype.startsWith('image/')) {
         cb(null, true);
       } else {
-        cb(new Error('Only image files are allowed'), false);
+        cb(new Error('Only image files are allowed'));
       }
     }
   });
@@ -3623,14 +3628,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.post('/api/agents/amazon-product-photography/process', requireAuth, photographyUpload.single('image'), async (req: any, res: any) => {
     console.log('🌐 [REQUEST] POST /api/agents/amazon-product-photography/process');
     
+    const startTime = Date.now();
+    const user = req.user;
+    
     try {
-      const startTime = Date.now();
-      
       if (!req.file) {
         return res.status(400).json({ error: 'Nenhuma imagem fornecida' });
       }
-
-      const user = req.user;
       const fileName = req.file.originalname;
 
       console.log('📸 [PRODUCT_PHOTOGRAPHY] Processing image via N8N webhook:', {
@@ -5140,12 +5144,12 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { name, email, username, role, isActive, groupIds } = req.body;
       
       // Update user
-      const result = await db.execute(`
+      const result = await db.execute(sql`
         UPDATE users 
-        SET name = $1, email = $2, username = $3, role = $4, is_active = $5, updated_at = NOW()
-        WHERE id = $6
+        SET name = ${name}, email = ${email}, username = ${username}, role = ${role}, is_active = ${isActive}, updated_at = NOW()
+        WHERE id = ${parseInt(id)}
         RETURNING id, username, email, name, role, is_active as "isActive", updated_at as "updatedAt"
-      `, [name, email, username, role, isActive, id]);
+      `);
       
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'User not found' });
@@ -5154,15 +5158,15 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       // Update user groups
       if (groupIds !== undefined) {
         // Remove existing group memberships
-        await db.execute('DELETE FROM user_group_members WHERE user_id = $1', [id]);
+        await db.execute(sql`DELETE FROM user_group_members WHERE user_id = ${parseInt(id)}`);
         
         // Add new group memberships
         if (groupIds.length > 0) {
           for (const groupId of groupIds) {
-            await db.execute(`
+            await db.execute(sql`
               INSERT INTO user_group_members (user_id, group_id)
-              VALUES ($1, $2)
-            `, [id, groupId]);
+              VALUES (${parseInt(id)}, ${parseInt(groupId)})
+            `);
           }
         }
       }
@@ -5566,13 +5570,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       // Descontar 5 créditos ANTES da chamada da API
       try {
-        const creditsDeducted = await CreditService.deductCredits(userId, 'tools.compare_listings');
+        const creditsDeducted = await CreditService.deductCredits(userId!, 'tools.compare_listings');
         console.log(`✅ [CREDIT] Successfully deducted ${creditsDeducted} credits for tools.compare_listings - User: ${userId}`);
-      } catch (creditError) {
+      } catch (creditError: any) {
         console.error(`❌ [CREDIT] Failed to deduct credits:`, creditError);
         return res.status(402).json({ 
           error: 'Créditos insuficientes',
-          details: creditError.message 
+          details: creditError?.message || 'Erro desconhecido'
         });
       }
 
@@ -5595,7 +5599,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
             }
 
             return await response.json();
-          } catch (error) {
+          } catch (error: any) {
             console.error(`❌ [AMAZON_COMPARE] Error fetching ${asin}:`, error);
             return { 
               status: 'ERROR', 
@@ -5663,13 +5667,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
       // Descontar créditos ANTES da chamada da API
       try {
-        const creditsDeducted = await CreditService.deductCredits(userId, 'tools.product_details');
+        const creditsDeducted = await CreditService.deductCredits(userId!, 'tools.product_details');
         console.log(`✅ [CREDIT] Successfully deducted ${creditsDeducted} credits for tools.product_details - User: ${userId}`);
-      } catch (creditError) {
+      } catch (creditError: any) {
         console.error(`❌ [CREDIT] Failed to deduct credits:`, creditError);
         return res.status(402).json({ 
           error: 'Créditos insuficientes',
-          details: creditError.message 
+          details: creditError?.message || 'Erro desconhecido'
         });
       }
 
@@ -5714,7 +5718,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         // Log da busca de produto (manter existente)
         try {
           await db.insert(toolUsageLogs).values({
-            userId: userId,
+            userId: userId!,
             userName: req.user?.name || 'Unknown',
             userEmail: req.user?.email || 'unknown@email.com',
             toolName: 'Detalhes do Produto Amazon',
