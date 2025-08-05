@@ -50,14 +50,14 @@ export default function AmazonImageProcessing() {
   // Validação de arquivo
   const validateFile = (file: File): string | null => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const maxSize = 10 * 1024 * 1024; // 10MB (aumentado para permitir compressão)
+    const maxSize = 5 * 1024 * 1024; // 5MB
     const minSize = 1024; // 1KB
 
     if (!validTypes.includes(file.type)) {
       return 'Formato não suportado. Use JPG, JPEG, PNG ou WEBP.';
     }
     if (file.size > maxSize) {
-      return 'Arquivo muito grande. Máximo 10MB.';
+      return 'Arquivo muito grande. Máximo 5MB.';
     }
     if (file.size < minSize) {
       return 'Arquivo muito pequeno. Mínimo 1KB.';
@@ -65,66 +65,17 @@ export default function AmazonImageProcessing() {
     return null;
   };
 
-  // Função para comprimir e redimensionar imagem
-  const compressImage = (file: File): Promise<{ file: File; preview: string }> => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        // Definir tamanho 1:1 (quadrado)
-        const size = Math.min(img.width, img.height);
-        canvas.width = 400; // Tamanho padrão otimizado
-        canvas.height = 400;
-        
-        if (!ctx) {
-          reject(new Error('Canvas context not available'));
-          return;
-        }
-        
-        // Calcular offset para centralizar a imagem
-        const offsetX = (img.width - size) / 2;
-        const offsetY = (img.height - size) / 2;
-        
-        // Desenhar imagem centralizada e cortada em quadrado
-        ctx.drawImage(
-          img, 
-          offsetX, offsetY, size, size,  // source (crop)
-          0, 0, 400, 400                 // destination (scale)
-        );
-        
-        // Converter para blob com compressão
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            reject(new Error('Failed to compress image'));
-            return;
-          }
-          
-          const compressedFile = new File([blob], file.name, {
-            type: 'image/jpeg',
-            lastModified: Date.now()
-          });
-          
-          const preview = canvas.toDataURL('image/jpeg', 0.85);
-          resolve({ file: compressedFile, preview });
-        }, 'image/jpeg', 0.85); // 85% quality
-      };
-      
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
   // Handle upload de arquivo
-  const handleFileUpload = async (
+  const handleFileUpload = (
     file: File, 
     index: number, 
     type: 'target' | 'base'
   ) => {
+    console.log(`🚀 [UPLOAD] Processing: ${type} slot ${index} - ${file.name}`);
     const error = validateFile(file);
     
     if (error) {
+      console.log(`❌ [UPLOAD] Validation error: ${error}`);
       const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
       updateFunction(prev => {
         const newImages = [...prev];
@@ -134,27 +85,22 @@ export default function AmazonImageProcessing() {
       return;
     }
 
-    try {
-      const { file: compressedFile, preview } = await compressImage(file);
-      
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      console.log(`✅ [UPLOAD] File loaded: ${type} slot ${index}`);
       const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
       updateFunction(prev => {
         const newImages = [...prev];
         newImages[index] = {
-          file: compressedFile,
-          preview,
+          file,
+          preview: e.target?.result as string,
           error: null
         };
+        console.log(`📦 [UPLOAD] State updated: ${type} slot ${index}`, { hasFile: !!file, hasPreview: !!e.target?.result });
         return newImages;
       });
-    } catch (err) {
-      const updateFunction = type === 'target' ? setTargetImages : setBaseImages;
-      updateFunction(prev => {
-        const newImages = [...prev];
-        newImages[index] = { file: null, preview: null, error: 'Erro ao processar imagem' };
-        return newImages;
-      });
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
   // Handle input change
@@ -164,6 +110,7 @@ export default function AmazonImageProcessing() {
     type: 'target' | 'base'
   ) => {
     const file = e.target.files?.[0];
+    console.log(`📎 [UPLOAD] Input change: ${type} slot ${index}`, file?.name);
     if (file) {
       handleFileUpload(file, index, type);
     }
@@ -399,6 +346,7 @@ export default function AmazonImageProcessing() {
           onDrop={(e) => {
             e.preventDefault();
             const files = Array.from(e.dataTransfer.files);
+            console.log(`🎯 [DROP] Files dropped on ${type} slot ${index}:`, files.map(f => f.name));
             if (files.length > 0) {
               handleFileUpload(files[0], index, type);
             }
@@ -411,7 +359,7 @@ export default function AmazonImageProcessing() {
               <img 
                 src={slot.preview} 
                 alt={label}
-                className="w-full h-32 object-contain rounded-lg bg-gray-100"
+                className="w-full h-32 object-cover rounded-lg"
               />
               <Button
                 type="button"
@@ -484,7 +432,7 @@ export default function AmazonImageProcessing() {
               Imagens Target para Análise
             </CardTitle>
             <CardDescription className="text-sm text-gray-600">
-              Faça upload de imagens que servirão como referência para a IA analisar e aplicar o estilo. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 10MB cada). As imagens serão automaticamente otimizadas e convertidas para formato quadrado.
+              Faça upload de imagens que servirão como referência para a IA analisar e aplicar o estilo. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 5MB cada)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -507,7 +455,7 @@ export default function AmazonImageProcessing() {
               Imagens Base do Produto
             </CardTitle>
             <CardDescription className="text-sm text-gray-600">
-              Envie até 4 imagens do produto em diferentes ângulos que serão editadas pela IA. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 10MB cada). As imagens serão automaticamente otimizadas e convertidas para formato quadrado.
+              Envie até 4 imagens do produto em diferentes ângulos que serão editadas pela IA. A primeira imagem é obrigatória. Formatos suportados: JPG, PNG, WEBP (máx. 5MB cada)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
