@@ -39,7 +39,7 @@ export default function LifestyleWithModel() {
   const { toast } = useToast();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
 
-  const FEATURE_CODE = 'agents.lifestyle_with_model';
+  const FEATURE_CODE = 'agents.lifestyle_model';
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

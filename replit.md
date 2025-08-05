@@ -37,6 +37,15 @@ The project follows strict development guidelines, emphasizing type safety with 
 
 ## Recent Changes & Fixes
 
+### Feature Names Auditoria - Sistema de Créditos (05/08/2025)
+- **Problema**: Inconsistência nos feature names entre frontend/backend
+- **Correção**: Validação e correção dos feature names dos agentes de imagem
+- **Agentes Verificados**:
+  - ✅ **Copiador de Fotos**: `agents.amazon_image_processing` (15 créditos)
+  - ✅ **Editor Lifestyle com Modelo**: `agents.lifestyle_model` (15 créditos)
+  - ✅ **Gerador Avançado Infográficos**: `agents.advanced_infographic` (15 créditos)
+- **Status**: ✅ **TODOS OS FEATURE NAMES ÚNICOS E FUNCIONANDO**
+
 ### Amazon Listing Optimizer - Webhook N8N Configurado (05/08/2025)
 - **Mudança**: Sistema configurado para aguardar resposta do webhook n8n
 - **Endpoint**: `https://webhook.guivasques.app/webhook/amazon_listing_optimizer`
