@@ -38,13 +38,20 @@ The project follows strict development guidelines, emphasizing type safety with 
 ## Recent Changes & Fixes
 
 ### Feature Names Auditoria - Sistema de Créditos (05/08/2025)
-- **Problema**: Inconsistência nos feature names entre frontend/backend
-- **Correção**: Validação e correção dos feature names dos agentes de imagem
-- **Agentes Verificados**:
+- **Problema**: Inconsistência nos feature names entre frontend/backend causando falhas na dedução de créditos
+- **Correções Executadas**:
+  - ✅ **Editor de Imagem Principal**: `agents.amazon_product_photography` → `agents.main_image_editor` (8 créditos)
+  - ✅ **Editor de Foto Infográficos**: `agents.infographic_generator` → `agents.infographic_editor` (12 créditos)
+  - ✅ **Gerador Avançado Infográficos**: `agents.infographic_generator` → `agents.advanced_infographic` (15 créditos)
+- **Agentes Verificados e Consistentes**:
+  - ✅ **Gerador de Descrições HTML**: `agents.html_descriptions` (1 crédito)
+  - ✅ **Gerador de Bullet Points**: `agents.bullet_points` (1 crédito)
+  - ✅ **Amazon Customer Service**: `agents.customer_service` (3 créditos)
+  - ✅ **Amazon Negative Reviews**: `agents.negative_reviews` (4 créditos)
+  - ✅ **Amazon Listings Optimizer**: `agents.amazon_listing` (8 créditos)
   - ✅ **Copiador de Fotos**: `agents.amazon_image_processing` (15 créditos)
   - ✅ **Editor Lifestyle com Modelo**: `agents.lifestyle_model` (15 créditos)
-  - ✅ **Gerador Avançado Infográficos**: `agents.advanced_infographic` (15 créditos)
-- **Status**: ✅ **TODOS OS FEATURE NAMES ÚNICOS E FUNCIONANDO**
+- **Status**: ✅ **TODOS OS 10 AGENTES COM FEATURE NAMES ÚNICOS E CONSISTENTES**
 
 ### Amazon Listing Optimizer - Webhook N8N Configurado (05/08/2025)
 - **Mudança**: Sistema configurado para aguardar resposta do webhook n8n

@@ -42,7 +42,7 @@ export default function InfographicGenerator() {
   const { toast } = useToast();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
 
-  const FEATURE_CODE = 'agents.infographic_generator';
+  const FEATURE_CODE = 'agents.infographic_editor';
   
   // Buscar departamentos para o dropdown
   const { data: departments = [] } = useQuery({

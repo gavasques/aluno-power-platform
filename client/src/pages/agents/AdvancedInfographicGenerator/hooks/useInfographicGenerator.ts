@@ -5,7 +5,7 @@ import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { apiRequest } from '@/lib/queryClient';
 import type { InfographicSession, InfographicState, ProductData, ConceptData } from '../types';
 
-const FEATURE_CODE = 'agents.infographic_generator';
+const FEATURE_CODE = 'agents.advanced_infographic';
 
 export const useInfographicGenerator = () => {
   const { toast } = useToast();

@@ -39,7 +39,7 @@ export default function AmazonProductPhotography() {
   const { toast } = useToast();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
 
-  const FEATURE_CODE = 'agents.amazon_product_photography';
+  const FEATURE_CODE = 'agents.main_image_editor';
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

@@ -16,7 +16,7 @@ export const useInfographicGenerator = () => {
   const { toast } = useToast();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
 
-  const FEATURE_CODE = 'agents.infographic_generator';
+  const FEATURE_CODE = 'agents.advanced_infographic';
 
   // Fetch categories for dropdown - memoized
   const { data: departments = [] } = useQuery<any[]>({
