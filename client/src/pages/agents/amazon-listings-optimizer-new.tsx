@@ -379,7 +379,7 @@ Comentário: ${comment}
         format: 'text'
       };
 
-      console.log('Enviando dados para processamento:', submitData);
+
       
       // Fazer chamada direta da API com timeout estendido
       const apiResponse = await fetch('/api/agents/amazon-listings-optimizer/process', {
@@ -409,7 +409,6 @@ Comentário: ${comment}
       }
 
       const response = await apiResponse.json();
-      console.log('Response from API:', response);
 
       if (response && response.success) {
         // Log da geração para o sistema de créditos

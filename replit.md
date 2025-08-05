@@ -39,7 +39,7 @@ The project follows strict development guidelines, emphasizing type safety with 
 
 ### Amazon Listing Optimizer - Webhook N8N Configurado (05/08/2025)
 - **Mudança**: Sistema configurado para aguardar resposta do webhook n8n
-- **Endpoint**: `https://n8n.guivasques.app/webhook-test/amazon_listing_optimizer`
+- **Endpoint**: `https://webhook.guivasques.app/webhook/amazon_listing_optimizer`
 - **Arquitetura**: App → N8n Webhook (aguarda resposta) → IA → Retorno direto (300s timeout)
 - **Funcionalidades**:
   - ✅ Processamento síncrono via webhook n8n
@@ -49,8 +49,8 @@ The project follows strict development guidelines, emphasizing type safety with 
   - ✅ Tratamento de erros e timeouts
   - ✅ Mensagem informativa quando webhook não está registrado
 - **Dados Enviados**: userId, userName, userEmail, productData, reviewsData, sessionId, timestamp
-- **Status**: ✅ **CONFIGURADO - AGUARDANDO ATIVAÇÃO DO WEBHOOK N8N**
-- **Próximo Passo**: Ativar webhook no n8n clicando "Execute workflow" no canvas
+- **Status**: ✅ **EM PRODUÇÃO - FUNCIONANDO**
+- **URL Produção**: Migrado para webhook.guivasques.app (produção)
 
 ### Amazon Negative Reviews System - SOLUÇÃO FINAL (03/08/2025)
 - **Problema Principal**: Sistema assíncrono complexo com callback n8n não funcionando

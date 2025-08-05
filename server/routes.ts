@@ -3897,9 +3897,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const timeoutId = setTimeout(() => controller.abort(), 300000);
 
       try {
-        console.log('📡 [WEBHOOK] Enviando dados para n8n webhook...');
-        
-        const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/amazon_listing_optimizer', {
+        const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/amazon_listing_optimizer', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -3913,17 +3911,10 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
 
         if (!webhookResponse.ok) {
           const errorText = await webhookResponse.text();
-          console.log(`❌ [WEBHOOK] Webhook failed with status ${webhookResponse.status}: ${errorText}`);
           throw new Error(`Webhook returned status ${webhookResponse.status}: ${webhookResponse.statusText}`);
         }
 
         const result = await webhookResponse.json();
-        
-        console.log('✅ [WEBHOOK] Resposta recebida do n8n:', {
-          status: webhookResponse.status,
-          hasResult: !!result,
-          resultKeys: Object.keys(result || {})
-        });
 
         // Log da geração para o sistema
         try {
