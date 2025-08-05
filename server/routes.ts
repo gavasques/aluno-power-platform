@@ -3663,7 +3663,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
 
-      const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/editor-imagem-principal', {
+      const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/editor-imagem-principal', {
         method: 'POST',
         body: formData,
         signal: controller.signal,

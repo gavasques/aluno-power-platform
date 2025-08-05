@@ -79,8 +79,13 @@ The project follows strict development guidelines, emphasizing type safety with 
   - ✅ **Credit System**: Mantida dedução de 8 créditos via LoggingService
   - ✅ **Error Handling**: Tratamento completo de erros com logs estruturados
 - **Arquitetura Nova**: Frontend → Express → N8N Webhook (processamento IA) → Resposta direta
-- **Webhook URL**: `https://n8n.guivasques.app/webhook-test/editor-imagem-principal`
-- **Status**: ✅ **MIGRAÇÃO COMPLETA - AGUARDANDO ATIVAÇÃO N8N WEBHOOK**
+- **Webhook URL**: `https://webhook.guivasques.app/webhook/editor-imagem-principal` (PRODUÇÃO)
+- **Status**: ✅ **EM PRODUÇÃO - WEBHOOK ATIVO**
+
+### Editor de Imagem Principal - Migração para Produção ✅ CONCLUÍDA (05/08/2025)
+- **Mudança**: Webhook migrado para ambiente de produção
+- **URL Atualizada**: `https://webhook.guivasques.app/webhook/editor-imagem-principal`
+- **Status**: ✅ **WEBHOOK DE PRODUÇÃO CONFIGURADO E ATIVO**
 
 ### Sistema de Créditos - Ferramentas - Auditoria ✅ EM ANDAMENTO (05/08/2025)
 - **Problema**: Inconsistências críticas no sistema de créditos das ferramentas
