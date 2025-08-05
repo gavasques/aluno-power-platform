@@ -150,27 +150,37 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/phone-verification', component: lazyComponents.PhoneVerification, isProtected: false, layout: 'none' }
     ],
     
-    // Admin Routes (Protected + Admin Layout)
+    // Admin Routes (Protected + Admin Layout) - PADRONIZADO PORTUGUÊS
     ADMIN_ROUTES: [
+      // Principais
       { path: '/admin', component: lazyComponents.AdminDashboard, isProtected: true, layout: 'admin' },
       { path: '/admin/dashboard', component: lazyComponents.Admin, isProtected: true, layout: 'admin' },
-      { path: '/admin/users', component: lazyComponents.UserManagement, isProtected: true, layout: 'admin' },
+      { path: '/admin/configuracoes', component: lazyComponents.AdminDashboard, isProtected: true, layout: 'admin' },
+      
+      // Gestão de usuários (português como padrão)
       { path: '/admin/usuarios', component: lazyComponents.UserManagement, isProtected: true, layout: 'admin' },
-      { path: '/admin/users/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/novo', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/grupos/:id', component: lazyComponents.GroupDetail, isProtected: true, layout: 'admin' },
       { path: '/admin/usuarios/grupos/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
-      { path: '/admin/groups/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
-      { path: '/admin/content', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
+      
+      // Gestão de conteúdo (português como padrão)
       { path: '/admin/conteudo', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/conteudo/:subsection', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/conteudo/:subsection/:id', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
       { path: '/admin/conteudo/:subsection/:id/:action', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
-      { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' },
+      
+      // Gestão de sistema
+      { path: '/admin/agentes', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' },
       { path: '/admin/cadastros', component: lazyComponents.AdminCadastros, isProtected: true, layout: 'admin' },
       { path: '/admin/cadastros/:subsection', component: lazyComponents.AdminCadastros, isProtected: true, layout: 'admin' },
-      { path: '/admin/configuracoes', component: lazyComponents.AdminDashboard, isProtected: true, layout: 'admin' }
+
+      // ROTAS DE COMPATIBILIDADE (Legacy) - Para não quebrar links existentes
+      { path: '/admin/users', component: lazyComponents.UserManagement, isProtected: true, layout: 'admin' },
+      { path: '/admin/users/:id/edit', component: lazyComponents.UserEdit, isProtected: true, layout: 'admin' },
+      { path: '/admin/groups/:id/edit', component: lazyComponents.GroupEdit, isProtected: true, layout: 'admin' },
+      { path: '/admin/content', component: lazyComponents.ContentManagement, isProtected: true, layout: 'admin' },
+      { path: '/admin/agents', component: lazyComponents.AgentProviderSettings, isProtected: true, layout: 'admin' }
     ],
     
     // Hub Routes (Protected)
@@ -189,28 +199,62 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/hub/prompts-ia/:id', component: lazyComponents.PromptDetail, isProtected: true }
     ],
     
-    // Tools Routes (Protected)
+    // Tools Routes (Protected) - PADRONIZADO PORTUGUÊS
     TOOLS_ROUTES: [
+      // Principal
       { path: '/ferramentas', component: lazyComponents.Ferramentas, isProtected: true },
+      
+      // Ferramentas de análise Amazon
       { path: '/ferramentas/amazon-reviews', component: lazyComponents.AmazonReviewExtractor, isProtected: true },
       { path: '/ferramentas/relatorio-keywords', component: lazyComponents.KeywordSearchReport, isProtected: true },
       { path: '/ferramentas/produto-detalhes', component: lazyComponents.AmazonProductDetails, isProtected: true },
       { path: '/ferramentas/comparar-listings', component: lazyComponents.CompararListings, isProtected: true },
-      { path: '/ferramentas/consulta-cnpj', component: lazyComponents.CNPJConsulta, isProtected: true },
       { path: '/ferramentas/keyword-suggestions', component: lazyComponents.AmazonKeywordSuggestions, isProtected: true },
-      { path: '/ai/image-upscale', component: lazyComponents.ImageUpscale, isProtected: true },
-      { path: '/ai/background-removal', component: lazyComponents.BackgroundRemoval, isProtected: true },
+      { path: '/ferramentas/amazon-ads-editor', component: lazyComponents.AmazonAdsEditor, isProtected: true },
+      
+      // Ferramentas de imagem (português como padrão)
+      { path: '/ferramentas/upscale-imagem', component: lazyComponents.ImageUpscale, isProtected: true },
+      { path: '/ferramentas/remover-fundo', component: lazyComponents.BackgroundRemoval, isProtected: true },
       { path: '/ferramentas/remover-fundo-pro', component: lazyComponents.BackgroundRemovalPro, isProtected: true },
       { path: '/ferramentas/gerador-logomarcas-pro', component: lazyComponents.LogoGeneratorPro, isProtected: true },
       { path: '/ferramentas/ultra-melhorador-pro', component: lazyComponents.UltraMelhoradorPro, isProtected: true },
       { path: '/ferramentas/upscale-pro', component: lazyComponents.UpscalePro, isProtected: true },
-      { path: '/ferramentas/amazon-ads-editor', component: lazyComponents.AmazonAdsEditor, isProtected: true }
+      
+      // Ferramentas gerais
+      { path: '/ferramentas/consulta-cnpj', component: lazyComponents.CNPJConsulta, isProtected: true },
+
+      // ROTAS DE COMPATIBILIDADE (Legacy)
+      { path: '/ai/image-upscale', component: lazyComponents.ImageUpscale, isProtected: true },
+      { path: '/ai/background-removal', component: lazyComponents.BackgroundRemoval, isProtected: true }
     ],
     
-    // Agent Routes (Protected)
+    // Agent Routes (Protected) - PADRONIZADO PORTUGUÊS
     AGENT_ROUTES: [
+      // Página principal dos agentes
       { path: '/agentes', component: lazyComponents.AgentsPage, isProtected: true },
+      
+      // Agentes de conteúdo textual
+      { path: '/agentes/html-descriptions-generator', component: lazyComponents.HtmlDescriptionAgent, isProtected: true },
       { path: '/agentes/bullet-points-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
+      
+      // Agentes de imagem
+      { path: '/agentes/editor-imagem-principal', component: lazyComponents.AmazonProductPhotography, isProtected: true },
+      { path: '/agentes/lifestyle-com-modelo', component: lazyComponents.LifestyleWithModel, isProtected: true },
+      { path: '/agentes/editor-infograficos', component: lazyComponents.InfographicGenerator, isProtected: true },
+      { path: '/agentes/editor-infograficos-avancado', component: lazyComponents.AdvancedInfographicGenerator, isProtected: true },
+      { path: '/agentes/copiador-imagens', component: lazyComponents.AmazonImageProcessing, isProtected: true },
+      
+      // Agentes de otimização
+      { path: '/agentes/otimizador-listings', component: lazyComponents.AmazonListingsOptimizer, isProtected: true },
+      { path: '/agentes/otimizador-listings/resultado', component: lazyComponents.AmazonListingsOptimizerResult, isProtected: true },
+      
+      // Agentes de atendimento
+      { path: '/agentes/atendimento-cliente', component: lazyComponents.AmazonCustomerService, isProtected: true },
+      { path: '/agentes/atendimento-cliente/resultado/:sessionId', component: lazyComponents.AmazonCustomerServiceResult, isProtected: true },
+      { path: '/agentes/reviews-negativos', component: lazyComponents.AmazonNegativeReviews, isProtected: true },
+      { path: '/agentes/reviews-negativos/resultado/:sessionId', component: lazyComponents.AmazonNegativeReviewsResult, isProtected: true },
+
+      // ROTAS DE COMPATIBILIDADE (Legacy) - Para não quebrar links existentes
       { path: '/agents/html-description-generator', component: lazyComponents.HtmlDescriptionAgent, isProtected: true },
       { path: '/agents/bullet-point-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
       { path: '/agents/bullet-points-generator', component: lazyComponents.BulletPointsAgent, isProtected: true },
@@ -230,13 +274,17 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/agentes/amazon-image-processing', component: lazyComponents.AmazonImageProcessing, isProtected: true }
     ],
     
-    // My Area Routes (Protected)
+    // My Area Routes (Protected) - PADRONIZADO PORTUGUÊS
     MY_AREA_ROUTES: [
+      // Principais (português como padrão)
       { path: '/minha-area', component: lazyComponents.MinhaAreaIndex, isProtected: true },
+      { path: '/minha-area/perfil', component: lazyComponents.UserProfile, isProtected: true },
+      { path: '/minha-area/assinatura', component: lazyComponents.SubscriptionPage, isProtected: true },
+
+      // ROTAS DE COMPATIBILIDADE (Legacy)
       { path: '/my-area', component: lazyComponents.MyArea, isProtected: true },
       { path: '/user/dashboard', component: lazyComponents.UserDashboard, isProtected: true },
       { path: '/user/usage', component: lazyComponents.UserUsage, isProtected: true },
-      { path: '/minha-area/perfil', component: lazyComponents.UserProfile, isProtected: true },
       { path: '/subscription', component: lazyComponents.SubscriptionPage, isProtected: true },
       
       // Products

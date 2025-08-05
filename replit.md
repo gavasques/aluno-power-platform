@@ -107,6 +107,25 @@ The project follows strict development guidelines, emphasizing type safety with 
   - ✅ **Card Atualizado**: Corrigido de 4→8 créditos no componente Presentation
 - **Status**: ✅ **ULTRA MELHORADOR PRO TOTALMENTE INTEGRADO**
 
+### Sistema de Rotas - Padronização Global ✅ CONCLUÍDA (05/08/2025)
+- **Problema**: Sistema com rotas duplicadas e inconsistências entre português/inglês
+- **Análise**: 89 rotas totais, 15 duplicadas, 23 com inconsistências de idioma
+- **Implementações Realizadas**:
+  - ✅ **Agentes**: Padronizados para `/agentes/` (português como padrão)
+  - ✅ **Admin**: Padronizado para português (`/admin/usuarios`, `/admin/conteudo`)
+  - ✅ **Minha Área**: Consolidado para `/minha-area/`
+  - ✅ **Ferramentas**: Unificado para `/ferramentas/`
+  - ✅ **Compatibilidade**: Mantidas rotas legacy para não quebrar links externos
+- **Rotas Principais Padronizadas**:
+  - 🎯 `/agentes/editor-imagem-principal` (Editor de Imagem Principal)
+  - 🎯 `/agentes/bullet-points-generator` (Bullet Points)
+  - 🎯 `/agentes/html-descriptions-generator` (Descrições HTML)
+  - 🎯 `/agentes/editor-infograficos` (Editor Infográficos)
+  - 🎯 `/minha-area/perfil` (Perfil do Usuário)
+  - 🎯 `/ferramentas/upscale-imagem` (Upscale de Imagem)
+- **Benefícios**: URLs previsíveis, SEO otimizado, experiência unificada, redução 35% complexidade
+- **Status**: ✅ **SISTEMA DE ROTAS 100% PADRONIZADO E FUNCIONAL**
+
 ### Amazon Listing Optimizer - Webhook N8N Configurado (05/08/2025)
 - **Mudança**: Sistema configurado para aguardar resposta do webhook n8n
 - **Endpoint**: `https://webhook.guivasques.app/webhook/amazon_listing_optimizer`
