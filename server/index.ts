@@ -51,13 +51,14 @@ app.use((req, res, next) => {
     return next();
   }
   // Debug log for JSON parsing
-  if (req.path === '/api/auth/login') {
-    console.log('🔍 [JSON PARSER] Processing login request:', {
+  if (req.path === '/api/auth/login' || req.path === '/api/agents/lifestyle-with-model/process') {
+    console.log('🔍 [JSON PARSER] Processing request:', {
       path: req.path,
       method: req.method,
       contentType: req.get('content-type'),
       bodyExists: !!req.body,
-      bodyKeys: req.body ? Object.keys(req.body) : []
+      bodyKeys: req.body ? Object.keys(req.body) : [],
+      bodySize: req.get('content-length')
     });
   }
   // Apply JSON parsing for all other routes
