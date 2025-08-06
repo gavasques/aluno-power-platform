@@ -1,7 +1,7 @@
 import { 
   users, 
   com360_suppliers, 
-  partners, 
+  hub_partners, 
   com360_materials, 
   tool_tools, 
   hub_templates, 
@@ -16,11 +16,11 @@ import {
   hub_template_categories,
   hub_prompt_categories,
   departments,
-  partnerTypes,
-  partnerContacts,
-  partnerFiles,
-  partnerReviews,
-  partnerReviewReplies,
+  hub_partner_types,
+  hub_partner_contacts,
+  hub_partner_files,
+  hub_partner_reviews,
+  hub_partner_review_replies,
   supplierReviews,
   supplierContacts,
   supplierBrands,
@@ -1723,7 +1723,7 @@ export class DatabaseStorage implements IStorage {
       // Fetch all reviews with users in one query
       const reviews = await db
         .select({
-          review: partnerReviews,
+          review: hub_partner_reviews,
           user: users
         })
         .from(partnerReviews)

@@ -128,7 +128,7 @@ export const internationalSupplierContracts = pgTable("international_supplier_co
 }));
 
 // Partner Types - Separate table for partner types
-export const partnerTypes = pgTable("partner_types", {
+export const hub_partner_types = pgTable("hub_partner_types", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   icon: text("icon").notNull().default("Users"),
@@ -255,13 +255,13 @@ export const supplierConversations = pgTable("supplier_conversations", {
 });
 
 // Partners
-export const partners = pgTable("partners", {
+export const hub_partners = pgTable("hub_partners", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email"), // Made optional
   phone: text("phone").notNull(),
   logo: text("logo"), // Added logo field
-  partnerTypeId: integer("partner_type_id").references(() => partnerTypes.id),
+  partnerTypeId: integer("partner_type_id").references(() => hub_partner_types.id),
   specialties: text("specialties").array(),
   description: text("description"),
   address: jsonb("address"), // {street, city, state, zipCode}
@@ -279,9 +279,9 @@ export const partners = pgTable("partners", {
 });
 
 // Partner Contacts
-export const partnerContacts = pgTable("partner_contacts", {
+export const hub_partner_contacts = pgTable("hub_partner_contacts", {
   id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  partnerId: integer("partner_id").references(() => hub_hub_partners.id).notNull(),
   area: text("area").notNull(), // Area/Departamento
   name: text("name").notNull(), // Nome do contato
   email: text("email"), // Email do contato
@@ -292,9 +292,9 @@ export const partnerContacts = pgTable("partner_contacts", {
 });
 
 // Partner Files
-export const partnerFiles = pgTable("partner_files", {
+export const hub_partner_files = pgTable("hub_partner_files", {
   id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  partnerId: integer("partner_id").references(() => hub_hub_partners.id).notNull(),
   name: text("name").notNull(),
   description: text("description"),
   fileUrl: text("file_url").notNull(),
@@ -305,9 +305,9 @@ export const partnerFiles = pgTable("partner_files", {
 });
 
 // Partner Materials
-export const partnerMaterials = pgTable("partner_materials", {
+export const hub_partner_materials = pgTable("hub_partner_materials", {
   id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  partnerId: integer("partner_id").references(() => hub_hub_partners.id).notNull(),
   name: text("name").notNull(),
   fileUrl: text("file_url").notNull(),
   fileType: text("file_type").notNull(),
@@ -316,9 +316,9 @@ export const partnerMaterials = pgTable("partner_materials", {
 });
 
 // Partner Reviews
-export const partnerReviews = pgTable("partner_reviews", {
+export const hub_partner_reviews = pgTable("hub_partner_reviews", {
   id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  partnerId: integer("partner_id").references(() => hub_partners.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment").notNull(),
@@ -328,9 +328,9 @@ export const partnerReviews = pgTable("partner_reviews", {
 });
 
 // Partner Review Replies
-export const partnerReviewReplies = pgTable("partner_review_replies", {
+export const hub_partner_review_replies = pgTable("hub_partner_review_replies", {
   id: serial("id").primaryKey(),
-  reviewId: integer("review_id").references(() => partnerReviews.id).notNull(),
+  reviewId: integer("review_id").references(() => hub_partner_reviews.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -886,7 +886,7 @@ export type SelectContract = typeof internationalSupplierContracts.$inferSelect;
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
-  partnerReviews: many(partnerReviews),
+  hub_partner_reviews: many(hub_partner_reviews),
   toolReviews: many(tool_reviews),
   materials: many(com360_materials),
   news: many(news),
@@ -912,8 +912,8 @@ export const categoriesRelations = relations(categories, ({ many }) => ({
   suppliers: many(com360_suppliers),
 }));
 
-export const partnerTypesRelations = relations(partnerTypes, ({ many }) => ({
-  partners: many(partners),
+export const hub_partner_typesRelations = relations(hub_partner_types, ({ many }) => ({
+  hub_partners: many(hub_partners),
 }));
 
 export const com360_suppliersRelations = relations(com360_suppliers, ({ one, many }) => ({
@@ -968,57 +968,57 @@ export const supplierReviewsRelations = relations(supplierReviews, ({ one }) => 
   }),
 }));
 
-export const partnersRelations = relations(partners, ({ one, many }) => ({
-  partnerType: one(partnerTypes, {
-    fields: [partners.partnerTypeId],
-    references: [partnerTypes.id],
+export const partnersRelations = relations(hub_partners, ({ one, many }) => ({
+  partnerType: one(hub_partner_types, {
+    fields: [hub_partners.partnerTypeId],
+    references: [hub_partner_types.id],
   }),
-  contacts: many(partnerContacts),
-  files: many(partnerFiles),
-  materials: many(partnerMaterials),
-  reviews: many(partnerReviews),
+  contacts: many(hub_partner_contacts),
+  files: many(hub_partner_files),
+  materials: many(hub_partner_materials),
+  reviews: many(hub_partner_reviews),
 }));
 
-export const partnerContactsRelations = relations(partnerContacts, ({ one }) => ({
-  partner: one(partners, {
-    fields: [partnerContacts.partnerId],
-    references: [partners.id],
-  }),
-}));
-
-export const partnerFilesRelations = relations(partnerFiles, ({ one }) => ({
-  partner: one(partners, {
-    fields: [partnerFiles.partnerId],
-    references: [partners.id],
+export const hub_partner_contactsRelations = relations(hub_partner_contacts, ({ one }) => ({
+  partner: one(hub_partners, {
+    fields: [hub_partner_contacts.partnerId],
+    references: [hub_partners.id],
   }),
 }));
 
-export const partnerMaterialsRelations = relations(partnerMaterials, ({ one }) => ({
-  partner: one(partners, {
-    fields: [partnerMaterials.partnerId],
-    references: [partners.id],
+export const hub_partner_filesRelations = relations(hub_partner_files, ({ one }) => ({
+  partner: one(hub_partners, {
+    fields: [hub_partner_files.partnerId],
+    references: [hub_partners.id],
   }),
 }));
 
-export const partnerReviewsRelations = relations(partnerReviews, ({ one, many }) => ({
-  partner: one(partners, {
-    fields: [partnerReviews.partnerId],
-    references: [partners.id],
+export const hub_partner_materialsRelations = relations(hub_partner_materials, ({ one }) => ({
+  partner: one(hub_partners, {
+    fields: [hub_partner_materials.partnerId],
+    references: [hub_partners.id],
+  }),
+}));
+
+export const hub_partner_reviewsRelations = relations(hub_partner_reviews, ({ one, many }) => ({
+  partner: one(hub_partners, {
+    fields: [hub_partner_reviews.partnerId],
+    references: [hub_partners.id],
   }),
   user: one(users, {
-    fields: [partnerReviews.userId],
+    fields: [hub_partner_reviews.userId],
     references: [users.id],
   }),
-  replies: many(partnerReviewReplies),
+  replies: many(hub_partner_review_replies),
 }));
 
-export const partnerReviewRepliesRelations = relations(partnerReviewReplies, ({ one }) => ({
-  review: one(partnerReviews, {
-    fields: [partnerReviewReplies.reviewId],
-    references: [partnerReviews.id],
+export const hub_partner_review_repliesRelations = relations(hub_partner_review_replies, ({ one }) => ({
+  review: one(hub_partner_reviews, {
+    fields: [hub_partner_review_replies.reviewId],
+    references: [hub_partner_reviews.id],
   }),
   user: one(users, {
-    fields: [partnerReviewReplies.userId],
+    fields: [hub_partner_review_replies.userId],
     references: [users.id],
   }),
 }));
@@ -1985,7 +1985,7 @@ export const insertSupplierFileSchema = createInsertSchema(supplierFiles).omit({
   uploadedAt: true,
 });
 
-export const insertPartnerSchema = createInsertSchema(partners).omit({
+export const insertPartnerSchema = createInsertSchema(hub_partners).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2043,14 +2043,14 @@ export const insertToolDiscountSchema = createInsertSchema(tool_discounts).omit(
   updatedAt: true,
 });
 
-export const insertPartnerReviewSchema = createInsertSchema(partnerReviews).omit({
+export const insertPartnerReviewSchema = createInsertSchema(hub_partner_reviews).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   isApproved: true,
 });
 
-export const insertPartnerReviewReplySchema = createInsertSchema(partnerReviewReplies).omit({
+export const insertPartnerReviewReplySchema = createInsertSchema(hub_partner_review_replies).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2124,17 +2124,17 @@ export const insertAgentGenerationSchema = createInsertSchema(agent_generations)
   createdAt: true,
 });
 
-export const insertPartnerTypeSchema = createInsertSchema(partnerTypes).omit({
+export const insertPartnerTypeSchema = createInsertSchema(hub_partner_types).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertPartnerContactSchema = createInsertSchema(partnerContacts).omit({
+export const insertPartnerContactSchema = createInsertSchema(hub_partner_contacts).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertPartnerFileSchema = createInsertSchema(partnerFiles).omit({
+export const insertPartnerFileSchema = createInsertSchema(hub_partner_files).omit({
   id: true,
   createdAt: true,
 });
@@ -2168,7 +2168,7 @@ export type InsertSupplierFile = z.infer<typeof insertSupplierFileSchema>;
 export type SupplierFile = typeof supplierFiles.$inferSelect;
 
 export type InsertPartner = z.infer<typeof insertPartnerSchema>;
-export type Partner = typeof partners.$inferSelect;
+export type Partner = typeof hub_partners.$inferSelect;
 
 export type InsertMaterial = z.infer<typeof insertMaterialSchema>;
 export type Material = typeof com360_materials.$inferSelect;
@@ -2219,19 +2219,19 @@ export type InsertMaterialCategory = z.infer<typeof insertMaterialCategorySchema
 export type MaterialCategory = typeof materialCategories.$inferSelect;
 
 export type InsertPartnerType = z.infer<typeof insertPartnerTypeSchema>;
-export type PartnerType = typeof partnerTypes.$inferSelect;
+export type PartnerType = typeof hub_partner_types.$inferSelect;
 
 export type InsertPartnerContact = z.infer<typeof insertPartnerContactSchema>;
-export type PartnerContact = typeof partnerContacts.$inferSelect;
+export type PartnerContact = typeof hub_partner_contacts.$inferSelect;
 
 export type InsertPartnerFile = z.infer<typeof insertPartnerFileSchema>;
-export type PartnerFile = typeof partnerFiles.$inferSelect;
+export type PartnerFile = typeof hub_partner_files.$inferSelect;
 
 export type InsertPartnerReview = z.infer<typeof insertPartnerReviewSchema>;
-export type PartnerReview = typeof partnerReviews.$inferSelect;
+export type PartnerReview = typeof hub_partner_reviews.$inferSelect;
 
 export type InsertPartnerReviewReply = z.infer<typeof insertPartnerReviewReplySchema>;
-export type PartnerReviewReply = typeof partnerReviewReplies.$inferSelect;
+export type PartnerReviewReply = typeof hub_partner_review_replies.$inferSelect;
 
 export type InsertToolReview = z.infer<typeof insertToolReviewSchema>;
 export type ToolReview = typeof tool_reviews.$inferSelect;

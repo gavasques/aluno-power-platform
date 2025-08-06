@@ -5,8 +5,8 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 
 **Recent Major Update (August 2025)**: Successfully completed comprehensive database schema standardization across all platform modules:
 - **COM360_** prefixing completed for all commercial360 tables and components
-- **HUB_** prefixing completed for all hub-related tables (tools, templates, prompts, features, etc.)
-- **TOOL_** prefixing completed for all tools-related tables and components
+- **HUB_** prefixing completed for all hub-related tables including partners (partners → hub_partners, partner_types → hub_partner_types, etc.), tools, templates, prompts, features
+- **TOOL_** prefixing completed for all tools-related tables and components  
 - **AGENT_** prefixing completed for all agent-related tables and components (agents → agent_agents, agentPrompts → agent_prompts, etc.)
 - **IMP360_** and **FIN360_** naming conventions maintained for respective modules
 - All foreign key references, relations, and server services updated to use new naming conventions
