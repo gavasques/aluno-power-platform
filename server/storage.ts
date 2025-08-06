@@ -51,6 +51,7 @@ import {
   userCompanies,
   com360_boxes,
   com360_boxProductCompatibility,
+  hub_feature_costs,
   type User, 
   type InsertUser,
   type Supplier,
@@ -3073,7 +3074,23 @@ export class DatabaseStorage implements IStorage {
       .limit(20);
   }
 
-
+  // Feature Costs
+  async getFeatureCosts(): Promise<Array<{
+    id: number;
+    featureName: string;
+    category: string;
+    costPerUse: number;
+    description: string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }>> {
+    console.log('🔍 [FEATURE_COSTS] Querying hub_feature_costs table...');
+    const costs = await db.select().from(hub_feature_costs).where(eq(hub_feature_costs.isActive, true));
+    console.log('📊 [FEATURE_COSTS] Found', costs.length, 'active feature costs');
+    console.log('📋 [FEATURE_COSTS] Sample data:', costs.slice(0, 2));
+    return costs;
+  }
 }
 
 export const storage = new DatabaseStorage();

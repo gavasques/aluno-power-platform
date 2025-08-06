@@ -4025,6 +4025,32 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     }
   });
 
+  // Feature Costs API
+  app.get('/api/feature-costs', requireAuth, async (req, res) => {
+    try {
+      const featureCosts = await storage.getFeatureCosts();
+      res.json({ 
+        success: true, 
+        data: {
+          byCategory: featureCosts.reduce((acc, cost) => {
+            if (!acc[cost.category]) acc[cost.category] = [];
+            acc[cost.category].push(cost);
+            return acc;
+          }, {} as any),
+          costsMap: featureCosts.reduce((acc, cost) => {
+            acc[cost.featureName] = cost.costPerUse;
+            return acc;
+          }, {} as any),
+          totalFeatures: featureCosts.length,
+          features: featureCosts
+        }
+      });
+    } catch (error) {
+      console.error('❌ [FEATURE_COSTS] Error fetching feature costs:', error);
+      res.status(500).json({ error: 'Failed to fetch feature costs' });
+    }
+  });
+
   // Save AI generation log
   app.post('/api/ai-generation-logs', async (req, res) => {
     try {

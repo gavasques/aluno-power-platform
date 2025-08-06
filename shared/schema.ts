@@ -1476,7 +1476,7 @@ export const userActivityLogs = pgTable("user_activity_logs", {
 export const hub_feature_costs = pgTable("hub_feature_costs", {
   id: serial("id").primaryKey(),
   featureName: text("feature_name").notNull().unique(),
-  costPerUse: integer("cost_per_use").notNull(),
+  costPerUse: decimal("cost_per_use", { precision: 10, scale: 4 }).notNull(),
   description: text("description"),
   category: text("category"),
   isActive: boolean("is_active").notNull().default(true),
