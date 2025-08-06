@@ -50,10 +50,10 @@ const comercial360Items: Comercial360Item[] = [
     }
   },
   {
-    id: "produtos-pro", 
-    title: "Produtos Pro",
+    id: "meus-produtos", 
+    title: "Meus Produtos",
     description: "Sistema avançado de multi-canais com cálculos Excel integrados e 18+ campos de custo",
-    href: "/produtos-pro",
+    href: "/meus-produtos",
     icon: Zap,
     category: "Produtos",
     isNew: true,

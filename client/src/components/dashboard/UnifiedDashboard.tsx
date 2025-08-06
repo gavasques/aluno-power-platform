@@ -70,7 +70,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
           window.location.href = '/hub';
           break;
         case 'produtos-pro':
-          window.location.href = '/produtos-pro';
+        case 'meus-produtos':
+          window.location.href = '/meus-produtos';
           break;
         case 'simuladores':
           window.location.href = '/simuladores';

@@ -141,7 +141,7 @@ export default function MinhaAreaIndex() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item) => {
           const IconComponent = item.icon;
-          const isProdutosPro = item.id === "produtos-pro";
+          const isProdutosPro = item.id === "meus-produtos";
           
           return (
             <Card 

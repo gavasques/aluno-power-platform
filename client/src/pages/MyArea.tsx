@@ -63,8 +63,8 @@ const MyArea = () => {
               O sistema de produtos foi atualizado. Agora você pode gerenciar seus produtos através do <strong>PRODUTOS PRO</strong>.
             </p>
             <Button asChild>
-              <Link to="/produtos-pro">
-                Acessar PRODUTOS PRO
+              <Link to="/meus-produtos">
+                Acessar MEUS PRODUTOS
               </Link>
             </Button>
           </div>

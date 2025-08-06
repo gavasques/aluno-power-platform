@@ -14,7 +14,7 @@ const ProductChannelsManagerSimple: React.FC = () => {
   const productId = parseInt(id || '0');
 
   const handleGoBack = () => {
-    setLocation('/produtos-pro');
+    setLocation('/meus-produtos');
   };
 
   return (
