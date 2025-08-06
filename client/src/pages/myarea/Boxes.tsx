@@ -190,10 +190,17 @@ const Boxes = () => {
   // Export functionality
   const handleExport = async (format: 'excel' | 'txt') => {
     try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Token de autenticação não encontrado');
+      }
+
       const response = await fetch(`/api/boxes/export/${format}`, {
         method: 'GET',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
 
@@ -230,7 +237,7 @@ const Boxes = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
