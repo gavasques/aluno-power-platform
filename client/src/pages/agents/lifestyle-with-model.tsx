@@ -89,8 +89,11 @@ export default function LifestyleWithModel() {
   };
 
   const formatFileSize = (bytes: number) => {
-    const { formatFileSize: unifiedFormatFileSize } = require('@/lib/utils/unifiedFormatters');
-    return unifiedFormatFileSize(bytes);
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const downloadImage = async (url: string, filename: string = 'lifestyle-image.png') => {
