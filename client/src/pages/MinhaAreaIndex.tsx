@@ -27,8 +27,8 @@ const minhaAreaItems: MinhaAreaItem[] = [
     isNew: true,
   },
   {
-    id: "importacoes",
-    title: "Importações",
+    id: "importacoes360",
+    title: "Importações360",
     description: "Ferramentas completas para gestão de importações, PO, documentos e compliance",
     href: "/minha-area/importacoes",
     icon: Ship,
