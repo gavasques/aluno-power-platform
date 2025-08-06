@@ -171,29 +171,90 @@ export default function LifestyleWithModel() {
         ACAO: formData.acao
       };
 
-      console.log('🔍 [FRONTEND] Sending data to backend:', {
+      console.log('🔍 [FRONTEND] Sending data directly to N8N webhook:', {
         imageLength: base64.length,
         variables
       });
 
-      const response = await apiRequest('/api/agents/lifestyle-with-model/process', {
+      // Convert base64 image to blob for FormData
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const imageBlob = new Blob([bytes], { type: 'image/jpeg' });
+      
+      // Prepare FormData for N8N webhook
+      const formData = new FormData();
+      
+      // Add the image file
+      formData.append('image', imageBlob, 'lifestyle-image.jpg');
+      
+      // Add user data (you might need to get this from auth context)
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      formData.append('userId', user.id?.toString() || '');
+      formData.append('userName', user.name || '');
+      formData.append('userEmail', user.email || '');
+      formData.append('agentType', 'lifestyle-with-model');
+      formData.append('timestamp', new Date().toISOString());
+      
+      // Add all variables as separate form fields
+      formData.append('produtoNome', variables.PRODUTO_NOME || '');
+      formData.append('ambiente', variables.AMBIENTE || '');
+      formData.append('sexo', variables.SEXO || '');
+      formData.append('faixaEtaria', variables.FAIXA_ETARIA || '');
+      formData.append('acao', variables.ACAO || '');
+
+      // Send directly to N8N webhook
+      const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/lifestyle-with-model', {
         method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image: base64,
-          variables
-        }),
-      }) as {
-        success: boolean;
-        originalImage: string;
-        processedImage: string;
-        processingTime: number;
-        cost: number;
-        credits?: number;
-        webhookSent?: boolean;
-        webhookResponse?: any;
+          'User-Agent': 'AI-Platform-Webhook/1.0'
+        }
+      });
+
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook error: ${webhookResponse.status} ${webhookResponse.statusText}`);
+      }
+
+      // Handle webhook response - prioritize binary image response
+      const contentType = webhookResponse.headers.get('content-type');
+      let processedImageUrl: string | null = null;
+
+      if (contentType?.includes('image/')) {
+        // Handle binary image response
+        const imageArrayBuffer = await webhookResponse.arrayBuffer();
+        const bytes = new Uint8Array(imageArrayBuffer);
+        let binaryString = '';
+        for (let i = 0; i < bytes.length; i++) {
+          binaryString += String.fromCharCode(bytes[i]);
+        }
+        const imageBase64 = btoa(binaryString);
+        processedImageUrl = `data:${contentType};base64,${imageBase64}`;
+      } else if (contentType?.includes('application/json')) {
+        const responseData = await webhookResponse.json();
+        processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+      } else {
+        // Handle text response as fallback
+        const textResponse = await webhookResponse.text();
+        try {
+          const responseData = JSON.parse(textResponse);
+          processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+        } catch {
+          // If it's not JSON, assume it's an error message
+          throw new Error(textResponse || 'Unknown error from webhook');
+        }
+      }
+
+      const response = {
+        success: true,
+        originalImage: `data:image/jpeg;base64,${base64}`,
+        processedImage: processedImageUrl,
+        processingTime: Math.round((Date.now() - startTime) / 1000),
+        cost: 0.167,
+        credits: 12,
+        webhookSent: true
       };
 
       clearInterval(timer);
