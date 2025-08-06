@@ -33,7 +33,7 @@ const ProductChannelsManager: React.FC = () => {
   });
 
   const handleGoBack = () => {
-    setLocation('/produtos-pro');
+    setLocation('/produtos-novo');
   };
 
   if (isLoading) {

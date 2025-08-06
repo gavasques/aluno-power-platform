@@ -203,7 +203,7 @@ const ProductEditWithTabs: React.FC = () => {
         description: 'O produto foi atualizado com sucesso.',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      setLocation('/produtos-pro');
+      setLocation('/produtos-novo');
     },
     onError: (error: any) => {
       toast({
@@ -255,7 +255,7 @@ const ProductEditWithTabs: React.FC = () => {
           <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Produto não encontrado</h3>
           <p className="text-gray-600 mb-6">O produto que você está procurando não existe ou foi removido.</p>
-          <Button onClick={() => setLocation('/produtos-pro')} variant="outline">
+          <Button onClick={() => setLocation('/produtos-novo')} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Produtos
           </Button>
@@ -271,7 +271,7 @@ const ProductEditWithTabs: React.FC = () => {
         <div className="flex items-center gap-4 mb-4">
           <Button
             variant="ghost"
-            onClick={() => setLocation('/produtos-pro')}
+            onClick={() => setLocation('/produtos-novo')}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />

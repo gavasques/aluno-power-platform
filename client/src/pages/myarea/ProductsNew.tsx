@@ -82,11 +82,11 @@ const ProductsNew: React.FC = () => {
   };
 
   const handleViewChannels = (productId: number) => {
-    setLocation(`/produtos-pro/${productId}/canais`);
+    setLocation(`/produtos-novo/${productId}/canais`);
   };
 
   const handleEditProduct = (productId: number) => {
-    setLocation(`/produtos-pro/${productId}/editar`);
+    setLocation(`/minha-area/produtos/${productId}/editar`);
   };
 
   const getActiveChannelsCount = (channels: any[] | undefined) => {
