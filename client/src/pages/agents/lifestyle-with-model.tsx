@@ -220,31 +220,76 @@ export default function LifestyleWithModel() {
 
       // Handle webhook response - prioritize binary image response
       const contentType = webhookResponse.headers.get('content-type');
+      const contentLength = webhookResponse.headers.get('content-length');
       let processedImageUrl: string | null = null;
 
-      if (contentType?.includes('image/')) {
-        // Handle binary image response
+      console.log('🔍 [WEBHOOK] Response headers:', {
+        contentType,
+        contentLength,
+        status: webhookResponse.status,
+        statusText: webhookResponse.statusText
+      });
+
+      // First try to handle as binary image (most common case for image generation)
+      try {
         const imageArrayBuffer = await webhookResponse.arrayBuffer();
-        const bytes = new Uint8Array(imageArrayBuffer);
-        let binaryString = '';
-        for (let i = 0; i < bytes.length; i++) {
-          binaryString += String.fromCharCode(bytes[i]);
+        
+        // Check if it's likely an image based on size and content
+        if (imageArrayBuffer.byteLength > 1000) { // Images are typically larger than 1KB
+          const bytes = new Uint8Array(imageArrayBuffer);
+          
+          // Check for common image file signatures
+          const isJPEG = bytes[0] === 0xFF && bytes[1] === 0xD8;
+          const isPNG = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47;
+          const isWebP = bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
+          
+          if (isJPEG || isPNG || isWebP || contentType?.includes('image/')) {
+            let binaryString = '';
+            for (let i = 0; i < bytes.length; i++) {
+              binaryString += String.fromCharCode(bytes[i]);
+            }
+            const imageBase64 = btoa(binaryString);
+            const mimeType = isJPEG ? 'image/jpeg' : isPNG ? 'image/png' : isWebP ? 'image/webp' : (contentType || 'image/jpeg');
+            processedImageUrl = `data:${mimeType};base64,${imageBase64}`;
+            
+            console.log('🖼️ [WEBHOOK] Binary image detected and processed:', {
+              mimeType,
+              size: bytes.length,
+              isJPEG,
+              isPNG,
+              isWebP
+            });
+          } else {
+            // Try to parse as text/JSON if not an image
+            const decoder = new TextDecoder();
+            const textResponse = decoder.decode(bytes);
+            
+            try {
+              const responseData = JSON.parse(textResponse);
+              processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+              console.log('📄 [WEBHOOK] JSON response parsed:', responseData);
+            } catch {
+              console.log('📄 [WEBHOOK] Raw text response:', textResponse.substring(0, 200));
+              throw new Error(textResponse || 'Unknown error from webhook');
+            }
+          }
+        } else {
+          // Small response, probably text or JSON
+          const decoder = new TextDecoder();
+          const textResponse = decoder.decode(new Uint8Array(imageArrayBuffer));
+          
+          try {
+            const responseData = JSON.parse(textResponse);
+            processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+            console.log('📄 [WEBHOOK] Small JSON response:', responseData);
+          } catch {
+            console.log('📄 [WEBHOOK] Small text response:', textResponse);
+            throw new Error(textResponse || 'Unknown error from webhook');
+          }
         }
-        const imageBase64 = btoa(binaryString);
-        processedImageUrl = `data:${contentType};base64,${imageBase64}`;
-      } else if (contentType?.includes('application/json')) {
-        const responseData = await webhookResponse.json();
-        processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
-      } else {
-        // Handle text response as fallback
-        const textResponse = await webhookResponse.text();
-        try {
-          const responseData = JSON.parse(textResponse);
-          processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
-        } catch {
-          // If it's not JSON, assume it's an error message
-          throw new Error(textResponse || 'Unknown error from webhook');
-        }
+      } catch (error) {
+        console.error('❌ [WEBHOOK] Error processing response:', error);
+        throw error;
       }
 
       const response = {
