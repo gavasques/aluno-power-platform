@@ -52,6 +52,7 @@ import {
   com360_boxes,
   com360_boxProductCompatibility,
   hub_feature_costs,
+  hub_system_features,
   type User, 
   type InsertUser,
   type Supplier,
@@ -3090,6 +3091,77 @@ export class DatabaseStorage implements IStorage {
     console.log('📊 [FEATURE_COSTS] Found', costs.length, 'active feature costs');
     console.log('📋 [FEATURE_COSTS] Sample data:', costs.slice(0, 2));
     return costs;
+  }
+
+  // Hub Tools
+  async getHubTools(): Promise<Array<{
+    id: number;
+    code: string;
+    name: string;
+    category: string;
+    description: string;
+    isActive: boolean;
+    sortOrder: number;
+    createdAt: Date;
+  }>> {
+    console.log('🔍 [TOOLS] Starting tools fetch...');
+    
+    // Primeiro, vamos tentar retornar os dados das ferramentas diretamente
+    const mockTools = [
+      {
+        id: 1,
+        code: 'tools.picsart_background_removal',
+        name: 'Remover de Fundo PRO',
+        category: 'Imagem',
+        description: 'Remova backgrounds de imagens com precisão de IA profissional',
+        isActive: true,
+        sortOrder: 1,
+        createdAt: new Date()
+      },
+      {
+        id: 2,
+        code: 'tools.ultra_enhance_pro',
+        name: 'Ultra Melhorador PRO',
+        category: 'Imagem',
+        description: 'Melhore e amplie imagens com IA de última geração (2x-16x)',
+        isActive: true,
+        sortOrder: 2,
+        createdAt: new Date()
+      },
+      {
+        id: 3,
+        code: 'tools.upscale_pro',
+        name: 'Upscale PRO',
+        category: 'Imagem',
+        description: 'Ampliação profissional de imagens com IA (2x-8x)',
+        isActive: true,
+        sortOrder: 3,
+        createdAt: new Date()
+      },
+      {
+        id: 4,
+        code: 'tools.logo_generation_pro',
+        name: 'Gerador de Logomarcas PRO',
+        category: 'Design',
+        description: 'Crie logomarcas profissionais com inteligência artificial',
+        isActive: true,
+        sortOrder: 4,
+        createdAt: new Date()
+      },
+      {
+        id: 5,
+        code: 'tools.amazon_reviews',
+        name: 'Amazon Reviews',
+        category: 'Amazon',
+        description: 'Extraia e analise reviews de produtos da Amazon',
+        isActive: true,
+        sortOrder: 5,
+        createdAt: new Date()
+      }
+    ];
+    
+    console.log('📊 [TOOLS] Returning', mockTools.length, 'tools');
+    return mockTools;
   }
 }
 

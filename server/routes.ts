@@ -711,10 +711,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tools
   app.get('/api/tools', async (req, res) => {
     try {
+      console.log('🔍 [TOOLS] Attempting to fetch tools...');
       const tools = await storage.getHubTools();
+      console.log('✅ [TOOLS] Successfully fetched', tools.length, 'tools');
       res.json(tools);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch tools' });
+      console.error('❌ [TOOLS] Error fetching tools:', error);
+      res.status(500).json({ error: 'Failed to fetch tools', details: error.message });
     }
   });
 
