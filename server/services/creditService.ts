@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { users, featureCosts } from "../../shared/schema";
+import { users, hub_feature_costs } from "../../shared/schema";
 import { eq } from "drizzle-orm";
 
 export class CreditService {

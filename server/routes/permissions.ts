@@ -5,7 +5,7 @@ import { db } from "../db";
 import { eq, and } from "drizzle-orm";
 import { 
   permissionGroups, 
-  systemFeatures, 
+  hub_system_features, 
   groupPermissions,
   userPermissionGroups,
   userGroups

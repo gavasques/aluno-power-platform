@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db';
-import { featureCosts } from '../../shared/schema';
+import { hub_feature_costs } from '../../shared/schema';
 import { eq, desc } from 'drizzle-orm';
 import { requireAuth } from '../security';
 import { cache } from '../cache';
@@ -19,9 +19,9 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     const costs = await db.select()
-      .from(featureCosts)
-      .where(eq(featureCosts.isActive, true))
-      .orderBy(featureCosts.category, featureCosts.featureName);
+      .from(hub_feature_costs)
+      .where(eq(hub_feature_costs.isActive, true))
+      .orderBy(hub_feature_costs.category, hub_feature_costs.featureName);
 
     // Organizar por categoria para facilitar uso no frontend
     const costsByCategory = costs.reduce((acc: any, cost) => {

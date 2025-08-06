@@ -397,20 +397,20 @@ export const com360_materials = pgTable("com360_materials", {
   lastModified: timestamp("last_modified").notNull().defaultNow(),
 });
 
-// Tool Types
-export const toolTypes = pgTable("tool_types", {
+// Hub Tool Types
+export const hub_tool_types = pgTable("hub_tool_types", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Tools
-export const tools = pgTable("tools", {
+// Hub Tools
+export const hub_tools = pgTable("hub_tools", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  typeId: integer("type_id").references(() => toolTypes.id).notNull(),
+  typeId: integer("type_id").references(() => hub_tool_types.id).notNull(),
   logo: text("logo").notNull(),
   website: text("website"),
   pricing: text("pricing"),
@@ -425,10 +425,10 @@ export const tools = pgTable("tools", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Tool Reviews
-export const toolReviews = pgTable("tool_reviews", {
+// Hub Tool Reviews
+export const hub_tool_reviews = pgTable("hub_tool_reviews", {
   id: serial("id").primaryKey(),
-  toolId: integer("tool_id").references(() => tools.id).notNull(),
+  toolId: integer("tool_id").references(() => hub_tools.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment").notNull(),
@@ -436,19 +436,19 @@ export const toolReviews = pgTable("tool_reviews", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Tool Review Replies
-export const toolReviewReplies = pgTable("tool_review_replies", {
+// Hub Tool Review Replies
+export const hub_tool_review_replies = pgTable("hub_tool_review_replies", {
   id: serial("id").primaryKey(),
-  reviewId: integer("review_id").references(() => toolReviews.id).notNull(),
+  reviewId: integer("review_id").references(() => hub_tool_reviews.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   comment: text("comment").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Tool Discounts
-export const toolDiscounts = pgTable("tool_discounts", {
+// Hub Tool Discounts
+export const hub_tool_discounts = pgTable("hub_tool_discounts", {
   id: serial("id").primaryKey(),
-  toolId: integer("tool_id").references(() => tools.id).notNull(),
+  toolId: integer("tool_id").references(() => hub_tools.id).notNull(),
   title: text("title").notNull(),
   linkOrCoupon: text("link_or_coupon").notNull(),
   explanation: text("explanation").notNull(),
@@ -456,42 +456,42 @@ export const toolDiscounts = pgTable("tool_discounts", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Template Categories
-export const templateCategories = pgTable("template_categories", {
+// Hub Template Categories
+export const hub_template_categories = pgTable("hub_template_categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Templates
-export const templates = pgTable("templates", {
+// Hub Templates
+export const hub_templates = pgTable("hub_templates", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   content: text("content").notNull(),
-  categoryId: integer("category_id").references(() => templateCategories.id).notNull(),
+  categoryId: integer("category_id").references(() => hub_template_categories.id).notNull(),
   variables: text("variables").array(),
   usageInstructions: text("usage_instructions"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Prompt Categories
-export const promptCategories = pgTable("prompt_categories", {
+// Hub Prompt Categories
+export const hub_prompt_categories = pgTable("hub_prompt_categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Prompts
-export const prompts = pgTable("prompts", {
+// Hub Prompts
+export const hub_prompts = pgTable("hub_prompts", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   content: text("content").notNull(),
-  categoryId: integer("category_id").references(() => promptCategories.id).notNull(),
+  categoryId: integer("category_id").references(() => hub_prompt_categories.id).notNull(),
   tags: text("tags").array(),
   usageExamples: text("usage_examples").array(),
   steps: jsonb("steps"), // Array of step objects
@@ -699,7 +699,7 @@ export const updates = pgTable("updates", {
 // Tool videos
 export const toolVideos = pgTable("tool_videos", {
   id: serial("id").primaryKey(),
-  toolId: integer("tool_id").references(() => tools.id, { onDelete: "cascade" }).notNull(),
+  toolId: integer("tool_id").references(() => hub_tools.id, { onDelete: "cascade" }).notNull(),
   title: text("title").notNull(),
   videoId: text("video_id").notNull(), // YouTube video ID
   description: text("description"),
@@ -887,7 +887,7 @@ export type SelectContract = typeof internationalSupplierContracts.$inferSelect;
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
   partnerReviews: many(partnerReviews),
-  toolReviews: many(toolReviews),
+  toolReviews: many(hub_tool_reviews),
   materials: many(com360_materials),
   news: many(news),
   updates: many(updates),
@@ -1038,76 +1038,76 @@ export const com360_materialsRelations = relations(com360_materials, ({ one }) =
   }),
 }));
 
-export const toolTypesRelations = relations(toolTypes, ({ many }) => ({
-  tools: many(tools),
+export const hub_tool_types_relations = relations(hub_tool_types, ({ many }) => ({
+  tools: many(hub_tools),
 }));
 
-export const toolsRelations = relations(tools, ({ one, many }) => ({
-  type: one(toolTypes, {
-    fields: [tools.typeId],
-    references: [toolTypes.id],
+export const hub_tools_relations = relations(hub_tools, ({ one, many }) => ({
+  type: one(hub_tool_types, {
+    fields: [hub_tools.typeId],
+    references: [hub_tool_types.id],
   }),
-  reviews: many(toolReviews),
-  discounts: many(toolDiscounts),
+  reviews: many(hub_tool_reviews),
+  discounts: many(hub_tool_discounts),
   videos: many(toolVideos),
 }));
 
-export const toolReviewsRelations = relations(toolReviews, ({ one, many }) => ({
-  tool: one(tools, {
-    fields: [toolReviews.toolId],
-    references: [tools.id],
+export const hub_tool_reviews_relations = relations(hub_tool_reviews, ({ one, many }) => ({
+  tool: one(hub_tools, {
+    fields: [hub_tool_reviews.toolId],
+    references: [hub_tools.id],
   }),
   user: one(users, {
-    fields: [toolReviews.userId],
+    fields: [hub_tool_reviews.userId],
     references: [users.id],
   }),
-  replies: many(toolReviewReplies),
+  replies: many(hub_tool_review_replies),
 }));
 
-export const toolReviewRepliesRelations = relations(toolReviewReplies, ({ one }) => ({
-  review: one(toolReviews, {
-    fields: [toolReviewReplies.reviewId],
-    references: [toolReviews.id],
+export const hub_tool_review_replies_relations = relations(hub_tool_review_replies, ({ one }) => ({
+  review: one(hub_tool_reviews, {
+    fields: [hub_tool_review_replies.reviewId],
+    references: [hub_tool_reviews.id],
   }),
   user: one(users, {
-    fields: [toolReviewReplies.userId],
+    fields: [hub_tool_review_replies.userId],
     references: [users.id],
   }),
 }));
 
-export const toolDiscountsRelations = relations(toolDiscounts, ({ one }) => ({
-  tool: one(tools, {
-    fields: [toolDiscounts.toolId],
-    references: [tools.id],
+export const hub_tool_discounts_relations = relations(hub_tool_discounts, ({ one }) => ({
+  tool: one(hub_tools, {
+    fields: [hub_tool_discounts.toolId],
+    references: [hub_tools.id],
   }),
 }));
 
-export const toolVideosRelations = relations(toolVideos, ({ one }) => ({
-  tool: one(tools, {
+export const hub_tool_videos_relations = relations(toolVideos, ({ one }) => ({
+  tool: one(hub_tools, {
     fields: [toolVideos.toolId],
-    references: [tools.id],
+    references: [hub_tools.id],
   }),
 }));
 
-export const templateCategoriesRelations = relations(templateCategories, ({ many }) => ({
-  templates: many(templates),
+export const hub_template_categories_relations = relations(hub_template_categories, ({ many }) => ({
+  templates: many(hub_templates),
 }));
 
-export const templatesRelations = relations(templates, ({ one }) => ({
-  category: one(templateCategories, {
-    fields: [templates.categoryId],
-    references: [templateCategories.id],
+export const hub_templates_relations = relations(hub_templates, ({ one }) => ({
+  category: one(hub_template_categories, {
+    fields: [hub_templates.categoryId],
+    references: [hub_template_categories.id],
   }),
 }));
 
-export const promptCategoriesRelations = relations(promptCategories, ({ many }) => ({
-  prompts: many(prompts),
+export const hub_prompt_categories_relations = relations(hub_prompt_categories, ({ many }) => ({
+  prompts: many(hub_prompts),
 }));
 
-export const promptsRelations = relations(prompts, ({ one }) => ({
-  category: one(promptCategories, {
-    fields: [prompts.categoryId],
-    references: [promptCategories.id],
+export const hub_prompts_relations = relations(hub_prompts, ({ one }) => ({
+  category: one(hub_prompt_categories, {
+    fields: [hub_prompts.categoryId],
+    references: [hub_prompt_categories.id],
   }),
 }));
 
@@ -1473,7 +1473,7 @@ export const userActivityLogs = pgTable("user_activity_logs", {
 // =============================================================================
 
 // Feature Costs - Definir custo em créditos de cada funcionalidade
-export const featureCosts = pgTable("feature_costs", {
+export const hub_feature_costs = pgTable("hub_feature_costs", {
   id: serial("id").primaryKey(),
   featureName: text("feature_name").notNull().unique(),
   costPerUse: integer("cost_per_use").notNull(),
@@ -2001,7 +2001,7 @@ export const insertMaterialSchema = createInsertSchema(com360_materials).omit({
   viewCount: true,
 });
 
-export const insertToolSchema = createInsertSchema(tools).omit({
+export const insertHubToolSchema = createInsertSchema(hub_tools).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2009,13 +2009,13 @@ export const insertToolSchema = createInsertSchema(tools).omit({
   totalReviews: true,
 });
 
-export const insertTemplateSchema = createInsertSchema(templates).omit({
+export const insertHubTemplateSchema = createInsertSchema(hub_templates).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertPromptSchema = createInsertSchema(prompts).omit({
+export const insertHubPromptSchema = createInsertSchema(hub_prompts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2027,17 +2027,17 @@ export const insertProductSchema = createInsertSchema(com360_products).omit({
   updatedAt: true,
 });
 
-export const insertToolReviewSchema = createInsertSchema(toolReviews).omit({
+export const insertHubToolReviewSchema = createInsertSchema(hub_tool_reviews).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertToolReviewReplySchema = createInsertSchema(toolReviewReplies).omit({
+export const insertHubToolReviewReplySchema = createInsertSchema(hub_tool_review_replies).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertToolDiscountSchema = createInsertSchema(toolDiscounts).omit({
+export const insertHubToolDiscountSchema = createInsertSchema(hub_tool_discounts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2081,17 +2081,17 @@ export const insertUpdateSchema = createInsertSchema(updates).omit({
 
 
 
-export const insertTemplateCategorySchema = createInsertSchema(templateCategories).omit({
+export const insertHubTemplateCategorySchema = createInsertSchema(hub_template_categories).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertPromptCategorySchema = createInsertSchema(promptCategories).omit({
+export const insertHubPromptCategorySchema = createInsertSchema(hub_prompt_categories).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertToolTypeSchema = createInsertSchema(toolTypes).omit({
+export const insertHubToolTypeSchema = createInsertSchema(hub_tool_types).omit({
   id: true,
   createdAt: true,
 });
@@ -2204,13 +2204,13 @@ export type Update = typeof updates.$inferSelect;
 
 
 export type InsertTemplateCategory = z.infer<typeof insertTemplateCategorySchema>;
-export type TemplateCategory = typeof templateCategories.$inferSelect;
+export type HubTemplateCategory = typeof hub_template_categories.$inferSelect;
 
 export type InsertPromptCategory = z.infer<typeof insertPromptCategorySchema>;
-export type PromptCategory = typeof promptCategories.$inferSelect;
+export type HubPromptCategory = typeof hub_prompt_categories.$inferSelect;
 
 export type InsertToolType = z.infer<typeof insertToolTypeSchema>;
-export type ToolType = typeof toolTypes.$inferSelect;
+export type HubToolType = typeof hub_tool_types.$inferSelect;
 
 export type InsertMaterialType = z.infer<typeof insertMaterialTypeSchema>;
 export type MaterialType = typeof materialTypes.$inferSelect;
@@ -2233,23 +2233,23 @@ export type PartnerReview = typeof partnerReviews.$inferSelect;
 export type InsertPartnerReviewReply = z.infer<typeof insertPartnerReviewReplySchema>;
 export type PartnerReviewReply = typeof partnerReviewReplies.$inferSelect;
 
-export type InsertToolReview = z.infer<typeof insertToolReviewSchema>;
-export type ToolReview = typeof toolReviews.$inferSelect;
+export type InsertHubToolReview = z.infer<typeof insertToolReviewSchema>;
+export type HubToolReview = typeof hub_tool_reviews.$inferSelect;
 
-export type InsertToolReviewReply = z.infer<typeof insertToolReviewReplySchema>;
-export type ToolReviewReply = typeof toolReviewReplies.$inferSelect;
+export type InsertHubToolReviewReply = z.infer<typeof insertToolReviewReplySchema>;
+export type HubToolReviewReply = typeof hub_tool_review_replies.$inferSelect;
 
-export type InsertToolDiscount = z.infer<typeof insertToolDiscountSchema>;
-export type ToolDiscount = typeof toolDiscounts.$inferSelect;
+export type InsertHubToolDiscount = z.infer<typeof insertToolDiscountSchema>;
+export type HubToolDiscount = typeof hub_tool_discounts.$inferSelect;
 
 export type PartnerReviewWithUser = PartnerReview & {
   user: User;
   replies: (PartnerReviewReply & { user: User })[];
 };
 
-export type ToolReviewWithUser = ToolReview & {
+export type HubToolReviewWithUser = HubToolReview & {
   user: User;
-  replies: (ToolReviewReply & { user: User })[];
+  replies: (HubToolReviewReply & { user: User })[];
 };
 
 export type InsertToolVideo = z.infer<typeof insertToolVideoSchema>;
@@ -2860,7 +2860,7 @@ export const paymentHistoryRelations = relations(paymentHistory, ({ one }) => ({
 }));
 
 // Extended tables schemas and types
-export const insertFeatureCostSchema = createInsertSchema(featureCosts).omit({
+export const insertHubFeatureCostSchema = createInsertSchema(hub_feature_costs).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2907,7 +2907,7 @@ export type InsertAdminAction = z.infer<typeof insertAdminActionSchema>;
 export type AdminAction = typeof adminActions.$inferSelect;
 
 // Extended tables relations
-export const featureCostsRelations = relations(featureCosts, ({ many }) => ({
+export const hub_feature_costs_relations = relations(hub_feature_costs, ({ many }) => ({
   // Feature costs don't need direct relations, used by reference
 }));
 
@@ -2959,7 +2959,7 @@ export const permissionGroups = pgTable("permission_groups", {
   activeIdx: index("permission_groups_active_idx").on(table.isActive),
 }));
 
-export const systemFeatures = pgTable("system_features", {
+export const hub_system_features = pgTable("hub_system_features", {
   id: serial("id").primaryKey(),
   code: text("code").notNull().unique(), // e.g., 'ai.upscale', 'agents.amazon_listing'
   name: text("name").notNull(),
@@ -2979,7 +2979,7 @@ export const systemFeatures = pgTable("system_features", {
 export const groupPermissions = pgTable("group_permissions", {
   id: serial("id").primaryKey(),
   groupId: integer("group_id").references(() => permissionGroups.id).notNull(),
-  featureId: integer("feature_id").references(() => systemFeatures.id).notNull(),
+  featureId: integer("feature_id").references(() => hub_system_features.id).notNull(),
   hasAccess: boolean("has_access").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -3068,12 +3068,12 @@ export const insertPermissionGroupSchema = createInsertSchema(permissionGroups).
 export type InsertPermissionGroup = z.infer<typeof insertPermissionGroupSchema>;
 export type PermissionGroup = typeof permissionGroups.$inferSelect;
 
-export const insertSystemFeatureSchema = createInsertSchema(systemFeatures).omit({
+export const insertHubSystemFeatureSchema = createInsertSchema(hub_system_features).omit({
   id: true,
   createdAt: true,
 });
-export type InsertSystemFeature = z.infer<typeof insertSystemFeatureSchema>;
-export type SystemFeature = typeof systemFeatures.$inferSelect;
+export type InsertHubSystemFeature = z.infer<typeof insertHubSystemFeatureSchema>;
+export type HubSystemFeature = typeof hub_system_features.$inferSelect;
 
 export const insertGroupPermissionSchema = createInsertSchema(groupPermissions).omit({
   id: true,
@@ -3096,11 +3096,11 @@ export const permissionGroupsRelations = relations(permissionGroups, ({ many }) 
   users: many(userPermissionGroups),
 }));
 
-export const systemFeaturesRelations = relations(systemFeatures, ({ many, one }) => ({
+export const hub_system_features_relations = relations(hub_system_features, ({ many, one }) => ({
   permissions: many(groupPermissions),
-  parent: one(systemFeatures, {
-    fields: [systemFeatures.parentCode],
-    references: [systemFeatures.code],
+  parent: one(hub_system_features, {
+    fields: [hub_system_features.parentCode],
+    references: [hub_system_features.code],
   }),
 }));
 
@@ -3109,9 +3109,9 @@ export const groupPermissionsRelations = relations(groupPermissions, ({ one }) =
     fields: [groupPermissions.groupId],
     references: [permissionGroups.id],
   }),
-  feature: one(systemFeatures, {
+  feature: one(hub_system_features, {
     fields: [groupPermissions.featureId],
-    references: [systemFeatures.id],
+    references: [hub_system_features.id],
   }),
 }));
 

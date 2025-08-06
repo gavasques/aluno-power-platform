@@ -71,24 +71,24 @@ import {
   insertSupplierSchema, 
   insertPartnerSchema, 
   insertMaterialSchema, 
-  insertToolSchema, 
-  insertTemplateSchema, 
-  insertPromptSchema, 
+  insertHubToolSchema, 
+  insertHubTemplateSchema, 
+  insertHubPromptSchema, 
   insertProductSchema, 
   insertCategorySchema,
   insertDepartmentSchema,
-  insertTemplateCategorySchema,
-  insertPromptCategorySchema,
-  insertToolTypeSchema,
+  insertHubTemplateCategorySchema,
+  insertHubPromptCategorySchema,
+  insertHubToolTypeSchema,
   insertMaterialTypeSchema,
   insertPartnerTypeSchema,
   insertPartnerContactSchema,
   insertPartnerFileSchema,
   insertPartnerReviewSchema,
   insertPartnerReviewReplySchema,
-  insertToolReviewSchema,
-  insertToolReviewReplySchema,
-  insertToolDiscountSchema,
+  insertHubToolReviewSchema,
+  insertHubToolReviewReplySchema,
+  insertHubToolDiscountSchema,
   insertToolVideoSchema,
 
   insertNewsSchema,
@@ -125,7 +125,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth, requireRole } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { com360_materials, partners, tools, toolTypes, com360_suppliers, news, updates, agents, agentPrompts, agentUsage, agentGenerations, users, com360_products, com360_brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, categories, agentProcessingSessions } from '@shared/schema';
+import { com360_materials, partners, hub_tools, hub_tool_types, com360_suppliers, news, updates, agents, agentPrompts, agentUsage, agentGenerations, users, com360_products, com360_brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, categories, agentProcessingSessions } from '@shared/schema';
 
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';
@@ -711,7 +711,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tools
   app.get('/api/tools', async (req, res) => {
     try {
-      const tools = await storage.getTools();
+      const tools = await storage.getHubTools();
       res.json(tools);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch tools' });

@@ -1,7 +1,7 @@
 import { db } from '../db';
 import { 
   permissionGroups, 
-  systemFeatures, 
+  hub_system_features, 
   groupPermissions, 
   userPermissionGroups,
   users 
@@ -38,11 +38,11 @@ export class PermissionService {
 
     // Get feature id
     const feature = await db
-      .select({ id: systemFeatures.id })
-      .from(systemFeatures)
+      .select({ id: hub_system_features.id })
+      .from(hub_system_features)
       .where(and(
-        eq(systemFeatures.code, featureCode),
-        eq(systemFeatures.isActive, true)
+        eq(hub_system_features.code, featureCode),
+        eq(hub_system_features.isActive, true)
       ))
       .limit(1);
 
@@ -78,9 +78,9 @@ export class PermissionService {
     if (user[0]?.role === 'admin') {
       // Admin has access to all active features
       const allFeatures = await db
-        .select({ code: systemFeatures.code })
-        .from(systemFeatures)
-        .where(eq(systemFeatures.isActive, true));
+        .select({ code: hub_system_features.code })
+        .from(hub_system_features)
+        .where(eq(hub_system_features.isActive, true));
       
       return allFeatures.map(f => f.code);
     }
@@ -99,15 +99,15 @@ export class PermissionService {
 
     // Get all features user has access to through their groups
     const features = await db
-      .select({ code: systemFeatures.code })
-      .from(systemFeatures)
+      .select({ code: hub_system_features.code })
+      .from(hub_system_features)
       .innerJoin(groupPermissions, and(
-        eq(groupPermissions.featureId, systemFeatures.id),
+        eq(groupPermissions.featureId, hub_system_features.id),
         eq(groupPermissions.hasAccess, true)
       ))
       .where(and(
         inArray(groupPermissions.groupId, groupIds),
-        eq(systemFeatures.isActive, true)
+        eq(hub_system_features.isActive, true)
       ));
 
     return features.map(f => f.code);
@@ -119,9 +119,9 @@ export class PermissionService {
   static async getAllFeatures() {
     const features = await db
       .select()
-      .from(systemFeatures)
-      .where(eq(systemFeatures.isActive, true))
-      .orderBy(systemFeatures.category, systemFeatures.sortOrder);
+      .from(hub_system_features)
+      .where(eq(hub_system_features.isActive, true))
+      .orderBy(hub_system_features.category, hub_system_features.sortOrder);
 
     // Organize by category
     const categorized: Record<string, typeof features> = {};
@@ -154,15 +154,15 @@ export class PermissionService {
     const permissions = await db
       .select({
         featureId: groupPermissions.featureId,
-        featureCode: systemFeatures.code,
-        featureName: systemFeatures.name,
-        featureCategory: systemFeatures.category,
+        featureCode: hub_system_features.code,
+        featureName: hub_system_features.name,
+        featureCategory: hub_system_features.category,
         hasAccess: groupPermissions.hasAccess
       })
       .from(groupPermissions)
-      .innerJoin(systemFeatures, eq(systemFeatures.id, groupPermissions.featureId))
+      .innerJoin(hub_system_features, eq(hub_system_features.id, groupPermissions.featureId))
       .where(eq(groupPermissions.groupId, groupId))
-      .orderBy(systemFeatures.category, systemFeatures.sortOrder);
+      .orderBy(hub_system_features.category, hub_system_features.sortOrder);
 
     return permissions;
   }
@@ -304,13 +304,13 @@ export class PermissionService {
     // Insert features if they don't exist
     for (const feature of features) {
       const existing = await db
-        .select({ id: systemFeatures.id })
-        .from(systemFeatures)
-        .where(eq(systemFeatures.code, feature.code))
+        .select({ id: hub_system_features.id })
+        .from(hub_system_features)
+        .where(eq(hub_system_features.code, feature.code))
         .limit(1);
 
       if (!existing[0]) {
-        await db.insert(systemFeatures).values(feature);
+        await db.insert(hub_system_features).values(feature);
       }
     }
   }
