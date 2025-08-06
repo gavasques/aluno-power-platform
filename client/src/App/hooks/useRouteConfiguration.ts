@@ -301,6 +301,10 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area/produtos/:id/editar-completo', component: lazyComponents.ProductEditWithTabs, isProtected: true },
       { path: '/minha-area/produtos/import-export', component: lazyComponents.ProductImportExport, isProtected: true },
       
+      // Fornecedores Gerais
+      { path: '/minha-area/fornecedores', component: lazyComponents.Suppliers, isProtected: true },
+      { path: '/minha-area/fornecedores/:id', component: lazyComponents.SupplierDetail, isProtected: true },
+
       // Imports
       { path: '/minha-area/importacoes', component: lazyComponents.ImportacoesIndex, isProtected: true },
       { path: '/minha-area/importacoes/fornecedores', component: lazyComponents.InternationalSupplierCRM, isProtected: true },

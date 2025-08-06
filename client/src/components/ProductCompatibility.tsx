@@ -45,15 +45,7 @@ const ProductCompatibility: React.FC<ProductCompatibilityProps> = ({ boxId, boxC
     enabled: !!boxId,
   });
 
-  // Log for debugging
-  console.log('ProductCompatibility Debug:', {
-    boxId,
-    boxCode,
-    compatibleProducts,
-    isLoading: isLoadingCompatible,
-    error: compatibilityError,
-    productsCount: compatibleProducts?.length || 0
-  });
+
 
   // Search for products to add - busca apenas produtos do usuário logado
   const { data: searchResults = [], isLoading: isSearching } = useQuery<Product[]>({
