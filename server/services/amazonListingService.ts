@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../db";
-import { amazonListingSessions, agents, agentUsage, agentGenerations, aiGenerationLogs } from "@shared/schema";
+import { amazonListingSessions, agent_agents, agent_usage, agent_generations, aiGenerationLogs } from "@shared/schema";
 import type { InsertAmazonListingSession, AmazonListingSession } from "@shared/schema";
 import { aiProviderService } from "./aiProviderService";
 import { CreditService } from "./creditService";
@@ -184,7 +184,7 @@ export class AmazonListingService {
       const [agent] = await db
         .select()
         .from(agents)
-        .where(eq(agents.id, 'agent-amazon-listings'))
+        .where(eq(agent_agents.id, 'agent-amazon-listings'))
         .limit(1);
 
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
@@ -235,7 +235,7 @@ export class AmazonListingService {
       // Salvar log da Etapa 1 - Análise de Avaliações (com desconto de créditos)
       await this.saveAiGenerationLog(
         parseInt(session.idUsuario),
-        "agents.amazon_listing",
+        "agent_agents.amazon_listing",
         prompt,
         analysisResult,
         "openai",
@@ -359,7 +359,7 @@ export class AmazonListingService {
       const [agent] = await db
         .select()
         .from(agents)
-        .where(eq(agents.id, 'agent-amazon-listings'))
+        .where(eq(agent_agents.id, 'agent-amazon-listings'))
         .limit(1);
 
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
@@ -442,7 +442,7 @@ export class AmazonListingService {
       // Salvar log da Etapa 2 - Geração de Títulos (com desconto de créditos)
       await this.saveAiGenerationLog(
         parseInt(session.idUsuario),
-        "agents.amazon_listing",
+        "agent_agents.amazon_listing",
         prompt,
         titlesResult,
         "openai",
@@ -500,9 +500,9 @@ export class AmazonListingService {
       // Buscar o registro de generation existente para atualizar com dados do Prompt 2
       const existingGeneration = await db
         .select()
-        .from(agentGenerations)
-        .where(eq(agentGenerations.productName, session.nomeProduto || ''))
-        .orderBy(desc(agentGenerations.createdAt))
+        .from(agent_generations)
+        .where(eq(agent_generations.productName, session.nomeProduto || ''))
+        .orderBy(desc(agent_generations.createdAt))
         .limit(1);
 
       if (existingGeneration.length > 0) {
@@ -600,7 +600,7 @@ export class AmazonListingService {
       const [agent] = await db
         .select()
         .from(agents)
-        .where(eq(agents.id, 'agent-amazon-listings'))
+        .where(eq(agent_agents.id, 'agent-amazon-listings'))
         .limit(1);
 
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
@@ -753,9 +753,9 @@ export class AmazonListingService {
       // Buscar o registro de generation existente para atualizar com dados do Prompt 3
       const existingGeneration = await db
         .select()
-        .from(agentGenerations)
-        .where(eq(agentGenerations.productName, session.nomeProduto || ''))
-        .orderBy(desc(agentGenerations.createdAt))
+        .from(agent_generations)
+        .where(eq(agent_generations.productName, session.nomeProduto || ''))
+        .orderBy(desc(agent_generations.createdAt))
         .limit(1);
 
       if (existingGeneration.length > 0) {
@@ -838,7 +838,7 @@ export class AmazonListingService {
       const [agent] = await db
         .select()
         .from(agents)
-        .where(eq(agents.id, 'agent-amazon-listings'))
+        .where(eq(agent_agents.id, 'agent-amazon-listings'))
         .limit(1);
 
       if (!agent) throw new Error('Agente Amazon Listings não encontrado');
@@ -953,9 +953,9 @@ export class AmazonListingService {
       // Buscar o registro de generation existente para atualizar com dados do Prompt 4
       const existingGeneration = await db
         .select()
-        .from(agentGenerations)
-        .where(eq(agentGenerations.productName, session.nomeProduto || ''))
-        .orderBy(desc(agentGenerations.createdAt))
+        .from(agent_generations)
+        .where(eq(agent_generations.productName, session.nomeProduto || ''))
+        .orderBy(desc(agent_generations.createdAt))
         .limit(1);
 
       if (existingGeneration.length > 0) {

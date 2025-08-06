@@ -69,20 +69,20 @@ const lazyComponents = {
   AmazonAdsEditor: lazy(() => import('../../pages/tools/Tool_AmazonAdsEditor')),
   
   // Agents
-  AgentsPage: lazy(() => import('../../pages/agents')),
-  HtmlDescriptionAgent: lazy(() => import('../../pages/agents/HtmlDescriptionAgent')),
-  BulletPointsAgent: lazy(() => import('../../pages/agents/BulletPointsAgent')),
-  AmazonProductPhotography: lazy(() => import('../../pages/agents/amazon-product-photography')),
-  LifestyleWithModel: lazy(() => import('../../pages/agents/lifestyle-with-model')),
-  InfographicGenerator: lazy(() => import('../../pages/agents/infographic-generator')),
-  AdvancedInfographicGenerator: lazy(() => import('../../pages/agents/AdvancedInfographicGenerator/AdvancedInfographicGeneratorRefactored')),
-  AmazonListingsOptimizer: lazy(() => import('../../pages/agents/amazon-listings-optimizer-new')),
-  AmazonListingsOptimizerResult: lazy(() => import('../../pages/agents/amazon-listings-optimizer-result')),
-  AmazonCustomerService: lazy(() => import('../../pages/agents/amazon-customer-service')),
-  AmazonCustomerServiceResult: lazy(() => import('../../pages/agents/amazon-customer-service-result')),
-  AmazonNegativeReviews: lazy(() => import('../../pages/agents/amazon-negative-reviews')),
-  AmazonNegativeReviewsResult: lazy(() => import('../../pages/agents/amazon-negative-reviews-result')),
-  AmazonImageProcessing: lazy(() => import('../../pages/agents/amazon-image-processing')),
+  Agent_Agents: lazy(() => import('../../pages/Agent_Agents')),
+  HtmlDescriptionAgent: lazy(() => import('../../pages/agents/Agent_HtmlDescriptionAgent')),
+  BulletPointsAgent: lazy(() => import('../../pages/agents/Agent_BulletPointsAgent')),
+  AmazonProductPhotography: lazy(() => import('../../pages/agents/Agent_amazon-product-photography')),
+  LifestyleWithModel: lazy(() => import('../../pages/agents/Agent_lifestyle-with-model')),
+  InfographicGenerator: lazy(() => import('../../pages/agents/Agent_infographic-generator')),
+  AdvancedInfographicGenerator: lazy(() => import('../../pages/agents/Agent_AdvancedInfographicGenerator/AdvancedInfographicGeneratorRefactored')),
+  AmazonListingsOptimizer: lazy(() => import('../../pages/agents/Agent_amazon-listings-optimizer-new')),
+  AmazonListingsOptimizerResult: lazy(() => import('../../pages/agents/Agent_amazon-listings-optimizer-result')),
+  AmazonCustomerService: lazy(() => import('../../pages/agents/Agent_amazon-customer-service')),
+  AmazonCustomerServiceResult: lazy(() => import('../../pages/agents/Agent_amazon-customer-service-result')),
+  AmazonNegativeReviews: lazy(() => import('../../pages/agents/Agent_amazon-negative-reviews')),
+  AmazonNegativeReviewsResult: lazy(() => import('../../pages/agents/Agent_amazon-negative-reviews-result')),
+  AmazonImageProcessing: lazy(() => import('../../pages/agents/Agent_amazon-image-processing')),
   
   // My Area
   MyArea: lazy(() => import('../../pages/MyArea')),
@@ -236,7 +236,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
     // Agent Routes (Protected) - PADRONIZADO PORTUGUÊS
     AGENT_ROUTES: [
       // Página principal dos agentes
-      { path: '/agentes', component: lazyComponents.AgentsPage, isProtected: true },
+      { path: '/agentes', component: lazyComponents.Agent_Agents, isProtected: true },
       
       // Agentes de conteúdo textual
       { path: '/agentes/html-descriptions-generator', component: lazyComponents.HtmlDescriptionAgent, isProtected: true },

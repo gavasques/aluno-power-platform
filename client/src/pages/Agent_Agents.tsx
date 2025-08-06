@@ -236,7 +236,7 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
   );
 }
 
-export default function AgentsPage() {
+export default function Agent_Agents() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());

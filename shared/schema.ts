@@ -713,7 +713,7 @@ export const tool_videos = pgTable("tool_videos", {
 
 
 // Agents table
-export const agents = pgTable("agents", {
+export const agent_agents = pgTable("agent_agents", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
@@ -733,9 +733,9 @@ export const agents = pgTable("agents", {
 }));
 
 // Agent Prompts table
-export const agentPrompts = pgTable("agent_prompts", {
+export const agent_prompts = pgTable("agent_prompts", {
   id: text("id").primaryKey(),
-  agentId: text("agent_id").references(() => agents.id, { onDelete: "cascade" }).notNull(),
+  agentId: text("agent_id").references(() => agent_agents.id, { onDelete: "cascade" }).notNull(),
   promptType: text("prompt_type").notNull(), // 'system', 'analysis', 'title', 'bulletPoints', 'description'
   content: text("content").notNull(),
   version: integer("version").notNull().default(1),
@@ -746,9 +746,9 @@ export const agentPrompts = pgTable("agent_prompts", {
 }));
 
 // Agent Usage table
-export const agentUsage = pgTable("agent_usage", {
+export const agent_usage = pgTable("agent_usage", {
   id: text("id").primaryKey(),
-  agentId: text("agent_id").references(() => agents.id).notNull(),
+  agentId: text("agent_id").references(() => agent_agents.id).notNull(),
   userId: text("user_id").notNull(),
   userName: text("user_name"),
   inputTokens: integer("input_tokens"),
@@ -764,9 +764,9 @@ export const agentUsage = pgTable("agent_usage", {
 }));
 
 // Agent Generations table
-export const agentGenerations = pgTable("agent_generations", {
+export const agent_generations = pgTable("agent_generations", {
   id: text("id").primaryKey(),
-  usageId: text("usage_id").references(() => agentUsage.id).notNull(),
+  usageId: text("usage_id").references(() => agent_usage.id).notNull(),
   productName: text("product_name"),
   productInfo: jsonb("product_info"),
   reviewsData: jsonb("reviews_data"),
@@ -799,7 +799,7 @@ export const agentGenerations = pgTable("agent_generations", {
 });
 
 // Agent Sessions - Sistema de sessões para processamento
-export const agentSessions = pgTable("agent_sessions", {
+export const agent_sessions = pgTable("agent_sessions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   sessionHash: text("session_hash").notNull().unique(),
   userId: text("user_id").notNull(),
@@ -816,9 +816,9 @@ export const agentSessions = pgTable("agent_sessions", {
 }));
 
 // Agent Session Files - Arquivos de uma sessão
-export const agentSessionFiles = pgTable("agent_session_files", {
+export const agent_session_files = pgTable("agent_session_files", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  sessionId: text("session_id").references(() => agentSessions.id, { onDelete: "cascade" }).notNull(),
+  sessionId: text("session_id").references(() => agent_sessions.id, { onDelete: "cascade" }).notNull(),
   fileName: text("file_name").notNull(),
   fileType: text("file_type").notNull(),
   fileUrl: text("file_url").notNull(),
@@ -1131,41 +1131,41 @@ export const com360_productsRelations = relations(com360_products, ({ one }) => 
 }));
 
 // Agent relations
-export const agentsRelations = relations(agents, ({ many }) => ({
-  prompts: many(agentPrompts),
-  usage: many(agentUsage),
+export const agent_agents_relations = relations(agent_agents, ({ many }) => ({
+  prompts: many(agent_prompts),
+  usage: many(agent_usage),
 }));
 
-export const agentPromptsRelations = relations(agentPrompts, ({ one }) => ({
-  agent: one(agents, {
-    fields: [agentPrompts.agentId],
-    references: [agents.id],
+export const agent_prompts_relations = relations(agent_prompts, ({ one }) => ({
+  agent: one(agent_agents, {
+    fields: [agent_prompts.agentId],
+    references: [agent_agents.id],
   }),
 }));
 
-export const agentUsageRelations = relations(agentUsage, ({ one, many }) => ({
-  agent: one(agents, {
-    fields: [agentUsage.agentId],
-    references: [agents.id],
+export const agent_usage_relations = relations(agent_usage, ({ one, many }) => ({
+  agent: one(agent_agents, {
+    fields: [agent_usage.agentId],
+    references: [agent_agents.id],
   }),
-  generations: many(agentGenerations),
+  generations: many(agent_generations),
 }));
 
-export const agentGenerationsRelations = relations(agentGenerations, ({ one }) => ({
-  usage: one(agentUsage, {
-    fields: [agentGenerations.usageId],
-    references: [agentUsage.id],
+export const agent_generations_relations = relations(agent_generations, ({ one }) => ({
+  usage: one(agent_usage, {
+    fields: [agent_generations.usageId],
+    references: [agent_usage.id],
   }),
 }));
 
-export const agentSessionsRelations = relations(agentSessions, ({ many }) => ({
-  files: many(agentSessionFiles),
+export const agent_sessions_relations = relations(agent_sessions, ({ many }) => ({
+  files: many(agent_session_files),
 }));
 
-export const agentSessionFilesRelations = relations(agentSessionFiles, ({ one }) => ({
-  session: one(agentSessions, {
-    fields: [agentSessionFiles.sessionId],
-    references: [agentSessions.id],
+export const agent_session_files_relations = relations(agent_session_files, ({ one }) => ({
+  session: one(agent_sessions, {
+    fields: [agent_session_files.sessionId],
+    references: [agent_sessions.id],
   }),
 }));
 
@@ -2107,20 +2107,20 @@ export const insertMaterialCategorySchema = createInsertSchema(materialCategorie
 });
 
 // Agent schemas
-export const insertAgentSchema = createInsertSchema(agents).omit({
+export const insertAgentSchema = createInsertSchema(agent_agents).omit({
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertAgentPromptSchema = createInsertSchema(agentPrompts).omit({
+export const insertAgentPromptSchema = createInsertSchema(agent_prompts).omit({
   createdAt: true,
 });
 
-export const insertAgentUsageSchema = createInsertSchema(agentUsage).omit({
+export const insertAgentUsageSchema = createInsertSchema(agent_usage).omit({
   createdAt: true,
 });
 
-export const insertAgentGenerationSchema = createInsertSchema(agentGenerations).omit({
+export const insertAgentGenerationSchema = createInsertSchema(agent_generations).omit({
   createdAt: true,
 });
 
@@ -2257,16 +2257,16 @@ export type ToolVideo = typeof tool_videos.$inferSelect;
 
 // Agent types
 export type InsertAgent = z.infer<typeof insertAgentSchema>;
-export type Agent = typeof agents.$inferSelect;
+export type Agent = typeof agent_agents.$inferSelect;
 
 export type InsertAgentPrompt = z.infer<typeof insertAgentPromptSchema>;
-export type AgentPrompt = typeof agentPrompts.$inferSelect;
+export type AgentPrompt = typeof agent_prompts.$inferSelect;
 
 export type InsertAgentUsage = z.infer<typeof insertAgentUsageSchema>;
-export type AgentUsage = typeof agentUsage.$inferSelect;
+export type AgentUsage = typeof agent_usage.$inferSelect;
 
 export type InsertAgentGeneration = z.infer<typeof insertAgentGenerationSchema>;
-export type AgentGeneration = typeof agentGenerations.$inferSelect;
+export type AgentGeneration = typeof agent_generations.$inferSelect;
 
 // Amazon Listing Session schemas
 export const insertAmazonListingSessionSchema = createInsertSchema(amazonListingSessions).omit({
@@ -2299,21 +2299,21 @@ export type AgentUsageWithGenerations = AgentUsage & {
 };
 
 // Agent session types
-export const insertAgentSessionSchema = createInsertSchema(agentSessions).omit({
+export const insertAgentSessionSchema = createInsertSchema(agent_sessions).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertAgentSessionFileSchema = createInsertSchema(agentSessionFiles).omit({
+export const insertAgentSessionFileSchema = createInsertSchema(agent_session_files).omit({
   id: true,
   uploadedAt: true,
 });
 
 export type InsertAgentSession = z.infer<typeof insertAgentSessionSchema>;
-export type AgentSession = typeof agentSessions.$inferSelect;
+export type AgentSession = typeof agent_sessions.$inferSelect;
 export type InsertAgentSessionFile = z.infer<typeof insertAgentSessionFileSchema>;
-export type AgentSessionFile = typeof agentSessionFiles.$inferSelect;
+export type AgentSessionFile = typeof agent_session_files.$inferSelect;
 
 // Agent session with files type
 export type AgentSessionWithFiles = AgentSession & {

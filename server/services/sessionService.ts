@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { agentSessions, agentSessionFiles } from "@shared/schema";
+import { agent_sessions, agent_session_files } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 
@@ -31,7 +31,7 @@ export class SessionService {
     const sessionHash = this.generateSessionHash();
     
     const [session] = await db
-      .insert(agentSessions)
+      .insert(agent_sessions)
       .values({
         sessionHash,
         userId,
@@ -50,13 +50,13 @@ export class SessionService {
     const tags = this.generateTags(data);
     
     const [session] = await db
-      .update(agentSessions)
+      .update(agent_sessions)
       .set({
         inputData: data,
         tags,
         updatedAt: new Date()
       })
-      .where(eq(agentSessions.id, sessionId))
+      .where(eq(agent_sessions.id, sessionId))
       .returning();
     
     return session;
@@ -66,8 +66,8 @@ export class SessionService {
   static async getSession(sessionId: string) {
     const [session] = await db
       .select()
-      .from(agentSessions)
-      .where(eq(agentSessions.id, sessionId));
+      .from(agent_sessions)
+      .where(eq(agent_sessions.id, sessionId));
     
     return session;
   }
@@ -76,8 +76,8 @@ export class SessionService {
   static async getSessionByHash(sessionHash: string) {
     const [session] = await db
       .select()
-      .from(agentSessions)
-      .where(eq(agentSessions.sessionHash, sessionHash));
+      .from(agent_sessions)
+      .where(eq(agent_sessions.sessionHash, sessionHash));
     
     return session;
   }
@@ -92,7 +92,7 @@ export class SessionService {
     processedContent?: string
   ) {
     const [file] = await db
-      .insert(agentSessionFiles)
+      .insert(agent_session_files)
       .values({
         sessionId,
         fileName,
@@ -110,19 +110,19 @@ export class SessionService {
   static async getSessionFiles(sessionId: string) {
     return await db
       .select()
-      .from(agentSessionFiles)
-      .where(eq(agentSessionFiles.sessionId, sessionId));
+      .from(agent_session_files)
+      .where(eq(agent_session_files.sessionId, sessionId));
   }
 
   // Marcar sessão como completa
   static async completeSession(sessionId: string) {
     const [session] = await db
-      .update(agentSessions)
+      .update(agent_sessions)
       .set({
         status: "completed",
         updatedAt: new Date()
       })
-      .where(eq(agentSessions.id, sessionId))
+      .where(eq(agent_sessions.id, sessionId))
       .returning();
     
     return session;

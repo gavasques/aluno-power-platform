@@ -10,7 +10,7 @@ export const AuthenticatedPreloader = () => {
     if (user) {
       // Preload key routes when user is authenticated
       import('../pages/user/Dashboard');
-      import('../pages/agents');
+      import('../pages/Agent_Agents');
       import('../pages/Hub');
       import('../pages/MyArea');
     }
