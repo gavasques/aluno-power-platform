@@ -92,6 +92,7 @@ const lazyComponents = {
   UserProfile: lazy(() => import('../../pages/myarea/UserProfile')),
   Boxes: lazy(() => import('../../pages/myarea/Boxes')),
   MyBrands: lazy(() => import('../../pages/myarea/MyBrands')),
+  MySuppliers: lazy(() => import('../../pages/myarea/MySuppliers')),
   Comercial360: lazy(() => import('../../pages/myarea/Comercial360')),
   
   // My Area - Products
@@ -303,7 +304,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area/produtos/import-export', component: lazyComponents.ProductImportExport, isProtected: true },
       
       // Fornecedores Gerais
-      { path: '/minha-area/fornecedores', component: lazyComponents.Suppliers, isProtected: true },
+      { path: '/minha-area/fornecedores', component: lazyComponents.MySuppliers, isProtected: true },
       { path: '/minha-area/fornecedores/:id', component: lazyComponents.SupplierDetail, isProtected: true },
 
       // Marcas
