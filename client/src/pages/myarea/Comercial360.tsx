@@ -240,25 +240,7 @@ export default function Comercial360() {
         </Card>
       )}
 
-      {/* Quick Stats */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Star className="h-5 w-5" />
-            Resumo Comercial360
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categories.slice(1).map(category => (
-              <div key={category.name} className="text-center p-3 bg-muted/50 rounded-lg">
-                <div className="text-2xl font-bold text-primary">{category.count}</div>
-                <div className="text-sm text-muted-foreground">{category.name}</div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
