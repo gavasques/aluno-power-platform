@@ -11,7 +11,7 @@ import { AlertTriangle, Upload, Download, Wand2, ImageIcon, Users } from 'lucide
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { PermissionGuard } from '@/components/guards/PermissionGuard';
+
 import { useCreditSystem } from '@/hooks/useCreditSystem';
 import { ButtonLoader } from '@/components/common/LoadingSpinner';
 
@@ -226,11 +226,6 @@ export default function LifestyleWithModel() {
   };
 
   return (
-    <PermissionGuard 
-      featureCode="agents.lifestyle_model"
-      showMessage={true}
-      message="Você não tem permissão para usar o Editor de Imagem - Lifestyle com Modelo."
-    >
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
@@ -513,6 +508,5 @@ export default function LifestyleWithModel() {
         </div>
       </div>
     </div>
-    </PermissionGuard>
   );
 }
