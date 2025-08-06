@@ -19,6 +19,8 @@ The AI system focuses on Amazon listing optimization, including CSV upload from 
 ### Database Schema
 Key tables include `agents` (configurations), `agent_prompts` (templates), `agent_usage` (tracking), and `agent_generations` (content storage), alongside supporting tables for users, materials, tools, partners, and suppliers. Session data for AI agent processing is persisted in the `agentProcessingSessions` table.
 
+The `boxes` table has been implemented for packaging management with fields for dimensions (mm), weight (grams), box types, wave types, printing options, and MOQ functionality.
+
 ### Security & Permissions
 The system employs Role-Based Access Control (RBAC) with a 5-group architecture: `admin`, `mentorados`, `alunos`, `pagantes`, and `gratuito`. Security features include granular permissions, audit logging, rate limiting, input sanitization, XSS protection, CSRF protection, and secure headers.
 

@@ -90,6 +90,7 @@ const lazyComponents = {
   UserDashboard: lazy(() => import('../../pages/user/DashboardSimple')),
   UserUsage: lazy(() => import('../../pages/user/Usage')),
   UserProfile: lazy(() => import('../../pages/myarea/UserProfile')),
+  Boxes: lazy(() => import('../../pages/myarea/Boxes')),
   
   // My Area - Products
   ProductsNew: lazy(() => import('../../pages/myarea/ProductsNew')),
@@ -280,6 +281,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area', component: lazyComponents.MinhaAreaIndex, isProtected: true },
       { path: '/minha-area/perfil', component: lazyComponents.UserProfile, isProtected: true },
       { path: '/minha-area/assinatura', component: lazyComponents.SubscriptionPage, isProtected: true },
+      { path: '/minha-area/caixas', component: lazyComponents.Boxes, isProtected: true },
 
       // ROTAS DE COMPATIBILIDADE (Legacy)
       { path: '/my-area', component: lazyComponents.MyArea, isProtected: true },

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap, Ship, Calculator } from "lucide-react";
+import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap, Ship, Calculator, Box } from "lucide-react";
 
 interface MinhaAreaItem {
   id: string;
@@ -24,6 +24,15 @@ const minhaAreaItems: MinhaAreaItem[] = [
     href: "/minha-area/fornecedores",
     icon: Folder,
     category: "Gestão",
+  },
+  {
+    id: "caixas",
+    title: "Caixas",
+    description: "Gerencie suas embalagens: dimensões, tipos, custos e especificações completas",
+    href: "/minha-area/caixas",
+    icon: Box,
+    category: "Gestão",
+    isNew: true,
   },
   {
     id: "produtos-pro", 
