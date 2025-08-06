@@ -266,7 +266,12 @@ export default function LifestyleWithModel() {
             
             try {
               const responseData = JSON.parse(textResponse);
-              processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+              // Handle nested response structure from webhook
+              processedImageUrl = responseData?.body?.data?.url || 
+                                responseData?.data?.url || 
+                                responseData?.processedImage || 
+                                responseData?.imageUrl || 
+                                responseData?.url || null;
               console.log('📄 [WEBHOOK] JSON response parsed:', responseData);
             } catch {
               console.log('📄 [WEBHOOK] Raw text response:', textResponse.substring(0, 200));
@@ -280,7 +285,12 @@ export default function LifestyleWithModel() {
           
           try {
             const responseData = JSON.parse(textResponse);
-            processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+            // Handle nested response structure from webhook
+            processedImageUrl = responseData?.body?.data?.url || 
+                              responseData?.data?.url || 
+                              responseData?.processedImage || 
+                              responseData?.imageUrl || 
+                              responseData?.url || null;
             console.log('📄 [WEBHOOK] Small JSON response:', responseData);
           } catch {
             console.log('📄 [WEBHOOK] Small text response:', textResponse);
@@ -297,8 +307,6 @@ export default function LifestyleWithModel() {
         originalImage: `data:image/jpeg;base64,${base64}`,
         processedImage: processedImageUrl,
         processingTime: Math.round((Date.now() - startTime) / 1000),
-        cost: 0.167,
-        credits: 12,
         webhookSent: true
       };
 
@@ -315,7 +323,7 @@ export default function LifestyleWithModel() {
         inputTokens: 0,
         outputTokens: 0,
         totalTokens: 0,
-        cost: response.cost || 0,
+        cost: 0.167,
         duration: response.processingTime || 0
       });
       
