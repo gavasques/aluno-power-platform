@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Upload, Download, Wand2, ImageIcon, Users } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Upload, Download, Wand2, ImageIcon, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -171,10 +170,7 @@ export default function LifestyleWithModel() {
         ACAO: formData.acao
       };
 
-      console.log('🔍 [FRONTEND] Sending data directly to N8N webhook:', {
-        imageLength: base64.length,
-        variables
-      });
+
 
       // Convert base64 image to blob for FormData
       const binaryString = atob(base64);
@@ -223,12 +219,7 @@ export default function LifestyleWithModel() {
       const contentLength = webhookResponse.headers.get('content-length');
       let processedImageUrl: string | null = null;
 
-      console.log('🔍 [WEBHOOK] Response headers:', {
-        contentType,
-        contentLength,
-        status: webhookResponse.status,
-        statusText: webhookResponse.statusText
-      });
+
 
       // First try to handle as binary image (most common case for image generation)
       try {
@@ -252,13 +243,7 @@ export default function LifestyleWithModel() {
             const mimeType = isJPEG ? 'image/jpeg' : isPNG ? 'image/png' : isWebP ? 'image/webp' : (contentType || 'image/jpeg');
             processedImageUrl = `data:${mimeType};base64,${imageBase64}`;
             
-            console.log('🖼️ [WEBHOOK] Binary image detected and processed:', {
-              mimeType,
-              size: bytes.length,
-              isJPEG,
-              isPNG,
-              isWebP
-            });
+
           } else {
             // Try to parse as text/JSON if not an image
             const decoder = new TextDecoder();
@@ -272,9 +257,9 @@ export default function LifestyleWithModel() {
                                 responseData?.processedImage || 
                                 responseData?.imageUrl || 
                                 responseData?.url || null;
-              console.log('📄 [WEBHOOK] JSON response parsed:', responseData);
+
             } catch {
-              console.log('📄 [WEBHOOK] Raw text response:', textResponse.substring(0, 200));
+
               throw new Error(textResponse || 'Unknown error from webhook');
             }
           }
@@ -291,14 +276,14 @@ export default function LifestyleWithModel() {
                               responseData?.processedImage || 
                               responseData?.imageUrl || 
                               responseData?.url || null;
-            console.log('📄 [WEBHOOK] Small JSON response:', responseData);
+
           } catch {
-            console.log('📄 [WEBHOOK] Small text response:', textResponse);
+
             throw new Error(textResponse || 'Unknown error from webhook');
           }
         }
       } catch (error) {
-        console.error('❌ [WEBHOOK] Error processing response:', error);
+
         throw error;
       }
 
@@ -334,7 +319,7 @@ export default function LifestyleWithModel() {
 
     } catch (error: any) {
       clearInterval(timer);
-      console.error('Error processing image:', error);
+
       toast({
         title: 'Erro no processamento',
         description: error?.message || 'Não foi possível processar a imagem. Tente novamente.',
@@ -379,13 +364,7 @@ export default function LifestyleWithModel() {
           </p>
         </div>
 
-        {/* Important Notice */}
-        <Alert className="mb-6 border-amber-200 bg-amber-50">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="text-amber-800">
-            <strong>Importante:</strong> As imagens geradas têm resolução 1024x1024px. Para uso na Amazon, recomendamos fazer upscale 2x para atingir 2048x2048px.
-          </AlertDescription>
-        </Alert>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input Section */}
