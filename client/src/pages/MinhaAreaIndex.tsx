@@ -18,38 +18,13 @@ interface MinhaAreaItem {
 
 const minhaAreaItems: MinhaAreaItem[] = [
   {
-    id: "fornecedores",
-    title: "Meus Fornecedores",
-    description: "Gerencie seus fornecedores, contatos, marcas e conversas em um só lugar",
-    href: "/minha-area/fornecedores",
-    icon: Folder,
-    category: "Gestão",
-  },
-  {
-    id: "caixas",
-    title: "Caixas",
-    description: "Gerencie suas embalagens: dimensões, tipos, custos e especificações completas",
-    href: "/minha-area/caixas",
-    icon: Box,
-    category: "Gestão",
+    id: "comercial360",
+    title: "Comercial360",
+    description: "Central completa para gestão comercial: fornecedores, produtos, marcas e embalagens",
+    href: "/minha-area/comercial360",
+    icon: Package,
+    category: "Comercial",
     isNew: true,
-  },
-  {
-    id: "produtos-pro", 
-    title: "Produtos Pro",
-    description: "Sistema avançado de multi-canais com cálculos Excel integrados e 18+ campos de custo",
-    href: "/produtos-pro",
-    icon: Zap,
-    category: "Produtos",
-    isNew: true,
-  },
-  {
-    id: "marcas",
-    title: "Minhas Marcas", 
-    description: "Organize e gerencie suas marcas registradas e genéricas",
-    href: "/minha-area/marcas",
-    icon: Building,
-    category: "Branding",
   },
   {
     id: "importacoes",
@@ -73,9 +48,8 @@ const minhaAreaItems: MinhaAreaItem[] = [
 
 const categories = [
   { name: "Todos", count: minhaAreaItems.length },
+  { name: "Comercial", count: minhaAreaItems.filter(item => item.category === "Comercial").length },
   { name: "Gestão", count: minhaAreaItems.filter(item => item.category === "Gestão").length },
-  { name: "Produtos", count: minhaAreaItems.filter(item => item.category === "Produtos").length },
-  { name: "Branding", count: minhaAreaItems.filter(item => item.category === "Branding").length },
 ];
 
 export default function MinhaAreaIndex() {

@@ -91,6 +91,7 @@ const lazyComponents = {
   UserUsage: lazy(() => import('../../pages/user/Usage')),
   UserProfile: lazy(() => import('../../pages/myarea/UserProfile')),
   Boxes: lazy(() => import('../../pages/myarea/Boxes')),
+  Comercial360: lazy(() => import('../../pages/myarea/Comercial360')),
   
   // My Area - Products
   ProductsNew: lazy(() => import('../../pages/myarea/ProductsNew')),
@@ -282,6 +283,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area/perfil', component: lazyComponents.UserProfile, isProtected: true },
       { path: '/minha-area/assinatura', component: lazyComponents.SubscriptionPage, isProtected: true },
       { path: '/minha-area/caixas', component: lazyComponents.Boxes, isProtected: true },
+      { path: '/minha-area/comercial360', component: lazyComponents.Comercial360, isProtected: true },
 
       // ROTAS DE COMPATIBILIDADE (Legacy)
       { path: '/my-area', component: lazyComponents.MyArea, isProtected: true },
