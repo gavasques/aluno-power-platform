@@ -332,10 +332,7 @@ router.get('/:id/compatibility', requireAuth, async (req, res) => {
 
     const compatibleProducts = await storage.getBoxProductCompatibility(boxId);
     
-    res.json({
-      success: true,
-      data: compatibleProducts
-    });
+    res.json(compatibleProducts);
 
   } catch (error) {
     console.error('Error fetching box compatibility:', error);

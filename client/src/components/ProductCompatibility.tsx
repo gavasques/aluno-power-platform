@@ -40,9 +40,19 @@ const ProductCompatibility: React.FC<ProductCompatibilityProps> = ({ boxId, boxC
   const queryClient = useQueryClient();
 
   // Fetch compatible products for this box
-  const { data: compatibleProducts = [], isLoading: isLoadingCompatible } = useQuery<CompatibleProduct[]>({
+  const { data: compatibleProducts = [], isLoading: isLoadingCompatible, error: compatibilityError } = useQuery<CompatibleProduct[]>({
     queryKey: ['/api/boxes', boxId, 'compatibility'],
     enabled: !!boxId,
+  });
+
+  // Log for debugging
+  console.log('ProductCompatibility Debug:', {
+    boxId,
+    boxCode,
+    compatibleProducts,
+    isLoading: isLoadingCompatible,
+    error: compatibilityError,
+    productsCount: compatibleProducts?.length || 0
   });
 
   // Search for products to add - busca apenas produtos do usuário logado
