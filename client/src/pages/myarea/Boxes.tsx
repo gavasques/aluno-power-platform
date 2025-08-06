@@ -389,6 +389,7 @@ const Boxes = () => {
                         <SelectContent>
                           <SelectItem value="Caixa de Papelão">Caixa de Papelão</SelectItem>
                           <SelectItem value="Flyer">Flyer</SelectItem>
+                          <SelectItem value="Tabuleiro">Tabuleiro</SelectItem>
                           <SelectItem value="Outra">Outra</SelectItem>
                         </SelectContent>
                       </Select>
