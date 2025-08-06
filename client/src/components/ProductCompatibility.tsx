@@ -41,8 +41,21 @@ const ProductCompatibility: React.FC<ProductCompatibilityProps> = ({ boxId, boxC
 
   // Fetch compatible products for this box
   const { data: compatibleProducts = [], isLoading: isLoadingCompatible, error: compatibilityError } = useQuery<CompatibleProduct[]>({
-    queryKey: ['/api/boxes', boxId, 'compatibility'],
+    queryKey: [`/api/boxes/${boxId}/compatibility`],
     enabled: !!boxId,
+    staleTime: 0, // Force fresh data
+    gcTime: 0, // No cache
+  });
+
+  // Debug log para verificar dados retornados
+  console.log('ProductCompatibility Debug NEW:', {
+    boxId,
+    boxCode,
+    compatibleProducts,
+    isLoading: isLoadingCompatible,
+    error: compatibilityError,
+    productsCount: compatibleProducts?.length || 0,
+    firstProduct: compatibleProducts?.[0]
   });
 
 
@@ -74,7 +87,7 @@ const ProductCompatibility: React.FC<ProductCompatibilityProps> = ({ boxId, boxC
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/boxes', boxId, 'compatibility'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boxes/${boxId}/compatibility`] });
       toast({
         title: 'Sucesso',
         description: 'Produto adicionado à compatibilidade',
@@ -98,7 +111,7 @@ const ProductCompatibility: React.FC<ProductCompatibilityProps> = ({ boxId, boxC
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/boxes', boxId, 'compatibility'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boxes/${boxId}/compatibility`] });
       toast({
         title: 'Sucesso',
         description: 'Produto removido da compatibilidade',
