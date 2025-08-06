@@ -215,7 +215,7 @@ export const useProductEdit = (
       if (onSuccess) {
         onSuccess(updatedProduct);
       } else {
-        setLocation('/produtos-novo');
+        setLocation('/produtos-pro');
       }
     },
     onError: (error: any) => {
@@ -413,7 +413,7 @@ export const useProductEdit = (
         if (onCancel) {
           onCancel();
         } else {
-          setLocation('/produtos-novo');
+          setLocation('/produtos-pro');
         }
       }
     }, [hasChanges, onCancel, setLocation]),
