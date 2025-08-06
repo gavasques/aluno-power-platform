@@ -603,9 +603,8 @@ export default function LifestyleWithModel() {
                       </div>
                     </div>
                     
-                    <div className="flex justify-between text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                      <p><strong>Custo:</strong> ${result.cost.toFixed(3)}</p>
-                      <p><strong>Tempo:</strong> {result.processingTime}s</p>
+                    <div className="text-center text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                      <p><strong>Tempo de processamento:</strong> {result.processingTime}s</p>
                     </div>
                     
                     <div className="flex gap-2">
