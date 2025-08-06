@@ -12,7 +12,7 @@
 import { Request, Response } from 'express';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import { db } from '../db';
-import { productSuppliers, com360_suppliers, com360_products, supplierProducts } from '../../shared/schema';
+import { com360_product_suppliers, com360_suppliers, com360_products, supplierProducts } from '../../shared/schema';
 import { insertProductSupplierSchema } from '../../shared/schema';
 import { z } from 'zod';
 
@@ -68,20 +68,20 @@ export class ProductSupplierController {
       // Get suppliers with supplier information
       console.log(`🔍 [PRODUCT_SUPPLIERS] About to query database for productId: ${productId}`);
       
-      const productSuppliersList = await db
+      const com360_product_suppliersList = await db
         .select({
-          id: productSuppliers.id,
-          productId: productSuppliers.productId,
-          supplierId: productSuppliers.supplierId,
-          supplierCode: productSuppliers.supplierCode,
-          cost: productSuppliers.cost,
-          isPrimary: productSuppliers.isPrimary,
+          id: com360_product_suppliers.id,
+          productId: com360_product_suppliers.productId,
+          supplierId: com360_product_suppliers.supplierId,
+          supplierCode: com360_product_suppliers.supplierCode,
+          cost: com360_product_suppliers.cost,
+          isPrimary: com360_product_suppliers.isPrimary,
           
           
-          notes: productSuppliers.notes,
-          active: productSuppliers.active,
-          createdAt: productSuppliers.createdAt,
-          updatedAt: productSuppliers.updatedAt,
+          notes: com360_product_suppliers.notes,
+          active: com360_product_suppliers.active,
+          createdAt: com360_product_suppliers.createdAt,
+          updatedAt: com360_product_suppliers.updatedAt,
           supplier: {
             id: suppliers.id,
             tradeName: suppliers.tradeName,
@@ -90,23 +90,23 @@ export class ProductSupplierController {
             description: suppliers.description,
           }
         })
-        .from(productSuppliers)
-        .leftJoin(suppliers, eq(productSuppliers.supplierId, suppliers.id))
-        .where(eq(productSuppliers.productId, productId))
-        .orderBy(desc(productSuppliers.isPrimary), asc(productSuppliers.cost));
+        .from(com360_product_suppliers)
+        .leftJoin(suppliers, eq(com360_product_suppliers.supplierId, suppliers.id))
+        .where(eq(com360_product_suppliers.productId, productId))
+        .orderBy(desc(com360_product_suppliers.isPrimary), asc(com360_product_suppliers.cost));
 
-      console.log(`🔍 [PRODUCT_SUPPLIERS] Database result:`, JSON.stringify(productSuppliersList, null, 2));
-      console.log(`🔍 [PRODUCT_SUPPLIERS] Number of suppliers found: ${productSuppliersList.length}`);
+      console.log(`🔍 [PRODUCT_SUPPLIERS] Database result:`, JSON.stringify(com360_product_suppliersList, null, 2));
+      console.log(`🔍 [PRODUCT_SUPPLIERS] Number of suppliers found: ${com360_product_suppliersList.length}`);
       
       // Check if result is actually from database
-      if (productSuppliersList.length > 0) {
-        console.warn(`⚠️  [PRODUCT_SUPPLIERS] Found ${productSuppliersList.length} suppliers in database - this should be 0 based on direct SQL query!`);
-        console.warn(`⚠️  [PRODUCT_SUPPLIERS] First supplier ID: ${productSuppliersList[0].id}, supplierId: ${productSuppliersList[0].supplierId}`);
+      if (com360_product_suppliersList.length > 0) {
+        console.warn(`⚠️  [PRODUCT_SUPPLIERS] Found ${com360_product_suppliersList.length} suppliers in database - this should be 0 based on direct SQL query!`);
+        console.warn(`⚠️  [PRODUCT_SUPPLIERS] First supplier ID: ${com360_product_suppliersList[0].id}, supplierId: ${com360_product_suppliersList[0].supplierId}`);
       }
 
       return res.json({
         success: true,
-        data: productSuppliersList
+        data: com360_product_suppliersList
       });
     } catch (error) {
       console.error('Error fetching product suppliers:', error);
@@ -158,10 +158,10 @@ export class ProductSupplierController {
       // Check if supplier already exists for this product
       const existingSupplier = await db
         .select()
-        .from(productSuppliers)
+        .from(com360_product_suppliers)
         .where(and(
-          eq(productSuppliers.productId, productId),
-          eq(productSuppliers.supplierId, validatedData.supplierId)
+          eq(com360_product_suppliers.productId, productId),
+          eq(com360_product_suppliers.supplierId, validatedData.supplierId)
         ))
         .limit(1);
 
@@ -175,14 +175,14 @@ export class ProductSupplierController {
       // If setting as primary, remove primary flag from other suppliers
       if (validatedData.isPrimary) {
         await db
-          .update(productSuppliers)
+          .update(com360_product_suppliers)
           .set({ isPrimary: false })
-          .where(eq(productSuppliers.productId, productId));
+          .where(eq(com360_product_suppliers.productId, productId));
       }
 
       // Insert new supplier
       const [newSupplier] = await db
-        .insert(productSuppliers)
+        .insert(com360_product_suppliers)
         .values(validatedData)
         .returning();
 
@@ -204,18 +204,18 @@ export class ProductSupplierController {
       // Get the complete supplier information
       const supplierWithInfo = await db
         .select({
-          id: productSuppliers.id,
-          productId: productSuppliers.productId,
-          supplierId: productSuppliers.supplierId,
-          supplierCode: productSuppliers.supplierCode,
-          cost: productSuppliers.cost,
-          isPrimary: productSuppliers.isPrimary,
+          id: com360_product_suppliers.id,
+          productId: com360_product_suppliers.productId,
+          supplierId: com360_product_suppliers.supplierId,
+          supplierCode: com360_product_suppliers.supplierCode,
+          cost: com360_product_suppliers.cost,
+          isPrimary: com360_product_suppliers.isPrimary,
           
           
-          notes: productSuppliers.notes,
-          active: productSuppliers.active,
-          createdAt: productSuppliers.createdAt,
-          updatedAt: productSuppliers.updatedAt,
+          notes: com360_product_suppliers.notes,
+          active: com360_product_suppliers.active,
+          createdAt: com360_product_suppliers.createdAt,
+          updatedAt: com360_product_suppliers.updatedAt,
           supplier: {
             id: suppliers.id,
             tradeName: suppliers.tradeName,
@@ -224,9 +224,9 @@ export class ProductSupplierController {
             description: suppliers.description,
           }
         })
-        .from(productSuppliers)
-        .leftJoin(suppliers, eq(productSuppliers.supplierId, suppliers.id))
-        .where(eq(productSuppliers.id, newSupplier.id))
+        .from(com360_product_suppliers)
+        .leftJoin(suppliers, eq(com360_product_suppliers.supplierId, suppliers.id))
+        .where(eq(com360_product_suppliers.id, newSupplier.id))
         .limit(1);
 
       return res.status(201).json({
@@ -295,10 +295,10 @@ export class ProductSupplierController {
       // Check if product supplier exists
       const existingSupplier = await db
         .select()
-        .from(productSuppliers)
+        .from(com360_product_suppliers)
         .where(and(
-          eq(productSuppliers.productId, productId),
-          eq(productSuppliers.id, supplierId)
+          eq(com360_product_suppliers.productId, productId),
+          eq(com360_product_suppliers.id, supplierId)
         ))
         .limit(1);
 
@@ -320,38 +320,38 @@ export class ProductSupplierController {
       // If setting as primary, remove primary flag from other suppliers
       if (validatedData.isPrimary) {
         await db
-          .update(productSuppliers)
+          .update(com360_product_suppliers)
           .set({ isPrimary: false })
           .where(and(
-            eq(productSuppliers.productId, productId),
-            eq(productSuppliers.id, supplierId)
+            eq(com360_product_suppliers.productId, productId),
+            eq(com360_product_suppliers.id, supplierId)
           ));
       }
 
       // Update supplier
       await db
-        .update(productSuppliers)
+        .update(com360_product_suppliers)
         .set({
           ...validatedData,
           updatedAt: new Date()
         })
-        .where(eq(productSuppliers.id, supplierId));
+        .where(eq(com360_product_suppliers.id, supplierId));
 
       // Get updated supplier with info
       const updatedSupplier = await db
         .select({
-          id: productSuppliers.id,
-          productId: productSuppliers.productId,
-          supplierId: productSuppliers.supplierId,
-          supplierCode: productSuppliers.supplierCode,
-          cost: productSuppliers.cost,
-          isPrimary: productSuppliers.isPrimary,
+          id: com360_product_suppliers.id,
+          productId: com360_product_suppliers.productId,
+          supplierId: com360_product_suppliers.supplierId,
+          supplierCode: com360_product_suppliers.supplierCode,
+          cost: com360_product_suppliers.cost,
+          isPrimary: com360_product_suppliers.isPrimary,
           
           
-          notes: productSuppliers.notes,
-          active: productSuppliers.active,
-          createdAt: productSuppliers.createdAt,
-          updatedAt: productSuppliers.updatedAt,
+          notes: com360_product_suppliers.notes,
+          active: com360_product_suppliers.active,
+          createdAt: com360_product_suppliers.createdAt,
+          updatedAt: com360_product_suppliers.updatedAt,
           supplier: {
             id: suppliers.id,
             tradeName: suppliers.tradeName,
@@ -360,9 +360,9 @@ export class ProductSupplierController {
             description: suppliers.description,
           }
         })
-        .from(productSuppliers)
-        .leftJoin(suppliers, eq(productSuppliers.supplierId, suppliers.id))
-        .where(eq(productSuppliers.id, supplierId))
+        .from(com360_product_suppliers)
+        .leftJoin(suppliers, eq(com360_product_suppliers.supplierId, suppliers.id))
+        .where(eq(com360_product_suppliers.id, supplierId))
         .limit(1);
 
       return res.json({
@@ -433,10 +433,10 @@ export class ProductSupplierController {
       // Check if product supplier relationship exists
       const existingSupplier = await db
         .select()
-        .from(productSuppliers)
+        .from(com360_product_suppliers)
         .where(and(
-          eq(productSuppliers.productId, productId),
-          eq(productSuppliers.id, relationshipId)
+          eq(com360_product_suppliers.productId, productId),
+          eq(com360_product_suppliers.id, relationshipId)
         ))
         .limit(1);
 
@@ -455,20 +455,20 @@ export class ProductSupplierController {
       // Get supplier relationship details before deletion for synchronization
       const supplierRelation = await db
         .select({
-          supplierId: productSuppliers.supplierId,
-          productId: productSuppliers.productId,
-          supplierCode: productSuppliers.supplierCode
+          supplierId: com360_product_suppliers.supplierId,
+          productId: com360_product_suppliers.productId,
+          supplierCode: com360_product_suppliers.supplierCode
         })
-        .from(productSuppliers)
-        .where(eq(productSuppliers.id, relationshipId))
+        .from(com360_product_suppliers)
+        .where(eq(com360_product_suppliers.id, relationshipId))
         .limit(1);
 
       console.log('🔍 [DELETE] Supplier relation found:', supplierRelation);
 
       // Delete supplier relationship
       const deleteResult = await db
-        .delete(productSuppliers)
-        .where(eq(productSuppliers.id, relationshipId))
+        .delete(com360_product_suppliers)
+        .where(eq(com360_product_suppliers.id, relationshipId))
         .returning();
 
       console.log('🔍 [DELETE] Delete result:', deleteResult);
@@ -547,10 +547,10 @@ export class ProductSupplierController {
       // Check if product supplier exists
       const existingSupplier = await db
         .select()
-        .from(productSuppliers)
+        .from(com360_product_suppliers)
         .where(and(
-          eq(productSuppliers.productId, productId),
-          eq(productSuppliers.id, supplierId)
+          eq(com360_product_suppliers.productId, productId),
+          eq(com360_product_suppliers.id, supplierId)
         ))
         .limit(1);
 
@@ -563,18 +563,18 @@ export class ProductSupplierController {
 
       // Remove primary flag from all suppliers of this product
       await db
-        .update(productSuppliers)
+        .update(com360_product_suppliers)
         .set({ isPrimary: false })
-        .where(eq(productSuppliers.productId, productId));
+        .where(eq(com360_product_suppliers.productId, productId));
 
       // Set as primary
       await db
-        .update(productSuppliers)
+        .update(com360_product_suppliers)
         .set({ 
           isPrimary: true,
           updatedAt: new Date()
         })
-        .where(eq(productSuppliers.id, supplierId));
+        .where(eq(com360_product_suppliers.id, supplierId));
 
       return res.json({
         success: true,
@@ -624,20 +624,20 @@ export class ProductSupplierController {
       // Get all suppliers for statistics
       const suppliersList = await db
         .select({
-          id: productSuppliers.id,
-          cost: productSuppliers.cost,
-          isPrimary: productSuppliers.isPrimary,
+          id: com360_product_suppliers.id,
+          cost: com360_product_suppliers.cost,
+          isPrimary: com360_product_suppliers.isPrimary,
           
-          active: productSuppliers.active,
+          active: com360_product_suppliers.active,
           supplier: {
             id: suppliers.id,
             tradeName: suppliers.tradeName,
             corporateName: suppliers.corporateName,
           }
         })
-        .from(productSuppliers)
-        .leftJoin(suppliers, eq(productSuppliers.supplierId, suppliers.id))
-        .where(eq(productSuppliers.productId, productId));
+        .from(com360_product_suppliers)
+        .leftJoin(suppliers, eq(com360_product_suppliers.supplierId, suppliers.id))
+        .where(eq(com360_product_suppliers.productId, productId));
 
       // Calculate statistics
       const totalSuppliers = suppliersList.length;

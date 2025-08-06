@@ -7,7 +7,7 @@ import {
   hub_templates, 
   hub_prompts, 
   com360_products,
-  productCostHistory,
+  com360_product_cost_history,
   com360_brands,
   categories,
   materialTypes,
@@ -68,8 +68,8 @@ import {
   type InsertPrompt,
   type Product,
   type InsertProduct,
-  type ProductCostHistory,
-  type InsertProductCostHistory,
+  type Com360ProductCostHistory,
+  type InsertCom360ProductCostHistory,
   type Category,
   type InsertCategory,
   type Department,
@@ -95,13 +95,13 @@ import {
   type PartnerReviewReply,
   type InsertPartnerReviewReply,
   type PartnerReviewWithUser,
-  type ToolReview,
-  type InsertToolReview,
-  type ToolReviewReply,
-  type InsertToolReviewReply,
-  type ToolReviewWithUser,
-  type ToolDiscount,
-  type InsertToolDiscount,
+  type HubToolReview,
+  type InsertHubToolReview,
+  type HubToolReviewReply,
+  type InsertHubToolReviewReply,
+  type HubToolReviewWithUser,
+  type HubToolDiscount,
+  type InsertHubToolDiscount,
   type ToolVideo,
   type InsertToolVideo,
 
@@ -1381,7 +1381,7 @@ export class DatabaseStorage implements IStorage {
       };
       
       console.log('💾 [COST HISTORY] Saving:', costHistoryData);
-      await db.insert(productCostHistory).values(costHistoryData);
+      await db.insert(com360_product_cost_history).values(costHistoryData);
     }
     
     return updated;
@@ -1394,9 +1394,9 @@ export class DatabaseStorage implements IStorage {
   async getProductCostHistory(productId: number, limit?: number): Promise<ProductCostHistory[]> {
     const baseQuery = db
       .select()
-      .from(productCostHistory)
-      .where(eq(productCostHistory.productId, productId))
-      .orderBy(desc(productCostHistory.createdAt));
+      .from(com360_product_cost_history)
+      .where(eq(com360_product_cost_history.productId, productId))
+      .orderBy(desc(com360_product_cost_history.createdAt));
     
     const history = limit ? await baseQuery.limit(limit) : await baseQuery;
     return history;

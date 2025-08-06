@@ -34,7 +34,7 @@ router.get('/:productId/suppliers', async (req, res) => {
     }
 
     // Buscar fornecedores do produto com informações do fornecedor
-    const productSuppliers = await db
+    const importedProductSuppliersList = await db
       .select({
         id: importedProductSuppliers.id,
         productId: importedProductSuppliers.productId,
@@ -55,7 +55,7 @@ router.get('/:productId/suppliers', async (req, res) => {
 
     res.json({
       success: true,
-      data: productSuppliers
+      data: importedProductSuppliersList
     });
   } catch (error) {
     console.error('Erro ao buscar fornecedores do produto:', error);

@@ -6,7 +6,7 @@ import fs from 'fs';
 import sharp from 'sharp';
 import { requireAuth } from '../middleware/auth';
 import { db } from '../db';
-import { productImages, importedProducts } from '@shared/schema';
+import { com360_product_images, importedProducts } from '@shared/schema';
 import { eq, and, sql } from 'drizzle-orm';
 
 const router = Router();
@@ -78,8 +78,8 @@ router.post('/', requireAuth, upload.single('image'), async (req, res) => {
     }
 
     // Verificar limite de 10 imagens
-    const existingImages = await db.query.productImages.findMany({
-      where: eq(productImages.productId, productId)
+    const existingImages = await db.query.com360_product_images.findMany({
+      where: eq(com360_product_images.productId, productId)
     });
 
     if (existingImages.length >= 10) {
@@ -143,7 +143,7 @@ router.post('/', requireAuth, upload.single('image'), async (req, res) => {
     const compressionRatio = Math.round((1 - compressedStats.size / originalSize) * 100);
 
     // Inserir no banco de dados
-    const newImage = await db.insert(productImages).values({
+    const newImage = await db.insert(com360_product_images).values({
       productId,
       filename: compressedFilename,
       originalName: file.originalname,
@@ -206,9 +206,9 @@ router.get('/product/:productId', requireAuth, async (req, res) => {
     }
 
     // Buscar imagens ordenadas por posição
-    const images = await db.query.productImages.findMany({
-      where: eq(productImages.productId, productId),
-      orderBy: (productImages, { asc }) => [asc(productImages.position)]
+    const images = await db.query.com360_product_images.findMany({
+      where: eq(com360_product_images.productId, productId),
+      orderBy: (com360_product_images, { asc }) => [asc(com360_product_images.position)]
     });
 
     res.json({
@@ -239,8 +239,8 @@ router.put('/:imageId/move', requireAuth, async (req, res) => {
     }
 
     // Buscar a imagem e verificar propriedade
-    const image = await db.query.productImages.findFirst({
-      where: eq(productImages.id, imageId),
+    const image = await db.query.com360_product_images.findFirst({
+      where: eq(com360_product_images.id, imageId),
       with: {
         product: true
       }
@@ -261,9 +261,9 @@ router.put('/:imageId/move', requireAuth, async (req, res) => {
     }
 
     // Buscar todas as imagens do produto ordenadas
-    const allImages = await db.query.productImages.findMany({
-      where: eq(productImages.productId, image.productId),
-      orderBy: (productImages, { asc }) => [asc(productImages.position)]
+    const allImages = await db.query.com360_product_images.findMany({
+      where: eq(com360_product_images.productId, image.productId),
+      orderBy: (com360_product_images, { asc }) => [asc(com360_product_images.position)]
     });
 
     const currentIndex = allImages.findIndex(img => img.id === imageId);
@@ -296,13 +296,13 @@ router.put('/:imageId/move', requireAuth, async (req, res) => {
 
     await db.transaction(async (tx) => {
       // Atualizar posições
-      await tx.update(productImages)
+      await tx.update(com360_product_images)
         .set({ position: targetImage.position })
-        .where(eq(productImages.id, currentImage.id));
+        .where(eq(com360_product_images.id, currentImage.id));
 
-      await tx.update(productImages)
+      await tx.update(com360_product_images)
         .set({ position: currentImage.position })
-        .where(eq(productImages.id, targetImage.id));
+        .where(eq(com360_product_images.id, targetImage.id));
     });
 
     res.json({
@@ -325,8 +325,8 @@ router.delete('/:imageId', requireAuth, async (req, res) => {
     const { imageId } = req.params;
 
     // Buscar a imagem e verificar propriedade
-    const image = await db.query.productImages.findFirst({
-      where: eq(productImages.id, imageId),
+    const image = await db.query.com360_product_images.findFirst({
+      where: eq(com360_product_images.id, imageId),
       with: {
         product: true
       }
@@ -357,20 +357,20 @@ router.delete('/:imageId', requireAuth, async (req, res) => {
     }
 
     // Remover do banco de dados
-    await db.delete(productImages).where(eq(productImages.id, imageId));
+    await db.delete(com360_product_images).where(eq(com360_product_images.id, imageId));
 
     // Reordenar posições das imagens restantes
-    const remainingImages = await db.query.productImages.findMany({
-      where: eq(productImages.productId, image.productId),
-      orderBy: (productImages, { asc }) => [asc(productImages.position)]
+    const remainingImages = await db.query.com360_product_images.findMany({
+      where: eq(com360_product_images.productId, image.productId),
+      orderBy: (com360_product_images, { asc }) => [asc(com360_product_images.position)]
     });
 
     if (remainingImages.length > 0) {
       await db.transaction(async (tx) => {
         for (let i = 0; i < remainingImages.length; i++) {
-          await tx.update(productImages)
+          await tx.update(com360_product_images)
             .set({ position: i + 1 })
-            .where(eq(productImages.id, remainingImages[i].id));
+            .where(eq(com360_product_images.id, remainingImages[i].id));
         }
       });
     }
@@ -395,8 +395,8 @@ router.get('/:imageId/download', requireAuth, async (req, res) => {
     const { imageId } = req.params;
 
     // Buscar a imagem e verificar propriedade
-    const image = await db.query.productImages.findFirst({
-      where: eq(productImages.id, imageId),
+    const image = await db.query.com360_product_images.findFirst({
+      where: eq(com360_product_images.id, imageId),
       with: {
         product: true
       }

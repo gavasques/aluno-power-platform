@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth";
 import { db } from "../db";
-import { productPackages, importedProducts } from "@shared/schema";
+import { com360_product_packages, importedProducts } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 const router = Router();
@@ -48,9 +48,9 @@ router.get("/product/:productId", requireAuth, async (req, res) => {
     // Get all packages for this product
     const packages = await db
       .select()
-      .from(productPackages)
-      .where(eq(productPackages.productId, productId))
-      .orderBy(productPackages.packageNumber);
+      .from(com360_product_packages)
+      .where(eq(com360_product_packages.productId, productId))
+      .orderBy(com360_product_packages.packageNumber);
 
     res.json({
       success: true,
@@ -98,7 +98,7 @@ router.post("/", requireAuth, async (req, res) => {
 
     // Create the package
     const [newPackage] = await db
-      .insert(productPackages)
+      .insert(com360_product_packages)
       .values({
         productId: data.productId,
         packageNumber: data.packageNumber,
@@ -152,12 +152,12 @@ router.put("/:id", requireAuth, async (req, res) => {
     // Verify that the user owns this package (through the product)
     const [existingPackage] = await db
       .select({
-        id: productPackages.id,
-        productId: productPackages.productId,
+        id: com360_product_packages.id,
+        productId: com360_product_packages.productId,
       })
-      .from(productPackages)
-      .innerJoin(importedProducts, eq(productPackages.productId, importedProducts.id))
-      .where(and(eq(productPackages.id, packageId), eq(importedProducts.userId, userId)))
+      .from(com360_product_packages)
+      .innerJoin(importedProducts, eq(com360_product_packages.productId, importedProducts.id))
+      .where(and(eq(com360_product_packages.id, packageId), eq(importedProducts.userId, userId)))
       .limit(1);
 
     if (!existingPackage) {
@@ -169,7 +169,7 @@ router.put("/:id", requireAuth, async (req, res) => {
 
     // Update the package
     const [updatedPackage] = await db
-      .update(productPackages)
+      .update(com360_product_packages)
       .set({
         packageNumber: data.packageNumber,
         packageType: data.packageType,
@@ -185,7 +185,7 @@ router.put("/:id", requireAuth, async (req, res) => {
         packagingMaterial: data.packagingMaterial || null,
         specialHandling: data.specialHandling || null,
       })
-      .where(eq(productPackages.id, packageId))
+      .where(eq(com360_product_packages.id, packageId))
       .returning();
 
     res.json({
@@ -211,12 +211,12 @@ router.delete("/:id", requireAuth, async (req, res) => {
     // Verify that the user owns this package (through the product)
     const [existingPackage] = await db
       .select({
-        id: productPackages.id,
-        productId: productPackages.productId,
+        id: com360_product_packages.id,
+        productId: com360_product_packages.productId,
       })
-      .from(productPackages)
-      .innerJoin(importedProducts, eq(productPackages.productId, importedProducts.id))
-      .where(and(eq(productPackages.id, packageId), eq(importedProducts.userId, userId)))
+      .from(com360_product_packages)
+      .innerJoin(importedProducts, eq(com360_product_packages.productId, importedProducts.id))
+      .where(and(eq(com360_product_packages.id, packageId), eq(importedProducts.userId, userId)))
       .limit(1);
 
     if (!existingPackage) {
@@ -228,8 +228,8 @@ router.delete("/:id", requireAuth, async (req, res) => {
 
     // Delete the package
     await db
-      .delete(productPackages)
-      .where(eq(productPackages.id, packageId));
+      .delete(com360_product_packages)
+      .where(eq(com360_product_packages.id, packageId));
 
     res.json({
       success: true,

@@ -556,7 +556,7 @@ export const com360_products = pgTable("com360_products", {
 }));
 
 // Product Suppliers - Tabela de relacionamento Produto x Fornecedor (many-to-many)
-export const productSuppliers = pgTable("product_suppliers", {
+export const com360_product_suppliers = pgTable("com360_product_suppliers", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").references(() => com360_products.id, { onDelete: "cascade" }).notNull(),
   supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
@@ -571,10 +571,10 @@ export const productSuppliers = pgTable("product_suppliers", {
 }, (table) => ({
   // Garante que não há duplicatas produto-fornecedor
   productSupplierUnique: unique("product_supplier_unique").on(table.productId, table.supplierId),
-  productIdx: index("product_suppliers_product_idx").on(table.productId),
-  supplierIdx: index("product_suppliers_supplier_idx").on(table.supplierId),
-  primaryIdx: index("product_suppliers_primary_idx").on(table.isPrimary),
-  activeIdx: index("product_suppliers_active_idx").on(table.active),
+  productIdx: index("com360_product_suppliers_product_idx").on(table.productId),
+  supplierIdx: index("com360_product_suppliers_supplier_idx").on(table.supplierId),
+  primaryIdx: index("com360_product_suppliers_primary_idx").on(table.isPrimary),
+  activeIdx: index("com360_product_suppliers_active_idx").on(table.active),
 }));
 
 // Supplier Products - Tabela para produtos do fornecedor (existam ou não no sistema)
@@ -615,7 +615,7 @@ export const supplierProducts = pgTable("supplier_products", {
 }));
 
 // Product Cost History
-export const productCostHistory = pgTable("product_cost_history", {
+export const com360_product_cost_history = pgTable("com360_product_cost_history", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").references(() => com360_products.id).notNull(),
   previousCost: decimal("previous_cost", { precision: 10, scale: 2 }),
@@ -1687,13 +1687,13 @@ export type InsertBrand = z.infer<typeof insertBrandSchema>;
 export type Brand = typeof com360_brands.$inferSelect;
 
 // Insert schemas for product suppliers
-export const insertProductSupplierSchema = createInsertSchema(productSuppliers).omit({
+export const insertProductSupplierSchema = createInsertSchema(com360_product_suppliers).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export type InsertProductSupplier = z.infer<typeof insertProductSupplierSchema>;
-export type ProductSupplier = typeof productSuppliers.$inferSelect;
+export type Com360ProductSupplier = typeof com360_product_suppliers.$inferSelect;
 
 export const insertSupplierProductSchema = createInsertSchema(supplierProducts).omit({
   id: true,
@@ -2189,8 +2189,8 @@ export type Prompt = typeof prompts.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof com360_products.$inferSelect;
 
-export type InsertProductCostHistory = typeof productCostHistory.$inferInsert;
-export type ProductCostHistory = typeof productCostHistory.$inferSelect;
+export type InsertCom360ProductCostHistory = typeof com360_product_cost_history.$inferInsert;
+export type Com360ProductCostHistory = typeof com360_product_cost_history.$inferSelect;
 
 export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
@@ -3676,7 +3676,7 @@ export const importedProducts = pgTable("imported_products", {
 }));
 
 // Product Packages - System for managing multiple packaging of a product
-export const productPackages = pgTable("product_packages", {
+export const com360_product_packages = pgTable("com360_product_packages", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   productId: text("product_id").references(() => importedProducts.id).notNull(),
   packageNumber: integer("package_number").notNull(),
@@ -3699,7 +3699,7 @@ export const productPackages = pgTable("product_packages", {
 }));
 
 // Product Files - Storage for images, documents and certificates
-export const productFiles = pgTable("product_files", {
+export const com360_product_files = pgTable("com360_product_files", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   productId: text("product_id").references(() => importedProducts.id).notNull(),
   fileType: text("file_type").notNull(), // image, document, certificate, manual, other
@@ -3717,7 +3717,7 @@ export const productFiles = pgTable("product_files", {
 }));
 
 // Product Notes - System for annotations and important notes
-export const productNotes = pgTable("product_notes", {
+export const com360_product_notes = pgTable("com360_product_notes", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   productId: text("product_id").references(() => importedProducts.id).notNull(),
   title: text("title").notNull(),
@@ -3732,7 +3732,7 @@ export const productNotes = pgTable("product_notes", {
 }));
 
 // Product Images - System for managing product photos with ordering
-export const productImages = pgTable("product_images", {
+export const com360_product_images = pgTable("com360_product_images", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   productId: text("product_id").references(() => importedProducts.id).notNull(),
   filename: text("filename").notNull(),
@@ -3760,37 +3760,37 @@ export const importedProductsRelations = relations(importedProducts, ({ one, man
     fields: [importedProducts.supplierId],
     references: [com360_suppliers.id],
   }),
-  packages: many(productPackages),
-  files: many(productFiles),
-  notes: many(productNotes),
-  images: many(productImages),
+  packages: many(com360_product_packages),
+  files: many(com360_product_files),
+  notes: many(com360_product_notes),
+  images: many(com360_product_images),
   productSuppliers: many(importedProductSuppliers),
 }));
 
-export const productPackagesRelations = relations(productPackages, ({ one }) => ({
+export const com360_product_packages_relations = relations(com360_product_packages, ({ one }) => ({
   product: one(importedProducts, {
-    fields: [productPackages.productId],
+    fields: [com360_product_packages.productId],
     references: [importedProducts.id],
   }),
 }));
 
-export const productFilesRelations = relations(productFiles, ({ one }) => ({
+export const com360_product_files_relations = relations(com360_product_files, ({ one }) => ({
   product: one(importedProducts, {
-    fields: [productFiles.productId],
+    fields: [com360_product_files.productId],
     references: [importedProducts.id],
   }),
 }));
 
-export const productNotesRelations = relations(productNotes, ({ one }) => ({
+export const com360_product_notes_relations = relations(com360_product_notes, ({ one }) => ({
   product: one(importedProducts, {
-    fields: [productNotes.productId],
+    fields: [com360_product_notes.productId],
     references: [importedProducts.id],
   }),
 }));
 
-export const productImagesRelations = relations(productImages, ({ one }) => ({
+export const com360_product_images_relations = relations(com360_product_images, ({ one }) => ({
   product: one(importedProducts, {
-    fields: [productImages.productId],
+    fields: [com360_product_images.productId],
     references: [importedProducts.id],
   }),
 }));
@@ -3806,34 +3806,34 @@ export const insertImportedProductSchema = createInsertSchema(importedProducts).
 export type InsertImportedProduct = z.infer<typeof insertImportedProductSchema>;
 export type ImportedProduct = typeof importedProducts.$inferSelect;
 
-export const insertProductPackageSchema = createInsertSchema(productPackages).omit({
+export const insertProductPackageSchema = createInsertSchema(com360_product_packages).omit({
   id: true,
   createdAt: true,
 });
 export type InsertProductPackage = z.infer<typeof insertProductPackageSchema>;
-export type ProductPackage = typeof productPackages.$inferSelect;
+export type Com360ProductPackage = typeof com360_product_packages.$inferSelect;
 
-export const insertProductFileSchema = createInsertSchema(productFiles).omit({
+export const insertProductFileSchema = createInsertSchema(com360_product_files).omit({
   id: true,
   uploadedAt: true,
 });
 export type InsertProductFile = z.infer<typeof insertProductFileSchema>;
-export type ProductFile = typeof productFiles.$inferSelect;
+export type Com360ProductFile = typeof com360_product_files.$inferSelect;
 
-export const insertProductNoteSchema = createInsertSchema(productNotes).omit({
+export const insertProductNoteSchema = createInsertSchema(com360_product_notes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export type InsertProductNote = z.infer<typeof insertProductNoteSchema>;
-export type ProductNote = typeof productNotes.$inferSelect;
+export type Com360ProductNote = typeof com360_product_notes.$inferSelect;
 
-export const insertProductImageSchema = createInsertSchema(productImages).omit({
+export const insertProductImageSchema = createInsertSchema(com360_product_images).omit({
   id: true,
   createdAt: true,
 });
 export type InsertProductImage = z.infer<typeof insertProductImageSchema>;
-export type ProductImage = typeof productImages.$inferSelect;
+export type Com360ProductImage = typeof com360_product_images.$inferSelect;
 
 // Imported Product Suppliers - Sistema para múltiplos fornecedores por produto importado
 export const importedProductSuppliers = pgTable("imported_product_suppliers", {
