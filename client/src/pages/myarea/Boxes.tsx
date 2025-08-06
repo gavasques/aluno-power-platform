@@ -458,7 +458,7 @@ const Boxes = () => {
                         />
                       </FormControl>
                       <div className="text-xs text-gray-500">
-                        {field.value > 0 && `${(field.value/10).toFixed(1)} cm`}
+                        {(field.value ?? 0) > 0 && `${((field.value ?? 0)/10).toFixed(1)} cm`}
                       </div>
                       <FormMessage />
                     </FormItem>
@@ -480,7 +480,7 @@ const Boxes = () => {
                         />
                       </FormControl>
                       <div className="text-xs text-gray-500">
-                        {field.value > 0 && `${(field.value/1000).toFixed(2)} kg`}
+                        {(field.value ?? 0) > 0 && `${((field.value ?? 0)/1000).toFixed(2)} kg`}
                       </div>
                       <FormMessage />
                     </FormItem>
@@ -683,7 +683,6 @@ const Boxes = () => {
                     />
                   </div>
                 </div>
-              </div>
 
               <div className="flex justify-end gap-3 pt-4">
                 <Button

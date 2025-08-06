@@ -290,8 +290,9 @@ export default function LifestyleWithModel() {
       const response = {
         success: true,
         originalImage: `data:image/jpeg;base64,${base64}`,
-        processedImage: processedImageUrl,
+        processedImage: processedImageUrl || '',
         processingTime: Math.round((Date.now() - startTime) / 1000),
+        cost: 0.167,
         webhookSent: true
       };
 
