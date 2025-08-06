@@ -398,7 +398,7 @@ export const com360_materials = pgTable("com360_materials", {
 });
 
 // Hub Tool Types
-export const hub_tool_types = pgTable("hub_tool_types", {
+export const tool_types = pgTable("tool_types", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
@@ -406,11 +406,11 @@ export const hub_tool_types = pgTable("hub_tool_types", {
 });
 
 // Hub Tools
-export const hub_tools = pgTable("hub_tools", {
+export const tool_tools = pgTable("tool_tools", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  typeId: integer("type_id").references(() => hub_tool_types.id).notNull(),
+  typeId: integer("type_id").references(() => tool_types.id).notNull(),
   logo: text("logo").notNull(),
   website: text("website"),
   pricing: text("pricing"),
@@ -426,9 +426,9 @@ export const hub_tools = pgTable("hub_tools", {
 });
 
 // Hub Tool Reviews
-export const hub_tool_reviews = pgTable("hub_tool_reviews", {
+export const tool_reviews = pgTable("tool_reviews", {
   id: serial("id").primaryKey(),
-  toolId: integer("tool_id").references(() => hub_tools.id).notNull(),
+  toolId: integer("tool_id").references(() => tool_tools.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment").notNull(),
@@ -437,18 +437,18 @@ export const hub_tool_reviews = pgTable("hub_tool_reviews", {
 });
 
 // Hub Tool Review Replies
-export const hub_tool_review_replies = pgTable("hub_tool_review_replies", {
+export const tool_review_replies = pgTable("tool_review_replies", {
   id: serial("id").primaryKey(),
-  reviewId: integer("review_id").references(() => hub_tool_reviews.id).notNull(),
+  reviewId: integer("review_id").references(() => tool_reviews.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   comment: text("comment").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Hub Tool Discounts
-export const hub_tool_discounts = pgTable("hub_tool_discounts", {
+export const tool_discounts = pgTable("tool_discounts", {
   id: serial("id").primaryKey(),
-  toolId: integer("tool_id").references(() => hub_tools.id).notNull(),
+  toolId: integer("tool_id").references(() => tool_tools.id).notNull(),
   title: text("title").notNull(),
   linkOrCoupon: text("link_or_coupon").notNull(),
   explanation: text("explanation").notNull(),
@@ -697,9 +697,9 @@ export const updates = pgTable("updates", {
 }));
 
 // Tool videos
-export const toolVideos = pgTable("tool_videos", {
+export const tool_videos = pgTable("tool_videos", {
   id: serial("id").primaryKey(),
-  toolId: integer("tool_id").references(() => hub_tools.id, { onDelete: "cascade" }).notNull(),
+  toolId: integer("tool_id").references(() => tool_tools.id, { onDelete: "cascade" }).notNull(),
   title: text("title").notNull(),
   videoId: text("video_id").notNull(), // YouTube video ID
   description: text("description"),
@@ -887,7 +887,7 @@ export type SelectContract = typeof internationalSupplierContracts.$inferSelect;
 export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
   partnerReviews: many(partnerReviews),
-  toolReviews: many(hub_tool_reviews),
+  toolReviews: many(tool_reviews),
   materials: many(com360_materials),
   news: many(news),
   updates: many(updates),
@@ -1038,54 +1038,54 @@ export const com360_materialsRelations = relations(com360_materials, ({ one }) =
   }),
 }));
 
-export const hub_tool_types_relations = relations(hub_tool_types, ({ many }) => ({
-  tools: many(hub_tools),
+export const tool_types_relations = relations(tool_types, ({ many }) => ({
+  tools: many(tool_tools),
 }));
 
-export const hub_tools_relations = relations(hub_tools, ({ one, many }) => ({
-  type: one(hub_tool_types, {
-    fields: [hub_tools.typeId],
-    references: [hub_tool_types.id],
+export const tool_tools_relations = relations(tool_tools, ({ one, many }) => ({
+  type: one(tool_types, {
+    fields: [tool_tools.typeId],
+    references: [tool_types.id],
   }),
-  reviews: many(hub_tool_reviews),
-  discounts: many(hub_tool_discounts),
-  videos: many(toolVideos),
+  reviews: many(tool_reviews),
+  discounts: many(tool_discounts),
+  videos: many(tool_videos),
 }));
 
-export const hub_tool_reviews_relations = relations(hub_tool_reviews, ({ one, many }) => ({
-  tool: one(hub_tools, {
-    fields: [hub_tool_reviews.toolId],
-    references: [hub_tools.id],
+export const tool_reviews_relations = relations(tool_reviews, ({ one, many }) => ({
+  tool: one(tool_tools, {
+    fields: [tool_reviews.toolId],
+    references: [tool_tools.id],
   }),
   user: one(users, {
-    fields: [hub_tool_reviews.userId],
+    fields: [tool_reviews.userId],
     references: [users.id],
   }),
-  replies: many(hub_tool_review_replies),
+  replies: many(tool_review_replies),
 }));
 
-export const hub_tool_review_replies_relations = relations(hub_tool_review_replies, ({ one }) => ({
-  review: one(hub_tool_reviews, {
-    fields: [hub_tool_review_replies.reviewId],
-    references: [hub_tool_reviews.id],
+export const tool_review_replies_relations = relations(tool_review_replies, ({ one }) => ({
+  review: one(tool_reviews, {
+    fields: [tool_review_replies.reviewId],
+    references: [tool_reviews.id],
   }),
   user: one(users, {
-    fields: [hub_tool_review_replies.userId],
+    fields: [tool_review_replies.userId],
     references: [users.id],
   }),
 }));
 
-export const hub_tool_discounts_relations = relations(hub_tool_discounts, ({ one }) => ({
-  tool: one(hub_tools, {
-    fields: [hub_tool_discounts.toolId],
-    references: [hub_tools.id],
+export const tool_discounts_relations = relations(tool_discounts, ({ one }) => ({
+  tool: one(tool_tools, {
+    fields: [tool_discounts.toolId],
+    references: [tool_tools.id],
   }),
 }));
 
-export const hub_tool_videos_relations = relations(toolVideos, ({ one }) => ({
-  tool: one(hub_tools, {
-    fields: [toolVideos.toolId],
-    references: [hub_tools.id],
+export const tool_videos_relations = relations(tool_videos, ({ one }) => ({
+  tool: one(tool_tools, {
+    fields: [tool_videos.toolId],
+    references: [tool_tools.id],
   }),
 }));
 
@@ -1226,7 +1226,7 @@ export const aiGenerationLogs = pgTable("ai_generation_logs", {
 }));
 
 // Tool Usage Logs
-export const toolUsageLogs = pgTable("tool_usage_logs", {
+export const tool_usage_logs = pgTable("tool_usage_logs", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   userName: text("user_name").notNull(),
@@ -1751,12 +1751,12 @@ export type InsertAiGenerationLog = z.infer<typeof insertAiGenerationLogSchema>;
 export type AiGenerationLog = typeof aiGenerationLogs.$inferSelect;
 
 // Insert schemas for tool usage logs
-export const insertToolUsageLogSchema = createInsertSchema(toolUsageLogs).omit({
+export const insertToolUsageLogSchema = createInsertSchema(tool_usage_logs).omit({
   id: true,
   createdAt: true,
 });
 export type InsertToolUsageLog = z.infer<typeof insertToolUsageLogSchema>;
-export type ToolUsageLog = typeof toolUsageLogs.$inferSelect;
+export type ToolUsageLog = typeof tool_usage_logs.$inferSelect;
 
 // Insert schemas for user dashboard tables
 export const insertUserPlanSchema = createInsertSchema(userPlans).omit({
@@ -2001,7 +2001,7 @@ export const insertMaterialSchema = createInsertSchema(com360_materials).omit({
   viewCount: true,
 });
 
-export const insertHubToolSchema = createInsertSchema(hub_tools).omit({
+export const insertToolSchema = createInsertSchema(tool_tools).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2027,17 +2027,17 @@ export const insertProductSchema = createInsertSchema(com360_products).omit({
   updatedAt: true,
 });
 
-export const insertHubToolReviewSchema = createInsertSchema(hub_tool_reviews).omit({
+export const insertToolReviewSchema = createInsertSchema(tool_reviews).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertHubToolReviewReplySchema = createInsertSchema(hub_tool_review_replies).omit({
+export const insertToolReviewReplySchema = createInsertSchema(tool_review_replies).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertHubToolDiscountSchema = createInsertSchema(hub_tool_discounts).omit({
+export const insertToolDiscountSchema = createInsertSchema(tool_discounts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2091,7 +2091,7 @@ export const insertHubPromptCategorySchema = createInsertSchema(hub_prompt_categ
   createdAt: true,
 });
 
-export const insertHubToolTypeSchema = createInsertSchema(hub_tool_types).omit({
+export const insertToolTypeSchema = createInsertSchema(tool_types).omit({
   id: true,
   createdAt: true,
 });
@@ -2139,7 +2139,7 @@ export const insertPartnerFileSchema = createInsertSchema(partnerFiles).omit({
   createdAt: true,
 });
 
-export const insertToolVideoSchema = createInsertSchema(toolVideos).omit({
+export const insertToolVideoSchema = createInsertSchema(tool_videos).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2178,13 +2178,13 @@ export type MaterialWithType = Material & {
 };
 
 export type InsertTool = z.infer<typeof insertToolSchema>;
-export type Tool = typeof tools.$inferSelect;
+export type Tool = typeof tool_tools.$inferSelect;
 
 export type InsertTemplate = z.infer<typeof insertTemplateSchema>;
-export type Template = typeof templates.$inferSelect;
+export type Template = typeof hub_templates.$inferSelect;
 
 export type InsertPrompt = z.infer<typeof insertPromptSchema>;
-export type Prompt = typeof prompts.$inferSelect;
+export type Prompt = typeof hub_prompts.$inferSelect;
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof com360_products.$inferSelect;
@@ -2210,7 +2210,7 @@ export type InsertPromptCategory = z.infer<typeof insertPromptCategorySchema>;
 export type HubPromptCategory = typeof hub_prompt_categories.$inferSelect;
 
 export type InsertToolType = z.infer<typeof insertToolTypeSchema>;
-export type HubToolType = typeof hub_tool_types.$inferSelect;
+export type ToolType = typeof tool_types.$inferSelect;
 
 export type InsertMaterialType = z.infer<typeof insertMaterialTypeSchema>;
 export type MaterialType = typeof materialTypes.$inferSelect;
@@ -2233,27 +2233,27 @@ export type PartnerReview = typeof partnerReviews.$inferSelect;
 export type InsertPartnerReviewReply = z.infer<typeof insertPartnerReviewReplySchema>;
 export type PartnerReviewReply = typeof partnerReviewReplies.$inferSelect;
 
-export type InsertHubToolReview = z.infer<typeof insertToolReviewSchema>;
-export type HubToolReview = typeof hub_tool_reviews.$inferSelect;
+export type InsertToolReview = z.infer<typeof insertToolReviewSchema>;
+export type ToolReview = typeof tool_reviews.$inferSelect;
 
-export type InsertHubToolReviewReply = z.infer<typeof insertToolReviewReplySchema>;
-export type HubToolReviewReply = typeof hub_tool_review_replies.$inferSelect;
+export type InsertToolReviewReply = z.infer<typeof insertToolReviewReplySchema>;
+export type ToolReviewReply = typeof tool_review_replies.$inferSelect;
 
-export type InsertHubToolDiscount = z.infer<typeof insertToolDiscountSchema>;
-export type HubToolDiscount = typeof hub_tool_discounts.$inferSelect;
+export type InsertToolDiscount = z.infer<typeof insertToolDiscountSchema>;
+export type ToolDiscount = typeof tool_discounts.$inferSelect;
 
 export type PartnerReviewWithUser = PartnerReview & {
   user: User;
   replies: (PartnerReviewReply & { user: User })[];
 };
 
-export type HubToolReviewWithUser = HubToolReview & {
+export type ToolReviewWithUser = ToolReview & {
   user: User;
-  replies: (HubToolReviewReply & { user: User })[];
+  replies: (ToolReviewReply & { user: User })[];
 };
 
 export type InsertToolVideo = z.infer<typeof insertToolVideoSchema>;
-export type ToolVideo = typeof toolVideos.$inferSelect;
+export type ToolVideo = typeof tool_videos.$inferSelect;
 
 // Agent types
 export type InsertAgent = z.infer<typeof insertAgentSchema>;
@@ -2563,7 +2563,7 @@ export const picsartSessions = pgTable("picsart_sessions", {
 }));
 
 // Picsart Tool Configurations - Configurações dos diferentes tools
-export const picsartToolConfigs = pgTable("picsart_tool_configs", {
+export const tool_picsart_configs = pgTable("tool_picsart_configs", {
   id: serial("id").primaryKey(),
   toolName: text("tool_name").notNull().unique(),
   displayName: text("display_name").notNull(),
@@ -2592,7 +2592,7 @@ export const picsartSessionsRelations = relations(picsartSessions, ({ one }) => 
   }),
 }));
 
-export const picsartToolConfigsRelations = relations(picsartToolConfigs, ({ many }) => ({
+export const tool_picsart_configs_relations = relations(tool_picsart_configs, ({ many }) => ({
   sessions: many(picsartSessions),
 }));
 
@@ -2603,7 +2603,7 @@ export const insertPicsartSessionSchema = createInsertSchema(picsartSessions).om
   completedAt: true,
 });
 
-export const insertPicsartToolConfigSchema = createInsertSchema(picsartToolConfigs).omit({
+export const insertPicsartToolConfigSchema = createInsertSchema(tool_picsart_configs).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

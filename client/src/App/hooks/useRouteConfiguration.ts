@@ -62,11 +62,11 @@ const lazyComponents = {
   // AI Tools
   ImageUpscale: lazy(() => import('../../pages/ai/ImageUpscale')),
   BackgroundRemoval: lazy(() => import('../../pages/ai/BackgroundRemoval')),
-  BackgroundRemovalPro: lazy(() => import('../../pages/tools/BackgroundRemovalPro')),
-  LogoGeneratorPro: lazy(() => import('../../pages/tools/LogoGeneratorPro')),
-  UltraMelhoradorPro: lazy(() => import('../../pages/tools/UltraMelhoradorPro')),
-  UpscalePro: lazy(() => import('../../pages/tools/UpscalePro')),
-  AmazonAdsEditor: lazy(() => import('../../pages/tools/AmazonAdsEditor')),
+  BackgroundRemovalPro: lazy(() => import('../../pages/tools/Tool_BackgroundRemovalPro')),
+  LogoGeneratorPro: lazy(() => import('../../pages/tools/Tool_LogoGeneratorPro')),
+  UltraMelhoradorPro: lazy(() => import('../../pages/tools/Tool_UltraMelhoradorPro')),
+  UpscalePro: lazy(() => import('../../pages/tools/Tool_UpscalePro')),
+  AmazonAdsEditor: lazy(() => import('../../pages/tools/Tool_AmazonAdsEditor')),
   
   // Agents
   AgentsPage: lazy(() => import('../../pages/agents')),

@@ -125,7 +125,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth, requireRole } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { com360_materials, partners, hub_tools, hub_tool_types, com360_suppliers, news, updates, agents, agentPrompts, agentUsage, agentGenerations, users, com360_products, com360_brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, toolUsageLogs, insertToolUsageLogSchema, aiImgGenerationLogs, categories, agentProcessingSessions } from '@shared/schema';
+import { com360_materials, partners, tool_tools, tool_types, com360_suppliers, news, updates, agents, agentPrompts, agentUsage, agentGenerations, users, com360_products, com360_brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, tool_usage_logs, insertToolUsageLogSchema, aiImgGenerationLogs, categories, agentProcessingSessions } from '@shared/schema';
 
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';

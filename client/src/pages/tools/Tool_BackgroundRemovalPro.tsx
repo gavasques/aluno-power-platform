@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import BackgroundRemovalTool from '@/components/background-removal/BackgroundRemovalTool';
 
-const BackgroundRemovalPro: React.FC = () => {
+const Tool_BackgroundRemovalPro: React.FC = () => {
   const [, setLocation] = useLocation();
 
   return (
@@ -46,4 +46,4 @@ const BackgroundRemovalPro: React.FC = () => {
   );
 };
 
-export default BackgroundRemovalPro;
+export default Tool_BackgroundRemovalPro;

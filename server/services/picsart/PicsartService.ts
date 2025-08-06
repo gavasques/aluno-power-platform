@@ -11,7 +11,7 @@
  */
 
 import { db } from '../../db';
-import { picsartSessions, picsartToolConfigs } from '@shared/schema';
+import { picsartSessions, tool_picsart_configs } from '@shared/schema';
 import type { InsertPicsartSession, PicsartSession, PicsartToolConfig } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import crypto from 'crypto';
@@ -141,12 +141,12 @@ export class PicsartService {
     for (const config of defaultConfigs) {
       const exists = await db
         .select()
-        .from(picsartToolConfigs)
-        .where(eq(picsartToolConfigs.toolName, config.toolName))
+        .from(tool_picsart_configs)
+        .where(eq(tool_picsart_configs.toolName, config.toolName))
         .limit(1);
 
       if (exists.length === 0) {
-        await db.insert(picsartToolConfigs).values(config);
+        await db.insert(tool_picsart_configs).values(config);
         console.log(`✅ [PICSART] Initialized tool config: ${config.toolName}`);
       }
     }
@@ -158,9 +158,9 @@ export class PicsartService {
   async getAvailableTools(): Promise<PicsartToolConfig[]> {
     return await db
       .select()
-      .from(picsartToolConfigs)
-      .where(eq(picsartToolConfigs.isActive, true))
-      .orderBy(picsartToolConfigs.toolName);
+      .from(tool_picsart_configs)
+      .where(eq(tool_picsart_configs.isActive, true))
+      .orderBy(tool_picsart_configs.toolName);
   }
 
   /**
@@ -172,25 +172,25 @@ export class PicsartService {
       
       const result = await db
         .select({
-          id: picsartToolConfigs.id,
-          toolName: picsartToolConfigs.toolName,
-          displayName: picsartToolConfigs.displayName,
-          description: picsartToolConfigs.description,
-          endpoint: picsartToolConfigs.endpoint,
-          defaultParameters: picsartToolConfigs.defaultParameters,
-          costPerUse: picsartToolConfigs.costPerUse,
-          isActive: picsartToolConfigs.isActive,
-          category: picsartToolConfigs.category,
-          supportedFormats: picsartToolConfigs.supportedFormats,
-          maxFileSize: picsartToolConfigs.maxFileSize,
-          processingTime: picsartToolConfigs.processingTime,
-          createdAt: picsartToolConfigs.createdAt,
-          updatedAt: picsartToolConfigs.updatedAt,
+          id: tool_picsart_configs.id,
+          toolName: tool_picsart_configs.toolName,
+          displayName: tool_picsart_configs.displayName,
+          description: tool_picsart_configs.description,
+          endpoint: tool_picsart_configs.endpoint,
+          defaultParameters: tool_picsart_configs.defaultParameters,
+          costPerUse: tool_picsart_configs.costPerUse,
+          isActive: tool_picsart_configs.isActive,
+          category: tool_picsart_configs.category,
+          supportedFormats: tool_picsart_configs.supportedFormats,
+          maxFileSize: tool_picsart_configs.maxFileSize,
+          processingTime: tool_picsart_configs.processingTime,
+          createdAt: tool_picsart_configs.createdAt,
+          updatedAt: tool_picsart_configs.updatedAt,
         })
-        .from(picsartToolConfigs)
+        .from(tool_picsart_configs)
         .where(and(
-          eq(picsartToolConfigs.toolName, toolName),
-          eq(picsartToolConfigs.isActive, true)
+          eq(tool_picsart_configs.toolName, toolName),
+          eq(tool_picsart_configs.isActive, true)
         ))
         .limit(1);
 

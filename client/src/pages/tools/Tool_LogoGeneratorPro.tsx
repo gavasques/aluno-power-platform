@@ -17,7 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Palette, Zap, Download } from 'lucide-react';
 
-const LogoGeneratorPro: React.FC = () => {
+const Tool_LogoGeneratorPro: React.FC = () => {
   // Get feature cost for dynamic pricing
   const { data: featureCosts } = useQuery({
     queryKey: ['/api/feature-costs'],
@@ -90,4 +90,4 @@ const LogoGeneratorPro: React.FC = () => {
   );
 };
 
-export default LogoGeneratorPro;
+export default Tool_LogoGeneratorPro;
