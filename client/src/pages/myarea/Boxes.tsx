@@ -21,14 +21,14 @@ import type { Box } from '@shared/schema';
 
 // Validation schema for box form
 const boxFormSchema = z.object({
-  code: z.string().min(1, 'Código da caixa é obrigatório'),
+  code: z.string().optional(),
   status: z.string().min(1, 'Status é obrigatório'),
   type: z.string().min(1, 'Tipo é obrigatório'),
   length: z.number().min(1, 'Comprimento deve ser maior que 0'),
   width: z.number().min(1, 'Largura deve ser maior que 0'),
-  height: z.number().min(1, 'Altura deve ser maior que 0'),
-  weight: z.number().min(1, 'Peso deve ser maior que 0'),
-  waveType: z.string().min(1, 'Tipo de onda é obrigatório'),
+  height: z.number().optional(),
+  weight: z.number().optional(),
+  waveType: z.string().optional(),
   paper: z.string().optional(),
   hasLogo: z.boolean().default(false),
   isColored: z.boolean().default(false),
@@ -57,16 +57,16 @@ const Boxes = () => {
       type: '',
       length: 0,
       width: 0,
-      height: 0,
-      weight: 0,
+      height: undefined,
+      weight: undefined,
       waveType: '',
       paper: '',
       hasLogo: false,
       isColored: false,
       isFullColor: false,
       isPremiumPrint: false,
-      unitCost: 0,
-      moq: 0,
+      unitCost: undefined,
+      moq: undefined,
       idealFor: '',
       notes: '',
     },
@@ -343,7 +343,7 @@ const Boxes = () => {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Código da Caixa *</FormLabel>
+                      <FormLabel>Código da Caixa</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Ex: CX001" />
                       </FormControl>
@@ -446,7 +446,7 @@ const Boxes = () => {
                   name="height"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Altura (mm) *</FormLabel>
+                      <FormLabel>Altura (mm)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -468,7 +468,7 @@ const Boxes = () => {
                   name="weight"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Peso (gramas) *</FormLabel>
+                      <FormLabel>Peso (gramas)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -490,7 +490,7 @@ const Boxes = () => {
                   name="waveType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de Onda *</FormLabel>
+                      <FormLabel>Tipo de Onda</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
