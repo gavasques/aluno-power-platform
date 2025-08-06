@@ -25,8 +25,11 @@ export class SupplierController extends BaseController {
         return;
       }
 
-      console.log('GET_ALL_SUPPLIERS', { userId });
-      const suppliers = await storage.getSuppliers(userId);
+      // Check if this is for national suppliers only (from query parameter)
+      const onlyNational = req.query.national === 'true';
+
+      console.log('GET_ALL_SUPPLIERS', { userId, onlyNational, query: req.query });
+      const suppliers = await storage.getSuppliers(userId, onlyNational);
       res.json({ success: true, data: suppliers });
     } catch (error) {
       this.logError(error, 'GET_ALL_SUPPLIERS');

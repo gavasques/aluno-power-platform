@@ -26,11 +26,11 @@ const MySuppliers = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Buscar fornecedores
+  // Buscar fornecedores nacionais apenas
   const { data: suppliersResponse, isLoading } = useQuery({
-    queryKey: ['/api/suppliers'],
+    queryKey: ['/api/suppliers', { national: true }],
     queryFn: async () => {
-      const response = await fetch('/api/suppliers', {
+      const response = await fetch('/api/suppliers?national=true', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },

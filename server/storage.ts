@@ -169,7 +169,7 @@ export type InsertSupplierReview = {
   comment: string;
   isApproved?: boolean;
 };
-import { eq, ilike, and, or, desc, asc, sql, count } from "drizzle-orm";
+import { eq, ilike, and, or, desc, asc, sql, count, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -178,7 +178,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
 
   // Suppliers
-  getSuppliers(userId?: number): Promise<Supplier[]>;
+  getSuppliers(userId?: number, onlyNational?: boolean): Promise<Supplier[]>;
   getSupplier(id: number): Promise<Supplier | undefined>;
   createSupplier(supplier: InsertSupplier): Promise<Supplier>;
   updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier>;
@@ -455,22 +455,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Suppliers
-  async getSuppliers(userId?: number): Promise<Supplier[]> {
-    if (userId) {
-      return await db.query.suppliers.findMany({
-        where: eq(suppliers.userId, userId),
-        with: {
-          category: true,
-          brands: true,
-          contacts: true,
-          files: true,
-          reviews: true
-        }
-      });
-    }
+  async getSuppliers(userId?: number, onlyNational?: boolean): Promise<Supplier[]> {
+    const baseWhere = userId ? eq(suppliers.userId, userId) : undefined;
     
-    // For admin or when no userId specified, return all
+    // If onlyNational is true, filter by country = 'Brasil' or 'Brazil' or null (assume national)
+    let whereClause = baseWhere;
+    if (onlyNational && baseWhere) {
+      whereClause = and(
+        baseWhere,
+        or(
+          eq(suppliers.country, 'Brasil'),
+          eq(suppliers.country, 'Brazil'),
+          isNull(suppliers.country)
+        )
+      );
+    } else if (onlyNational) {
+      whereClause = or(
+        eq(suppliers.country, 'Brasil'),
+        eq(suppliers.country, 'Brazil'),
+        isNull(suppliers.country)
+      );
+    }
+
     return await db.query.suppliers.findMany({
+      where: whereClause,
       with: {
         category: true,
         brands: true,
