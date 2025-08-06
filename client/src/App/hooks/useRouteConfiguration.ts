@@ -89,37 +89,37 @@ const lazyComponents = {
   MinhaAreaIndex: lazy(() => import('../../pages/MinhaAreaIndex')),
   UserDashboard: lazy(() => import('../../pages/user/DashboardSimple')),
   UserUsage: lazy(() => import('../../pages/user/Usage')),
-  UserProfile: lazy(() => import('../../pages/myarea/UserProfile')),
-  Boxes: lazy(() => import('../../pages/myarea/Boxes')),
-  MyBrands: lazy(() => import('../../pages/myarea/MyBrands')),
-  MySuppliers: lazy(() => import('../../pages/myarea/MySuppliers')),
+  COM360_UserProfile: lazy(() => import('../../pages/myarea/COM360_UserProfile')),
+  COM360_Boxes: lazy(() => import('../../pages/myarea/COM360_Boxes')),
+  COM360_MyBrands: lazy(() => import('../../pages/myarea/COM360_MyBrands')),
+  COM360_MySuppliers: lazy(() => import('../../pages/myarea/COM360_MySuppliers')),
   Comercial360: lazy(() => import('../../pages/myarea/Comercial360')),
   
   // My Area - Products
-  ProductsPro: lazy(() => import('../../pages/myarea/ProductsPro')),
-  MyProductsList: lazy(() => import('../../pages/myarea/MyProductsList')),
-  ProductChannelsManager: lazy(() => import('../../pages/myarea/ProductChannelsManager')),
-  ProductEdit: lazy(() => import('../../pages/myarea/ProductEdit')),
+  COM360_ProductsPro: lazy(() => import('../../pages/myarea/COM360_ProductsPro')),
+  COM360_MyProductsList: lazy(() => import('../../pages/myarea/COM360_MyProductsList')),
+  COM360_ProductChannelsManager: lazy(() => import('../../pages/myarea/COM360_ProductChannelsManager')),
+  COM360_ProductEdit: lazy(() => import('../../pages/myarea/COM360_ProductEdit')),
   ProductEditWithTabs: lazy(() => import('../../pages/myarea/ProductEditWithTabs')),
-  ProductImportExport: lazy(() => import('../../pages/myarea/ProductImportExport')),
+  COM360_ProductImportExport: lazy(() => import('../../pages/myarea/COM360_ProductImportExport')),
   
   // My Area - Imports
-  ImportacoesIndex: lazy(() => import('../../pages/myarea/ImportacoesIndex')),
-  InternationalSupplierCRM: lazy(() => import('../../pages/myarea/InternationalSupplierCRM')),
-  InternationalSupplierForm: lazy(() => import('../../pages/myarea/InternationalSupplierForm')),
-  InternationalSupplierDetail: lazy(() => import('../../pages/myarea/InternationalSupplierDetail')),
+  IMP360_ImportacoesIndex: lazy(() => import('../../pages/myarea/IMP360_ImportacoesIndex')),
+  IMP360_InternationalSupplierCRM: lazy(() => import('../../pages/myarea/IMP360_InternationalSupplierCRM')),
+  IMP360_InternationalSupplierForm: lazy(() => import('../../pages/myarea/IMP360_InternationalSupplierForm')),
+  IMP360_InternationalSupplierDetail: lazy(() => import('../../pages/myarea/IMP360_InternationalSupplierDetail')),
   ImportedProductsIndex: lazy(() => import('../../pages/myarea/importacoes/produtos/ImportedProductsIndex')),
   ImportedProductForm: lazy(() => import('../../pages/myarea/importacoes/produtos/ImportedProductForm')),
   ImportedProductDetail: lazy(() => import('../../pages/myarea/importacoes/produtos/ImportedProductDetail')),
   
   // Finanças360
-  Financas360Index: lazy(() => import('../../pages/myarea/financas360/Financas360Index')),
+  FIN360_Financas360Index: lazy(() => import('../../pages/myarea/financas360/FIN360_Financas360Index')),
   
   // Packing List Generator
   PackingListGenerator: lazy(() => import('../../pages/myarea/importacoes/packing-list-generator')),
   DocumentosSalvos: lazy(() => import('../../pages/myarea/importacoes/documentos-salvos')),
   GeradorEtiquetas: lazy(() => import('../../pages/myarea/importacoes/gerador-etiquetas')),
-  MinhasEmpresas: lazy(() => import('../../pages/myarea/importacoes/MinhasEmpresas')),
+  IMP360_MinhasEmpresas: lazy(() => import('../../pages/myarea/importacoes/IMP360_MinhasEmpresas')),
   
   // Simulators
   SimuladoresIndex: lazy(() => import('../../pages/SimuladoresIndex')),
@@ -283,9 +283,9 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
     MY_AREA_ROUTES: [
       // Principais (português como padrão)
       { path: '/minha-area', component: lazyComponents.MinhaAreaIndex, isProtected: true },
-      { path: '/minha-area/perfil', component: lazyComponents.UserProfile, isProtected: true },
+      { path: '/minha-area/perfil', component: lazyComponents.COM360_UserProfile, isProtected: true },
       { path: '/minha-area/assinatura', component: lazyComponents.SubscriptionPage, isProtected: true },
-      { path: '/minha-area/caixas', component: lazyComponents.Boxes, isProtected: true },
+      { path: '/minha-area/caixas', component: lazyComponents.COM360_Boxes, isProtected: true },
       { path: '/minha-area/comercial360', component: lazyComponents.Comercial360, isProtected: true },
 
       // ROTAS DE COMPATIBILIDADE (Legacy)
@@ -295,26 +295,26 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/subscription', component: lazyComponents.SubscriptionPage, isProtected: true },
       
       // Products - CONSOLIDADO
-      { path: '/minha-area/produtos', component: lazyComponents.MyProductsList, isProtected: true },
-      { path: '/meus-produtos', component: lazyComponents.MyProductsList, isProtected: true },
-      { path: '/produtos-pro', component: lazyComponents.ProductsPro, isProtected: true },
-      { path: '/produtos-novo/:id/canais', component: lazyComponents.ProductChannelsManager, isProtected: true },
-      { path: '/minha-area/produtos/:id/editar', component: lazyComponents.ProductEdit, isProtected: true },
+      { path: '/minha-area/produtos', component: lazyComponents.COM360_MyProductsList, isProtected: true },
+      { path: '/meus-produtos', component: lazyComponents.COM360_MyProductsList, isProtected: true },
+      { path: '/produtos-pro', component: lazyComponents.COM360_ProductsPro, isProtected: true },
+      { path: '/produtos-novo/:id/canais', component: lazyComponents.COM360_ProductChannelsManager, isProtected: true },
+      { path: '/minha-area/produtos/:id/editar', component: lazyComponents.COM360_ProductEdit, isProtected: true },
       { path: '/minha-area/produtos/:id/editar-completo', component: lazyComponents.ProductEditWithTabs, isProtected: true },
-      { path: '/minha-area/produtos/import-export', component: lazyComponents.ProductImportExport, isProtected: true },
+      { path: '/minha-area/produtos/import-export', component: lazyComponents.COM360_ProductImportExport, isProtected: true },
       
       // Fornecedores Gerais
-      { path: '/minha-area/fornecedores', component: lazyComponents.MySuppliers, isProtected: true },
+      { path: '/minha-area/fornecedores', component: lazyComponents.COM360_MySuppliers, isProtected: true },
       { path: '/minha-area/fornecedores/:id', component: lazyComponents.SupplierDetail, isProtected: true },
 
       // Marcas
-      { path: '/minha-area/marcas', component: lazyComponents.MyBrands, isProtected: true },
+      { path: '/minha-area/marcas', component: lazyComponents.COM360_MyBrands, isProtected: true },
 
-      // Imports
-      { path: '/minha-area/importacoes', component: lazyComponents.ImportacoesIndex, isProtected: true },
-      { path: '/minha-area/importacoes/fornecedores', component: lazyComponents.InternationalSupplierCRM, isProtected: true },
-      { path: '/minha-area/importacoes/fornecedores/novo', component: lazyComponents.InternationalSupplierForm, isProtected: true },
-      { path: '/minha-area/importacoes/fornecedores/:id', component: lazyComponents.InternationalSupplierDetail, isProtected: true },
+      // Imports - IMP360
+      { path: '/minha-area/importacoes', component: lazyComponents.IMP360_ImportacoesIndex, isProtected: true },
+      { path: '/minha-area/importacoes/fornecedores', component: lazyComponents.IMP360_InternationalSupplierCRM, isProtected: true },
+      { path: '/minha-area/importacoes/fornecedores/novo', component: lazyComponents.IMP360_InternationalSupplierForm, isProtected: true },
+      { path: '/minha-area/importacoes/fornecedores/:id', component: lazyComponents.IMP360_InternationalSupplierDetail, isProtected: true },
       { path: '/minha-area/importacoes/produtos', component: lazyComponents.ImportedProductsIndex, isProtected: true },
       { path: '/minha-area/importacoes/produtos/novo', component: lazyComponents.ImportedProductForm, isProtected: true },
       { path: '/minha-area/importacoes/produtos/:id', component: lazyComponents.ImportedProductDetail, isProtected: true },
@@ -324,10 +324,10 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       { path: '/minha-area/importacoes/packing-list-generator', component: lazyComponents.PackingListGenerator, isProtected: true },
       { path: '/minha-area/importacoes/documentos-salvos', component: lazyComponents.DocumentosSalvos, isProtected: true },
       { path: '/minha-area/importacoes/gerador-etiquetas', component: lazyComponents.GeradorEtiquetas, isProtected: true },
-      { path: '/minha-area/importacoes/minhas-empresas', component: lazyComponents.MinhasEmpresas, isProtected: true },
+      { path: '/minha-area/importacoes/minhas-empresas', component: lazyComponents.IMP360_MinhasEmpresas, isProtected: true },
       
-      // Finanças360
-      { path: '/minha-area/financas360', component: lazyComponents.Financas360Index, isProtected: true }
+      // Finanças360 - FIN360
+      { path: '/minha-area/financas360', component: lazyComponents.FIN360_Financas360Index, isProtected: true }
     ],
     
     // Simulator Routes (Protected)

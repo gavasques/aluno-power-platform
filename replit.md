@@ -1,7 +1,9 @@
 # Aluno Power Platform - AI Agents System
 
 ## Overview
-This project is an educational e-commerce platform specializing in Amazon FBA and e-commerce training. Its core purpose is to provide students with essential tools, resources, and an integrated AI agents system to master e-commerce strategies. The platform aims to be a comprehensive solution for learning and implementing e-commerce practices, enhancing user capabilities through AI-powered assistance for tasks like Amazon listing optimization via competitor review analysis and content generation. The project is deployment-ready, with a robust, modular architecture and optimized performance, with a vision to empower users in the e-commerce domain.
+This project is an educational e-commerce platform specializing in Amazon FBA and e-commerce training. Its core purpose is to provide students with essential tools, resources, and an integrated AI agents system to master e-commerce strategies. The platform consists of three main modules: Commercial360 (product and supplier management), Importações360 (international trade operations), and Finanças360 (financial management). The platform aims to be a comprehensive solution for learning and implementing e-commerce practices, enhancing user capabilities through AI-powered assistance for tasks like Amazon listing optimization via competitor review analysis and content generation. The project is deployment-ready, with a robust, modular architecture and optimized performance, with a vision to empower users in the e-commerce domain.
+
+**Recent Major Update (January 2025)**: Completed comprehensive component reorganization with standardized naming conventions (COM360_, IMP360_, FIN360_ prefixes) to prevent system confusion and improve maintainability.
 
 ## User Preferences
 **Communication Style**: Simple, everyday language (user is non-technical)
@@ -9,6 +11,13 @@ This project is an educational e-commerce platform specializing in Amazon FBA an
 ## System Architecture
 ### Frontend Architecture
 The frontend is built with React 18, TypeScript, and Vite. Styling is handled by Tailwind CSS and shadcn/ui components. State management uses TanStack Query and React Context, with Wouter for client-side routing. The code adheres to a DRY-compliant modular system, featuring generic services, unified hooks, a component library, and a utility system for data formatting. A strict Container/Presentational pattern is enforced for complex components. UI/UX decisions prioritize a clean layout, consistent color schemes (yellow, emerald), and user-friendly navigation.
+
+**Component Organization (Updated January 2025)**: All components now follow a standardized naming convention with module prefixes:
+- **COM360_** - Commercial360 components (box management, products, suppliers, brands)
+- **IMP360_** - Importações360 components (international suppliers, import operations)
+- **FIN360_** - Finanças360 components (financial management, banking, operations)
+
+This standardization prevents system confusion and improves maintainability across the three main platform modules.
 
 ### Backend Architecture
 The backend uses Node.js and Express with TypeScript, providing RESTful endpoints and WebSocket support for real-time features. Data is managed with PostgreSQL and Drizzle ORM. AI integration is multi-provider, supporting OpenAI, Anthropic, Google, DeepSeek, and xAI. Security is robust, featuring JWT authentication, role-based permissions, and audit logging. File handling is managed via Multer with validation and S3-compatible storage.
