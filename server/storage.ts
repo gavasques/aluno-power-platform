@@ -139,6 +139,9 @@ import {
   packingListDocuments,
   type PackingListDocument,
   type InsertPackingListDocument,
+  boxes,
+  type Box,
+  type InsertBox,
   type UserCompany,
   type InsertUserCompany,
 
@@ -397,6 +400,14 @@ export interface IStorage {
   updatePackingListDocument(id: number, document: Partial<InsertPackingListDocument>): Promise<PackingListDocument>;
   deletePackingListDocument(id: number): Promise<void>;
   searchPackingListDocuments(userId: number, query: string): Promise<PackingListDocument[]>;
+
+  // Boxes (Caixas)
+  getBoxes(userId: number): Promise<Box[]>;
+  getBox(id: number): Promise<Box | undefined>;
+  createBox(box: InsertBox): Promise<Box>;
+  updateBox(id: number, box: Partial<InsertBox>): Promise<Box>;
+  deleteBox(id: number): Promise<void>;
+  searchBoxes(userId: number, query: string): Promise<Box[]>;
 
   // User Companies
   getUserCompanies(userId: number): Promise<UserCompany[]>;
@@ -2795,6 +2806,73 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(packingListDocuments.createdAt))
       .limit(20); // Limite para busca
     return documents;
+  }
+
+  // Boxes (Caixas)
+  async getBoxes(userId: number): Promise<Box[]> {
+    return await db
+      .select()
+      .from(boxes)
+      .where(eq(boxes.userId, userId))
+      .orderBy(desc(boxes.createdAt));
+  }
+
+  async getBox(id: number): Promise<Box | undefined> {
+    const [box] = await db
+      .select()
+      .from(boxes)
+      .where(eq(boxes.id, id));
+    return box || undefined;
+  }
+
+  async createBox(box: InsertBox): Promise<Box> {
+    const [created] = await db
+      .insert(boxes)
+      .values({
+        ...box,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return created;
+  }
+
+  async updateBox(id: number, box: Partial<InsertBox>): Promise<Box> {
+    const [updated] = await db
+      .update(boxes)
+      .set({
+        ...box,
+        updatedAt: new Date(),
+      })
+      .where(eq(boxes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteBox(id: number): Promise<void> {
+    await db
+      .delete(boxes)
+      .where(eq(boxes.id, id));
+  }
+
+  async searchBoxes(userId: number, query: string): Promise<Box[]> {
+    return await db
+      .select()
+      .from(boxes)
+      .where(
+        and(
+          eq(boxes.userId, userId),
+          or(
+            ilike(boxes.code, `%${query}%`),
+            ilike(boxes.type, `%${query}%`),
+            ilike(boxes.paper, `%${query}%`),
+            ilike(boxes.idealFor, `%${query}%`),
+            ilike(boxes.notes, `%${query}%`)
+          )
+        )
+      )
+      .orderBy(desc(boxes.createdAt))
+      .limit(20);
   }
 
   // User Companies - Minhas Empresas

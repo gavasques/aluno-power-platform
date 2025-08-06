@@ -3887,3 +3887,54 @@ export const insertPackingListDocumentSchema = createInsertSchema(packingListDoc
 });
 export type InsertPackingListDocument = z.infer<typeof insertPackingListDocumentSchema>;
 export type PackingListDocument = typeof packingListDocuments.$inferSelect;
+
+// Caixas (Packaging Boxes) table
+export const boxes = pgTable("boxes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  code: text("code").notNull(), // Código da Caixa (alfanumérico)
+  status: text("status").notNull().default("ativa"), // Ativa/Inativa
+  type: text("type").notNull(), // Caixa de Papelão / Flyer / Outra
+  
+  // Dimensões em mm
+  length: integer("length").notNull(), // Comprimento em mm
+  width: integer("width").notNull(), // Largura em mm
+  height: integer("height").notNull(), // Altura em mm
+  weight: integer("weight").notNull(), // Peso em gramas
+  
+  waveType: text("wave_type").notNull(), // Simples, Dupla, Tripla
+  paper: text("paper"), // Campo de texto simples
+  hasLogo: boolean("has_logo").notNull().default(false), // Com Logo (Sim/Não)
+  isColored: boolean("is_colored").notNull().default(false), // Colorido (Sim/Não)
+  isFullColor: boolean("is_full_color").notNull().default(false), // Colorido Total (Sim/Não)
+  isPremiumPrint: boolean("is_premium_print").notNull().default(false), // Impressão Premium (Sim/Não)
+  unitCost: decimal("unit_cost", { precision: 10, scale: 2 }), // Custo Unitário (R$ XX,XX)
+  moq: integer("moq"), // MOQ - Quantidade Mínima de pedido
+  idealFor: text("ideal_for"), // Ideal para (Campo de Texto)
+  notes: text("notes"), // Observação
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdx: index("boxes_user_idx").on(table.userId),
+  codeIdx: index("boxes_code_idx").on(table.code),
+  statusIdx: index("boxes_status_idx").on(table.status),
+  userCodeIdx: unique().on(table.userId, table.code), // Código único por usuário
+}));
+
+// Boxes Relations
+export const boxesRelations = relations(boxes, ({ one }) => ({
+  user: one(users, {
+    fields: [boxes.userId],
+    references: [users.id],
+  }),
+}));
+
+// Insert Schemas for Boxes
+export const insertBoxSchema = createInsertSchema(boxes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBox = z.infer<typeof insertBoxSchema>;
+export type Box = typeof boxes.$inferSelect;

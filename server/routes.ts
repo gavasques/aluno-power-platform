@@ -42,6 +42,7 @@ import productImagesRoutes from "./routes/productImages";
 import { financas360Router } from "./routes/financas360";
 import { financas360OperationsRouter } from "./routes/financas360-operations";
 import userCompaniesRoutes from "./routes/userCompanies";
+import boxesRoutes from "./routes/boxes";
 
 // Helper function for generating tags
 function generateTags(data: any): any {
@@ -7769,6 +7770,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
     app.use('/api/financas360', financas360Router);
     app.use('/api/financas360', financas360OperationsRouter);
     app.use('/api/user-companies', userCompaniesRoutes);
+    app.use('/api/boxes', boxesRoutes);
     console.log('✅ [PERFORMANCE] Performance monitoring routes registered');
     console.log('✅ [IMPORTED_PRODUCT_SUPPLIERS] Routes registered successfully');
     console.log('✅ [PRODUCT_PACKAGES] Product packages routes registered successfully');
