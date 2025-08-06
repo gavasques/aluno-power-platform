@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireAuth } from "../middleware/auth";
 import { db } from "../db";
 import { 
-  suppliers, 
+  com360_suppliers, 
   categories, 
   supplierFiles,
   supplierBrands,
@@ -11,7 +11,7 @@ import {
   supplierContacts,
   supplierConversations,
   supplierProducts,
-  products,
+  com360_products,
   importedProducts,
   importedProductSuppliers
 } from "@shared/schema";

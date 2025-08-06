@@ -12,7 +12,7 @@
 import { Request, Response } from 'express';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import { db } from '../db';
-import { productSuppliers, suppliers, products, supplierProducts } from '../../shared/schema';
+import { productSuppliers, com360_suppliers, com360_products, supplierProducts } from '../../shared/schema';
 import { insertProductSupplierSchema } from '../../shared/schema';
 import { z } from 'zod';
 

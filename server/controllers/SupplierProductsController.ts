@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { db } from '../db';
-import { supplierProducts, products } from '../../shared/schema';
+import { supplierProducts, com360_products } from '../../shared/schema';
 import { eq, and, like, or, isNull, isNotNull, desc, count, ilike } from 'drizzle-orm';
 import { z } from 'zod';
 import * as XLSX from 'xlsx';

@@ -1,7 +1,7 @@
 import express from 'express';
 import { db } from '../db.js';
 import { eq, and } from 'drizzle-orm';
-import { importedProductSuppliers, importedProducts, suppliers } from '../../shared/schema.js';
+import { importedProductSuppliers, importedProducts, com360_suppliers } from '../../shared/schema.js';
 import { insertImportedProductSupplierSchema } from '../../shared/schema.js';
 import { requireAuth } from '../security.js';
 

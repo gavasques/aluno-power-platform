@@ -10,7 +10,7 @@
  */
 
 import { Database } from '../db';
-import { suppliers, supplierContacts, supplierBrands, supplierFiles } from '@shared/schema';
+import { com360_suppliers, supplierContacts, supplierBrands, supplierFiles } from '@shared/schema';
 import { eq, and, desc, asc, like, ilike, or, sql, count } from 'drizzle-orm';
 import { cache } from '../cache';
 import { DatabaseOptimizationService } from './DatabaseOptimizationService';

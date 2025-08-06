@@ -3,7 +3,7 @@
 ## Overview
 This project is an educational e-commerce platform specializing in Amazon FBA and e-commerce training. Its core purpose is to provide students with essential tools, resources, and an integrated AI agents system to master e-commerce strategies. The platform consists of three main modules: Commercial360 (product and supplier management), Importações360 (international trade operations), and Finanças360 (financial management). The platform aims to be a comprehensive solution for learning and implementing e-commerce practices, enhancing user capabilities through AI-powered assistance for tasks like Amazon listing optimization via competitor review analysis and content generation. The project is deployment-ready, with a robust, modular architecture and optimized performance, with a vision to empower users in the e-commerce domain.
 
-**Recent Major Update (January 2025)**: Completed comprehensive component reorganization with standardized naming conventions (COM360_, IMP360_, FIN360_ prefixes) to prevent system confusion and improve maintainability. Component naming standardization successfully implemented while maintaining database table compatibility.
+**Recent Major Update (January 2025)**: Completed comprehensive database schema reorganization with standardized naming conventions (COM360_, IMP360_, FIN360_ prefixes) for all database tables and components. Successfully renamed all commercial360 tables including boxes, brands, products, suppliers, materials, and material types. All foreign key references and relations updated. Component naming standardization successfully implemented with full database compatibility.
 
 ## User Preferences
 **Communication Style**: Simple, everyday language (user is non-technical)
@@ -28,7 +28,7 @@ The AI system focuses on Amazon listing optimization, including CSV upload from 
 ### Database Schema
 Key tables include `agents` (configurations), `agent_prompts` (templates), `agent_usage` (tracking), and `agent_generations` (content storage), alongside supporting tables for users, materials, tools, partners, and suppliers. Session data for AI agent processing is persisted in the `agentProcessingSessions` table.
 
-The `boxes` table has been implemented for packaging management with fields for dimensions (mm), weight (grams), box types, wave types, printing options, and MOQ functionality.
+The `com360_boxes` table has been implemented for packaging management with fields for dimensions (mm), weight (grams), box types, wave types, printing options, and MOQ functionality. All commercial360 module tables now use standardized COM360_ prefix: com360_boxes, com360_brands, com360_products, com360_suppliers, com360_materials, and com360_material_categories.
 
 ### Security & Permissions
 The system employs Role-Based Access Control (RBAC) with a 5-group architecture: `admin`, `mentorados`, `alunos`, `pagantes`, and `gratuito`. Security features include granular permissions, audit logging, rate limiting, input sanitization, XSS protection, CSRF protection, and secure headers.

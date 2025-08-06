@@ -13,7 +13,7 @@
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
 import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
-import { products, users, suppliers, brands, categories } from '../../shared/schema';
+import { com360_products, users, com360_suppliers, com360_brands, categories } from '../../shared/schema';
 import type { Product } from '../../shared/schema';
 
 export interface QueryPerformanceMetrics {

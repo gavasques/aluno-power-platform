@@ -144,8 +144,8 @@ export const departments = pgTable("departments", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Suppliers
-export const suppliers = pgTable("suppliers", {
+// COM360 - Suppliers
+export const com360_suppliers = pgTable("com360_suppliers", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   tradeName: text("trade_name").notNull(),
@@ -192,7 +192,7 @@ export const suppliers = pgTable("suppliers", {
 // Supplier Contacts
 export const supplierContacts = pgTable("supplier_contacts", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   name: text("name").notNull(),
   email: text("email"),
@@ -207,7 +207,7 @@ export const supplierContacts = pgTable("supplier_contacts", {
 // Supplier Files
 export const supplierFiles = pgTable("supplier_files", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   name: text("name").notNull(),
   fileUrl: text("file_url").notNull(),
@@ -220,7 +220,7 @@ export const supplierFiles = pgTable("supplier_files", {
 // Supplier Brands
 export const supplierBrands = pgTable("supplier_brands", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   name: text("name").notNull(),
   description: text("description"),
@@ -232,7 +232,7 @@ export const supplierBrands = pgTable("supplier_brands", {
 // Supplier Reviews
 export const supplierReviews = pgTable("supplier_reviews", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment").notNull(),
@@ -243,7 +243,7 @@ export const supplierReviews = pgTable("supplier_reviews", {
 // Supplier Conversations (CRM)
 export const supplierConversations = pgTable("supplier_conversations", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   subject: text("subject").notNull(), // Assunto da conversa
   content: text("content").notNull(), // O que foi falado
@@ -362,7 +362,7 @@ export const materialTypes = pgTable("material_types", {
 });
 
 // Materials
-export const materials = pgTable("materials", {
+export const com360_materials = pgTable("com360_materials", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -501,8 +501,8 @@ export const prompts = pgTable("prompts", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Brands
-export const brands = pgTable("brands", {
+// COM360 - Brands
+export const com360_brands = pgTable("com360_brands", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   userId: integer("user_id").references(() => users.id), // null for global brands
@@ -511,8 +511,8 @@ export const brands = pgTable("brands", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Products
-export const products = pgTable("products", {
+// COM360 - Products
+export const com360_products = pgTable("com360_products", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(), // Critical: User ownership
   name: text("name").notNull(),
@@ -525,9 +525,9 @@ export const products = pgTable("products", {
   dimensions: jsonb("dimensions"), // {length, width, height}
   weight: decimal("weight", { precision: 10, scale: 3 }),
   brand: text("brand"), // Legacy field for text brand name
-  brandId: integer("brand_id").references(() => brands.id), // Changed from text to reference
+  brandId: integer("brand_id").references(() => com360_brands.id), // Changed from text to reference
   category: text("category"),
-  supplierId: integer("supplier_id").references(() => suppliers.id),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id),
   ncm: text("ncm"),
   costItem: decimal("cost_item", { precision: 10, scale: 2 }),
   packCost: decimal("pack_cost", { precision: 10, scale: 2 }),
@@ -558,8 +558,8 @@ export const products = pgTable("products", {
 // Product Suppliers - Tabela de relacionamento Produto x Fornecedor (many-to-many)
 export const productSuppliers = pgTable("product_suppliers", {
   id: serial("id").primaryKey(),
-  productId: integer("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  productId: integer("product_id").references(() => com360_products.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   supplierCode: text("supplier_code"), // Código do produto no fornecedor
   cost: decimal("cost", { precision: 10, scale: 2 }), // Custo específico deste produto com este fornecedor
   isPrimary: boolean("is_primary").notNull().default(false), // Indica se é o fornecedor principal
@@ -580,7 +580,7 @@ export const productSuppliers = pgTable("product_suppliers", {
 // Supplier Products - Tabela para produtos do fornecedor (existam ou não no sistema)
 export const supplierProducts = pgTable("supplier_products", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   
   // Dados do produto no fornecedor (campos simplificados conforme solicitado)
@@ -593,7 +593,7 @@ export const supplierProducts = pgTable("supplier_products", {
   stock: integer("stock"), // Estoque disponível no fornecedor
   
   // Status de vinculação
-  productId: integer("product_id").references(() => products.id, { onDelete: "set null" }), // NULL se não existir no sistema
+  productId: integer("product_id").references(() => com360_products.id, { onDelete: "set null" }), // NULL se não existir no sistema
   linkStatus: text("link_status").notNull().default("pending"), // 'linked', 'pending', 'not_found'
   
   // Metadados
@@ -617,7 +617,7 @@ export const supplierProducts = pgTable("supplier_products", {
 // Product Cost History
 export const productCostHistory = pgTable("product_cost_history", {
   id: serial("id").primaryKey(),
-  productId: integer("product_id").references(() => products.id).notNull(),
+  productId: integer("product_id").references(() => com360_products.id).notNull(),
   previousCost: decimal("previous_cost", { precision: 10, scale: 2 }),
   newCost: decimal("new_cost", { precision: 10, scale: 2 }).notNull(),
   observations: text("observations"),
@@ -888,7 +888,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   supplierReviews: many(supplierReviews),
   partnerReviews: many(partnerReviews),
   toolReviews: many(toolReviews),
-  materials: many(materials),
+  materials: many(com360_materials),
   news: many(news),
   updates: many(updates),
   investmentSimulations: many(investmentSimulations),
@@ -909,16 +909,16 @@ export const updatesRelations = relations(updates, ({ one }) => ({
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
-  suppliers: many(suppliers),
+  suppliers: many(com360_suppliers),
 }));
 
 export const partnerTypesRelations = relations(partnerTypes, ({ many }) => ({
   partners: many(partners),
 }));
 
-export const suppliersRelations = relations(suppliers, ({ one, many }) => ({
+export const com360_suppliersRelations = relations(com360_suppliers, ({ one, many }) => ({
   category: one(categories, {
-    fields: [suppliers.categoryId],
+    fields: [com360_suppliers.categoryId],
     references: [categories.id],
   }),
   contacts: many(supplierContacts),
@@ -926,41 +926,41 @@ export const suppliersRelations = relations(suppliers, ({ one, many }) => ({
   brands: many(supplierBrands),
   reviews: many(supplierReviews),
   conversations: many(supplierConversations),
-  products: many(products),
+  products: many(com360_products),
 }));
 
 export const supplierContactsRelations = relations(supplierContacts, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierContacts.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
 }));
 
 export const supplierFilesRelations = relations(supplierFiles, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierFiles.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
 }));
 
 export const supplierBrandsRelations = relations(supplierBrands, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierBrands.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
 }));
 
 export const supplierConversationsRelations = relations(supplierConversations, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierConversations.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
 }));
 
 export const supplierReviewsRelations = relations(supplierReviews, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierReviews.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   user: one(users, {
     fields: [supplierReviews.userId],
@@ -1024,16 +1024,16 @@ export const partnerReviewRepliesRelations = relations(partnerReviewReplies, ({ 
 }));
 
 export const materialTypesRelations = relations(materialTypes, ({ many }) => ({
-  materials: many(materials),
+  materials: many(com360_materials),
 }));
 
-export const materialsRelations = relations(materials, ({ one }) => ({
+export const com360_materialsRelations = relations(com360_materials, ({ one }) => ({
   type: one(materialTypes, {
-    fields: [materials.typeId],
+    fields: [com360_materials.typeId],
     references: [materialTypes.id],
   }),
   uploadedByUser: one(users, {
-    fields: [materials.uploadedBy],
+    fields: [com360_materials.uploadedBy],
     references: [users.id],
   }),
 }));
@@ -1111,22 +1111,22 @@ export const promptsRelations = relations(prompts, ({ one }) => ({
   }),
 }));
 
-export const brandsRelations = relations(brands, ({ one, many }) => ({
+export const com360_brandsRelations = relations(com360_brands, ({ one, many }) => ({
   user: one(users, {
-    fields: [brands.userId],
+    fields: [com360_brands.userId],
     references: [users.id],
   }),
-  products: many(products),
+  products: many(com360_products),
 }));
 
-export const productsRelations = relations(products, ({ one }) => ({
-  supplier: one(suppliers, {
-    fields: [products.supplierId],
-    references: [suppliers.id],
+export const com360_productsRelations = relations(com360_products, ({ one }) => ({
+  supplier: one(com360_suppliers, {
+    fields: [com360_products.supplierId],
+    references: [com360_suppliers.id],
   }),
-  brand: one(brands, {
-    fields: [products.brandId],
-    references: [brands.id],
+  brand: one(com360_brands, {
+    fields: [com360_products.brandId],
+    references: [com360_brands.id],
   }),
 }));
 
@@ -1678,13 +1678,13 @@ export type InsertInfographicConcept = z.infer<typeof insertInfographicConceptSc
 export type InfographicConcept = typeof infographicConcepts.$inferSelect;
 
 // Insert schemas for brands
-export const insertBrandSchema = createInsertSchema(brands).omit({
+export const insertBrandSchema = createInsertSchema(com360_brands).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export type InsertBrand = z.infer<typeof insertBrandSchema>;
-export type Brand = typeof brands.$inferSelect;
+export type Brand = typeof com360_brands.$inferSelect;
 
 // Insert schemas for product suppliers
 export const insertProductSupplierSchema = createInsertSchema(productSuppliers).omit({
@@ -1960,7 +1960,7 @@ export const insertDepartmentSchema = createInsertSchema(departments).omit({
   createdAt: true,
 });
 
-export const insertSupplierSchema = createInsertSchema(suppliers).omit({
+export const insertSupplierSchema = createInsertSchema(com360_suppliers).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -1993,7 +1993,7 @@ export const insertPartnerSchema = createInsertSchema(partners).omit({
   totalReviews: true,
 });
 
-export const insertMaterialSchema = createInsertSchema(materials).omit({
+export const insertMaterialSchema = createInsertSchema(com360_materials).omit({
   id: true,
   uploadDate: true,
   lastModified: true,
@@ -2021,7 +2021,7 @@ export const insertPromptSchema = createInsertSchema(prompts).omit({
   updatedAt: true,
 });
 
-export const insertProductSchema = createInsertSchema(products).omit({
+export const insertProductSchema = createInsertSchema(com360_products).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2156,7 +2156,7 @@ export type InsertDepartment = z.infer<typeof insertDepartmentSchema>;
 export type Department = typeof departments.$inferSelect;
 
 export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
-export type Supplier = typeof suppliers.$inferSelect;
+export type Supplier = typeof com360_suppliers.$inferSelect;
 
 export type InsertSupplierContact = z.infer<typeof insertSupplierContactSchema>;
 export type SupplierContact = typeof supplierContacts.$inferSelect;
@@ -2171,7 +2171,7 @@ export type InsertPartner = z.infer<typeof insertPartnerSchema>;
 export type Partner = typeof partners.$inferSelect;
 
 export type InsertMaterial = z.infer<typeof insertMaterialSchema>;
-export type Material = typeof materials.$inferSelect;
+export type Material = typeof com360_materials.$inferSelect;
 
 export type MaterialWithType = Material & {
   type: MaterialType;
@@ -2187,7 +2187,7 @@ export type InsertPrompt = z.infer<typeof insertPromptSchema>;
 export type Prompt = typeof prompts.$inferSelect;
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type Product = typeof products.$inferSelect;
+export type Product = typeof com360_products.$inferSelect;
 
 export type InsertProductCostHistory = typeof productCostHistory.$inferInsert;
 export type ProductCostHistory = typeof productCostHistory.$inferSelect;
@@ -3209,7 +3209,7 @@ export type SimplesNacionalSimulation = typeof simplesNacionalSimulations.$infer
 // Supplier Contracts - Different types of contracts
 export const supplierContracts = pgTable("supplier_contracts", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   
   // Contract Details
@@ -3253,7 +3253,7 @@ export const supplierContracts = pgTable("supplier_contracts", {
 // Supplier Banking - International transfer information
 export const supplierBanking = pgTable("supplier_banking", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   
   // Bank Information
@@ -3294,7 +3294,7 @@ export const supplierBanking = pgTable("supplier_banking", {
 // Supplier Commercial Terms - Payment and commercial conditions
 export const supplierTerms = pgTable("supplier_terms", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   
   // Payment Terms
@@ -3340,7 +3340,7 @@ export const supplierTerms = pgTable("supplier_terms", {
 // Supplier Documents - Certificates and compliance documents
 export const supplierDocuments = pgTable("supplier_documents", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   
   // Document Information
@@ -3384,7 +3384,7 @@ export const supplierDocuments = pgTable("supplier_documents", {
 // Supplier Communications - Timeline of messages and notes
 export const supplierCommunications = pgTable("supplier_communications", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   contactId: integer("contact_id").references(() => supplierContacts.id),
   
@@ -3430,7 +3430,7 @@ export const supplierCommunications = pgTable("supplier_communications", {
 // Supplier Performance - KPIs and evaluation metrics
 export const supplierPerformance = pgTable("supplier_performance", {
   id: serial("id").primaryKey(),
-  supplierId: integer("supplier_id").references(() => suppliers.id, { onDelete: "cascade" }).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   
   // Evaluation Period
@@ -3498,9 +3498,9 @@ export const simplesNacionalSimulationsRelations = relations(simplesNacionalSimu
 // Supplier CRM Relations
 
 export const supplierContractsRelations = relations(supplierContracts, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierContracts.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   user: one(users, {
     fields: [supplierContracts.userId],
@@ -3509,9 +3509,9 @@ export const supplierContractsRelations = relations(supplierContracts, ({ one })
 }));
 
 export const supplierBankingRelations = relations(supplierBanking, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierBanking.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   user: one(users, {
     fields: [supplierBanking.userId],
@@ -3520,9 +3520,9 @@ export const supplierBankingRelations = relations(supplierBanking, ({ one }) => 
 }));
 
 export const supplierTermsRelations = relations(supplierTerms, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierTerms.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   user: one(users, {
     fields: [supplierTerms.userId],
@@ -3531,9 +3531,9 @@ export const supplierTermsRelations = relations(supplierTerms, ({ one }) => ({
 }));
 
 export const supplierDocumentsRelations = relations(supplierDocuments, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierDocuments.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   user: one(users, {
     fields: [supplierDocuments.userId],
@@ -3542,9 +3542,9 @@ export const supplierDocumentsRelations = relations(supplierDocuments, ({ one })
 }));
 
 export const supplierCommunicationsRelations = relations(supplierCommunications, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierCommunications.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   user: one(users, {
     fields: [supplierCommunications.userId],
@@ -3561,9 +3561,9 @@ export const supplierCommunicationsRelations = relations(supplierCommunications,
 }));
 
 export const supplierPerformanceRelations = relations(supplierPerformance, ({ one }) => ({
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [supplierPerformance.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   user: one(users, {
     fields: [supplierPerformance.userId],
@@ -3657,7 +3657,7 @@ export const importedProducts = pgTable("imported_products", {
   productUpc: text("product_upc"),
   internalBarcode: text("internal_barcode"),
   customsDescription: text("customs_description"),
-  supplierId: integer("supplier_id").references(() => suppliers.id),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id),
   supplierProductCode: text("supplier_product_code"),
   supplierProductName: text("supplier_product_name"),
   supplierDescription: text("supplier_description"),
@@ -3756,9 +3756,9 @@ export const importedProductsRelations = relations(importedProducts, ({ one, man
     fields: [importedProducts.userId],
     references: [users.id],
   }),
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [importedProducts.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
   packages: many(productPackages),
   files: many(productFiles),
@@ -3839,7 +3839,7 @@ export type ProductImage = typeof productImages.$inferSelect;
 export const importedProductSuppliers = pgTable("imported_product_suppliers", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   productId: text("product_id").references(() => importedProducts.id).notNull(),
-  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  supplierId: integer("supplier_id").references(() => com360_suppliers.id).notNull(),
   supplierProductCode: text("supplier_product_code"), // Código do Produto no Fornecedor
   supplierProductName: text("supplier_product_name"), // Nome do Produto no Fornecedor
   moq: integer("moq"), // MOQ (Quantidade Mínima)
@@ -3865,9 +3865,9 @@ export const importedProductSuppliersRelations = relations(importedProductSuppli
     fields: [importedProductSuppliers.productId],
     references: [importedProducts.id],
   }),
-  supplier: one(suppliers, {
+  supplier: one(com360_suppliers, {
     fields: [importedProductSuppliers.supplierId],
-    references: [suppliers.id],
+    references: [com360_suppliers.id],
   }),
 }));
 
@@ -3888,8 +3888,8 @@ export const insertPackingListDocumentSchema = createInsertSchema(packingListDoc
 export type InsertPackingListDocument = z.infer<typeof insertPackingListDocumentSchema>;
 export type PackingListDocument = typeof packingListDocuments.$inferSelect;
 
-// Caixas (Packaging Boxes) table
-export const boxes = pgTable("boxes", {
+// COM360 - Caixas (Packaging Boxes) table
+export const com360_boxes = pgTable("com360_boxes", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   code: text("code").notNull(), // Código da Caixa (alfanumérico)
@@ -3923,18 +3923,18 @@ export const boxes = pgTable("boxes", {
 }));
 
 // Boxes Relations
-export const boxesRelations = relations(boxes, ({ one }) => ({
+export const com360_boxesRelations = relations(com360_boxes, ({ one }) => ({
   user: one(users, {
-    fields: [boxes.userId],
+    fields: [com360_boxes.userId],
     references: [users.id],
   }),
 }));
 
-// Box Product Compatibility table
-export const boxProductCompatibility = pgTable("box_product_compatibility", {
+// COM360 - Box Product Compatibility table
+export const com360_boxProductCompatibility = pgTable("com360_box_product_compatibility", {
   id: serial("id").primaryKey(),
-  boxId: integer("box_id").references(() => boxes.id, { onDelete: "cascade" }).notNull(),
-  productId: integer("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
+  boxId: integer("box_id").references(() => com360_boxes.id, { onDelete: "cascade" }).notNull(),
+  productId: integer("product_id").references(() => com360_products.id, { onDelete: "cascade" }).notNull(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => ({
@@ -3945,43 +3945,43 @@ export const boxProductCompatibility = pgTable("box_product_compatibility", {
 }));
 
 // Box Product Compatibility Relations
-export const boxProductCompatibilityRelations = relations(boxProductCompatibility, ({ one }) => ({
-  box: one(boxes, {
-    fields: [boxProductCompatibility.boxId],
-    references: [boxes.id],
+export const com360_boxProductCompatibilityRelations = relations(com360_boxProductCompatibility, ({ one }) => ({
+  box: one(com360_boxes, {
+    fields: [com360_boxProductCompatibility.boxId],
+    references: [com360_boxes.id],
   }),
-  product: one(products, {
-    fields: [boxProductCompatibility.productId],
-    references: [products.id],
+  product: one(com360_products, {
+    fields: [com360_boxProductCompatibility.productId],
+    references: [com360_products.id],
   }),
   user: one(users, {
-    fields: [boxProductCompatibility.userId],
+    fields: [com360_boxProductCompatibility.userId],
     references: [users.id],
   }),
 }));
 
 // Enhanced Boxes Relations with compatibility
-export const boxesRelationsEnhanced = relations(boxes, ({ one, many }) => ({
+export const com360_boxesRelationsEnhanced = relations(com360_boxes, ({ one, many }) => ({
   user: one(users, {
-    fields: [boxes.userId],
+    fields: [com360_boxes.userId],
     references: [users.id],
   }),
-  compatibleProducts: many(boxProductCompatibility),
+  compatibleProducts: many(com360_boxProductCompatibility),
 }));
 
 // Insert Schemas for Boxes
-export const insertBoxSchema = createInsertSchema(boxes).omit({
+export const insertBoxSchema = createInsertSchema(com360_boxes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export type InsertBox = z.infer<typeof insertBoxSchema>;
-export type Box = typeof boxes.$inferSelect;
+export type Box = typeof com360_boxes.$inferSelect;
 
 // Insert Schemas for Box Product Compatibility
-export const insertBoxProductCompatibilitySchema = createInsertSchema(boxProductCompatibility).omit({
+export const insertBoxProductCompatibilitySchema = createInsertSchema(com360_boxProductCompatibility).omit({
   id: true,
   createdAt: true,
 });
 export type InsertBoxProductCompatibility = z.infer<typeof insertBoxProductCompatibilitySchema>;
-export type BoxProductCompatibility = typeof boxProductCompatibility.$inferSelect;
+export type BoxProductCompatibility = typeof com360_boxProductCompatibility.$inferSelect;
