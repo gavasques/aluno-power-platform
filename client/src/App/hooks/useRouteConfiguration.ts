@@ -95,6 +95,7 @@ const lazyComponents = {
   
   // My Area - Products
   ProductsNew: lazy(() => import('../../pages/myarea/ProductsNew')),
+  ProductsPro: lazy(() => import('../../pages/myarea/ProductsPro')),
   ProductChannelsManager: lazy(() => import('../../pages/myarea/ProductChannelsManager')),
   ProductEdit: lazy(() => import('../../pages/myarea/ProductEdit')),
   ProductEditWithTabs: lazy(() => import('../../pages/myarea/ProductEditWithTabs')),
@@ -293,6 +294,7 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
       
       // Products
       { path: '/produtos-novo', component: lazyComponents.ProductsNew, isProtected: true },
+      { path: '/produtos-pro', component: lazyComponents.ProductsPro, isProtected: true },
       { path: '/produtos-novo/:id/canais', component: lazyComponents.ProductChannelsManager, isProtected: true },
       { path: '/minha-area/produtos/:id/editar', component: lazyComponents.ProductEdit, isProtected: true },
       { path: '/minha-area/produtos/:id/editar-completo', component: lazyComponents.ProductEditWithTabs, isProtected: true },
