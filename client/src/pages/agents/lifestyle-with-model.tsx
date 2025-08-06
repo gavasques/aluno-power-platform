@@ -185,30 +185,30 @@ export default function LifestyleWithModel() {
       const imageBlob = new Blob([bytes], { type: 'image/jpeg' });
       
       // Prepare FormData for N8N webhook
-      const formData = new FormData();
+      const webhookData = new FormData();
       
       // Add the image file
-      formData.append('image', imageBlob, 'lifestyle-image.jpg');
+      webhookData.append('image', imageBlob, 'lifestyle-image.jpg');
       
       // Add user data (you might need to get this from auth context)
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      formData.append('userId', user.id?.toString() || '');
-      formData.append('userName', user.name || '');
-      formData.append('userEmail', user.email || '');
-      formData.append('agentType', 'lifestyle-with-model');
-      formData.append('timestamp', new Date().toISOString());
+      webhookData.append('userId', user.id?.toString() || '');
+      webhookData.append('userName', user.name || '');
+      webhookData.append('userEmail', user.email || '');
+      webhookData.append('agentType', 'lifestyle-with-model');
+      webhookData.append('timestamp', new Date().toISOString());
       
       // Add all variables as separate form fields
-      formData.append('produtoNome', variables.PRODUTO_NOME || '');
-      formData.append('ambiente', variables.AMBIENTE || '');
-      formData.append('sexo', variables.SEXO || '');
-      formData.append('faixaEtaria', variables.FAIXA_ETARIA || '');
-      formData.append('acao', variables.ACAO || '');
+      webhookData.append('produtoNome', variables.PRODUTO_NOME || '');
+      webhookData.append('ambiente', variables.AMBIENTE || '');
+      webhookData.append('sexo', variables.SEXO || '');
+      webhookData.append('faixaEtaria', variables.FAIXA_ETARIA || '');
+      webhookData.append('acao', variables.ACAO || '');
 
       // Send directly to N8N webhook
       const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/lifestyle-with-model', {
         method: 'POST',
-        body: formData,
+        body: webhookData,
         headers: {
           'User-Agent': 'AI-Platform-Webhook/1.0'
         }
