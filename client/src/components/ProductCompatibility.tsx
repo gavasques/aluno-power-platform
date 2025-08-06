@@ -45,9 +45,9 @@ const ProductCompatibility: React.FC<ProductCompatibilityProps> = ({ boxId, boxC
     enabled: !!boxId,
   });
 
-  // Search for products to add
+  // Search for products to add - busca apenas produtos do usuário logado
   const { data: searchResults = [], isLoading: isSearching } = useQuery<Product[]>({
-    queryKey: ['/api/products', { search: searchTerm }],
+    queryKey: ['/api/products/search', searchTerm],
     enabled: searchTerm.length > 2,
   });
 
