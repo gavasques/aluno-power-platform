@@ -17,6 +17,6 @@
 
 import InvestimentosROIRefactored from '@/components/simulators/investment-roi/InvestimentosROIRefactored';
 
-export default function InvestimentosROI() {
+export default function Simul_InvestimentosROI() {
   return <InvestimentosROIRefactored />;
 }

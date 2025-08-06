@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { db } from '../db';
 import { 
-  importSimulations, 
+  simul_import_simulations, 
   insertImportSimulationSchema, 
-  simplesNacionalSimulations, 
+  simul_simples_nacional_simulations, 
   insertSimplesNacionalSimulationSchema,
-  formalImportSimulations,
+  simul_formal_import_simulations,
   insertFormalImportSimulationSchema,
-  investmentSimulations,
+  simul_investment_simulations,
   insertInvestmentSimulationSchema
 } from '../../shared/schema';
 import { requireAuth } from '../security';
@@ -54,8 +54,8 @@ router.get('/import', requireAuth, requirePermission('simulators.importacao_simp
     // Get total count for pagination info
     const totalResult = await db
       .select({ count: sql<number>`count(*)` })
-      .from(importSimulations)
-      .where(eq(importSimulations.userId, userId))
+      .from(simul_import_simulations)
+      .where(eq(simul_import_simulations.userId, userId))
       .limit(maxItems);
     
     const total = Math.min(totalResult[0]?.count || 0, maxItems);
@@ -64,9 +64,9 @@ router.get('/import', requireAuth, requirePermission('simulators.importacao_simp
     // Get paginated simulations
     const simulations = await db
       .select()
-      .from(importSimulations)
-      .where(eq(importSimulations.userId, userId))
-      .orderBy(desc(importSimulations.dataLastModified))
+      .from(simul_import_simulations)
+      .where(eq(simul_import_simulations.userId, userId))
+      .orderBy(desc(simul_import_simulations.dataLastModified))
       .limit(effectiveLimit)
       .offset(offset);
 
@@ -92,8 +92,8 @@ router.get('/import/:id', requireAuth, requirePermission('simulators.importacao_
 
     const simulation = await db
       .select()
-      .from(importSimulations)
-      .where(eq(importSimulations.id, simulationId))
+      .from(simul_import_simulations)
+      .where(eq(simul_import_simulations.id, simulationId))
       .limit(1);
 
     if (!simulation.length || simulation[0].userId !== userId) {
@@ -129,7 +129,7 @@ router.post('/import', requireAuth, requirePermission('simulators.importacao_sim
     const codigoSimulacao = generateSimulationCode();
 
     const newSimulation = await db
-      .insert(importSimulations)
+      .insert(simul_import_simulations)
       .values({
         userId: userId,
         nomeSimulacao: req.body.nomeSimulacao,
@@ -157,8 +157,8 @@ router.put('/import/:id', requireAuth, requirePermission('simulators.importacao_
     // Check if simulation exists and belongs to user
     const existingSimulation = await db
       .select()
-      .from(importSimulations)
-      .where(eq(importSimulations.id, simulationId))
+      .from(simul_import_simulations)
+      .where(eq(simul_import_simulations.id, simulationId))
       .limit(1);
 
     if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
@@ -167,7 +167,7 @@ router.put('/import/:id', requireAuth, requirePermission('simulators.importacao_
 
     // Update simulation
     const updatedSimulation = await db
-      .update(importSimulations)
+      .update(simul_import_simulations)
       .set({
         nomeSimulacao: req.body.nomeSimulacao,
         nomeFornecedor: req.body.nomeFornecedor,
@@ -176,7 +176,7 @@ router.put('/import/:id', requireAuth, requirePermission('simulators.importacao_
         produtos: req.body.produtos,
         dataLastModified: new Date()
       })
-      .where(eq(importSimulations.id, simulationId))
+      .where(eq(simul_import_simulations.id, simulationId))
       .returning();
 
     res.json(updatedSimulation[0]);
@@ -195,8 +195,8 @@ router.delete('/import/:id', requireAuth, requirePermission('simulators.importac
     // Check if simulation exists and belongs to user
     const existingSimulation = await db
       .select()
-      .from(importSimulations)
-      .where(eq(importSimulations.id, simulationId))
+      .from(simul_import_simulations)
+      .where(eq(simul_import_simulations.id, simulationId))
       .limit(1);
 
     if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
@@ -205,8 +205,8 @@ router.delete('/import/:id', requireAuth, requirePermission('simulators.importac
 
     // Delete simulation
     await db
-      .delete(importSimulations)
-      .where(eq(importSimulations.id, simulationId));
+      .delete(simul_import_simulations)
+      .where(eq(simul_import_simulations.id, simulationId));
 
     res.json({ message: 'Simulação excluída com sucesso' });
   } catch (error) {
@@ -224,8 +224,8 @@ router.post('/import/:id/duplicate', requireAuth, requirePermission('simulators.
     // Get original simulation
     const originalSimulation = await db
       .select()
-      .from(importSimulations)
-      .where(eq(importSimulations.id, simulationId))
+      .from(simul_import_simulations)
+      .where(eq(simul_import_simulations.id, simulationId))
       .limit(1);
 
     if (!originalSimulation.length || originalSimulation[0].userId !== userId) {
@@ -237,7 +237,7 @@ router.post('/import/:id/duplicate', requireAuth, requirePermission('simulators.
 
     // Create duplicate
     const duplicatedSimulation = await db
-      .insert(importSimulations)
+      .insert(simul_import_simulations)
       .values({
         userId: userId,
         nomeSimulacao: `${originalSimulation[0].nomeSimulacao} (Cópia)`,
@@ -330,9 +330,9 @@ router.get('/simples-nacional', requireAuth, requirePermission('simulators.simpl
     
     const simulations = await db
       .select()
-      .from(simplesNacionalSimulations)
-      .where(eq(simplesNacionalSimulations.userId, userId))
-      .orderBy(desc(simplesNacionalSimulations.dataLastModified))
+      .from(simul_simples_nacional_simulations)
+      .where(eq(simul_simples_nacional_simulations.userId, userId))
+      .orderBy(desc(simul_simples_nacional_simulations.dataLastModified))
       .limit(30);
 
     res.json(simulations);
@@ -350,8 +350,8 @@ router.get('/simples-nacional/:id', requireAuth, requirePermission('simulators.s
 
     const simulation = await db
       .select()
-      .from(simplesNacionalSimulations)
-      .where(eq(simplesNacionalSimulations.id, simulationId))
+      .from(simul_simples_nacional_simulations)
+      .where(eq(simul_simples_nacional_simulations.id, simulationId))
       .limit(1);
 
     if (!simulation.length || simulation[0].userId !== userId) {
@@ -390,7 +390,7 @@ router.post('/simples-nacional', requireAuth, requirePermission('simulators.simp
     const codigoSimulacao = generateSimulationCode();
 
     const newSimulation = await db
-      .insert(simplesNacionalSimulations)
+      .insert(simul_simples_nacional_simulations)
       .values({
         userId: userId,
         nomeSimulacao: req.body.nomeSimulacao || 'Nova Simulação',
@@ -426,8 +426,8 @@ router.put('/simples-nacional/:id', requireAuth, requirePermission('simulators.s
     // Check if simulation exists and belongs to user
     const existingSimulation = await db
       .select()
-      .from(simplesNacionalSimulations)
-      .where(eq(simplesNacionalSimulations.id, simulationId))
+      .from(simul_simples_nacional_simulations)
+      .where(eq(simul_simples_nacional_simulations.id, simulationId))
       .limit(1);
 
     if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
@@ -452,7 +452,7 @@ router.put('/simples-nacional/:id', requireAuth, requirePermission('simulators.s
 
     // Update simulation
     const updatedSimulation = await db
-      .update(simplesNacionalSimulations)
+      .update(simul_simples_nacional_simulations)
       .set({
         nomeSimulacao: req.body.nomeSimulacao || existingSimulation[0].nomeSimulacao,
         observacoes: req.body.observacoes || existingSimulation[0].observacoes,
@@ -469,7 +469,7 @@ router.put('/simples-nacional/:id', requireAuth, requirePermission('simulators.s
         valorTotalSimples: calculoResult.valorTotalSimples.toString(),
         dataLastModified: new Date()
       })
-      .where(eq(simplesNacionalSimulations.id, simulationId))
+      .where(eq(simul_simples_nacional_simulations.id, simulationId))
       .returning();
 
     res.json(updatedSimulation[0]);
@@ -488,8 +488,8 @@ router.delete('/simples-nacional/:id', requireAuth, requirePermission('simulator
     // Check if simulation exists and belongs to user
     const existingSimulation = await db
       .select()
-      .from(simplesNacionalSimulations)
-      .where(eq(simplesNacionalSimulations.id, simulationId))
+      .from(simul_simples_nacional_simulations)
+      .where(eq(simul_simples_nacional_simulations.id, simulationId))
       .limit(1);
 
     if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
@@ -498,8 +498,8 @@ router.delete('/simples-nacional/:id', requireAuth, requirePermission('simulator
 
     // Delete simulation
     await db
-      .delete(simplesNacionalSimulations)
-      .where(eq(simplesNacionalSimulations.id, simulationId));
+      .delete(simul_simples_nacional_simulations)
+      .where(eq(simul_simples_nacional_simulations.id, simulationId));
 
     res.json({ message: 'Simulação excluída com sucesso' });
   } catch (error) {
@@ -712,9 +712,9 @@ router.get('/formal-import', requireAuth, requirePermission('simulators.importac
     
     const simulations = await db
       .select()
-      .from(formalImportSimulations)
-      .where(eq(formalImportSimulations.userId, userId))
-      .orderBy(desc(formalImportSimulations.dataModificacao))
+      .from(simul_formal_import_simulations)
+      .where(eq(simul_formal_import_simulations.userId, userId))
+      .orderBy(desc(simul_formal_import_simulations.dataModificacao))
       .limit(30);
 
     res.json(simulations);
@@ -732,8 +732,8 @@ router.get('/formal-import/:id', requireAuth, requirePermission('simulators.impo
 
     const simulation = await db
       .select()
-      .from(formalImportSimulations)
-      .where(eq(formalImportSimulations.id, simulationId))
+      .from(simul_formal_import_simulations)
+      .where(eq(simul_formal_import_simulations.id, simulationId))
       .limit(1);
 
     if (!simulation.length || simulation[0].userId !== userId) {
@@ -775,7 +775,7 @@ router.post('/formal-import', requireAuth, requirePermission('simulators.importa
     const calculatedSimulation = calcularSimulacaoCompleta(simulationData);
 
     const newSimulation = await db
-      .insert(formalImportSimulations)
+      .insert(simul_formal_import_simulations)
       .values(calculatedSimulation)
       .returning();
 
@@ -795,8 +795,8 @@ router.put('/formal-import/:id', requireAuth, requirePermission('simulators.impo
     // Check if simulation exists and belongs to user
     const existingSimulation = await db
       .select()
-      .from(formalImportSimulations)
-      .where(eq(formalImportSimulations.id, simulationId))
+      .from(simul_formal_import_simulations)
+      .where(eq(simul_formal_import_simulations.id, simulationId))
       .limit(1);
 
     if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
@@ -824,9 +824,9 @@ router.put('/formal-import/:id', requireAuth, requirePermission('simulators.impo
     const calculatedSimulation = calcularSimulacaoCompleta(updatedData);
 
     const updatedSimulation = await db
-      .update(formalImportSimulations)
+      .update(simul_formal_import_simulations)
       .set(calculatedSimulation)
-      .where(eq(formalImportSimulations.id, simulationId))
+      .where(eq(simul_formal_import_simulations.id, simulationId))
       .returning();
 
     res.json(updatedSimulation[0]);
@@ -845,8 +845,8 @@ router.delete('/formal-import/:id', requireAuth, requirePermission('simulators.i
     // Check if simulation exists and belongs to user
     const existingSimulation = await db
       .select()
-      .from(formalImportSimulations)
-      .where(eq(formalImportSimulations.id, simulationId))
+      .from(simul_formal_import_simulations)
+      .where(eq(simul_formal_import_simulations.id, simulationId))
       .limit(1);
 
     if (!existingSimulation.length || existingSimulation[0].userId !== userId) {
@@ -855,8 +855,8 @@ router.delete('/formal-import/:id', requireAuth, requirePermission('simulators.i
 
     // Delete simulation
     await db
-      .delete(formalImportSimulations)
-      .where(eq(formalImportSimulations.id, simulationId));
+      .delete(simul_formal_import_simulations)
+      .where(eq(simul_formal_import_simulations.id, simulationId));
 
     res.json({ message: 'Simulação excluída com sucesso' });
   } catch (error) {
@@ -874,8 +874,8 @@ router.post('/formal-import/:id/duplicate', requireAuth, requirePermission('simu
     // Get original simulation
     const originalSimulation = await db
       .select()
-      .from(formalImportSimulations)
-      .where(eq(formalImportSimulations.id, simulationId))
+      .from(simul_formal_import_simulations)
+      .where(eq(simul_formal_import_simulations.id, simulationId))
       .limit(1);
 
     if (!originalSimulation.length || originalSimulation[0].userId !== userId) {
@@ -887,7 +887,7 @@ router.post('/formal-import/:id/duplicate', requireAuth, requirePermission('simu
 
     // Create duplicate
     const duplicatedSimulation = await db
-      .insert(formalImportSimulations)
+      .insert(simul_formal_import_simulations)
       .values({
         userId: userId,
         nome: `${originalSimulation[0].nome} (Cópia)`,

@@ -123,13 +123,13 @@ const lazyComponents = {
   
   // Simulators
   SimuladoresIndex: lazy(() => import('../../pages/SimuladoresIndex')),
-  SimuladorSimplificado: lazy(() => import('../../pages/simuladores/SimuladorSimplificado')),
+  Simul_SimuladorSimplificado: lazy(() => import('../../pages/simuladores/Simul_SimuladorSimplificado')),
   FormalImportSimulator: lazy(() => import('../../pages/FormalImportSimulator')),
   FormalImportSimulatorFixed: lazy(() => import('../../pages/FormalImportSimulatorFixed')),
   FormalImportSimulationsFixed: lazy(() => import('../../pages/FormalImportSimulationsFixed')),
-  SimplesNacional: lazy(() => import('../../pages/simuladores/SimplesNacional')),
-  SimplesNacionalCompleto: lazy(() => import('../../pages/simuladores/SimplesNacionalCompleto')),
-  InvestimentosROI: lazy(() => import('../../pages/simuladores/InvestimentosROI')),
+  Simul_SimplesNacional: lazy(() => import('../../pages/simuladores/Simul_SimplesNacional')),
+  Simul_SimplesNacionalCompleto: lazy(() => import('../../pages/simuladores/Simul_SimplesNacionalCompleto')),
+  Simul_InvestimentosROI: lazy(() => import('../../pages/simuladores/Simul_InvestimentosROI')),
   
   // Subscription
   SubscriptionPage: lazy(() => import('../../pages/subscription/SubscriptionPage')),
@@ -333,14 +333,14 @@ export function useRouteConfiguration(): UseRouteConfigurationReturn {
     // Simulator Routes (Protected)
     SIMULATOR_ROUTES: [
       { path: '/simuladores', component: lazyComponents.SimuladoresIndex, isProtected: true },
-      { path: '/minha-area/importacoes/simuladores/simplificado', component: lazyComponents.SimuladorSimplificado, isProtected: true },
+      { path: '/minha-area/importacoes/simuladores/simplificado', component: lazyComponents.Simul_SimuladorSimplificado, isProtected: true },
       { path: '/simuladores/importacao-formal-direta', component: lazyComponents.FormalImportSimulationsFixed, isProtected: true },
       { path: '/simuladores/importacao-formal-direta/nova', component: lazyComponents.FormalImportSimulatorFixed, isProtected: true },
       { path: '/simuladores/importacao-formal-direta/editar/:id', component: lazyComponents.FormalImportSimulatorFixed, isProtected: true },
       { path: '/minha-area/importacoes/simuladores/importacao-formal-direta', component: lazyComponents.FormalImportSimulatorFixed, isProtected: true },
-      { path: '/simuladores/simples-nacional', component: lazyComponents.SimplesNacional, isProtected: true },
-      { path: '/simuladores/simulador-simples-nacional-completo', component: lazyComponents.SimplesNacionalCompleto, isProtected: true },
-      { path: '/simuladores/simulador-de-investimentos-e-roi', component: lazyComponents.InvestimentosROI, isProtected: true }
+      { path: '/simuladores/simples-nacional', component: lazyComponents.Simul_SimplesNacional, isProtected: true },
+      { path: '/simuladores/simulador-simples-nacional-completo', component: lazyComponents.Simul_SimplesNacionalCompleto, isProtected: true },
+      { path: '/simuladores/simulador-de-investimentos-e-roi', component: lazyComponents.Simul_InvestimentosROI, isProtected: true }
     ],
     
     // Legal Routes (Public)

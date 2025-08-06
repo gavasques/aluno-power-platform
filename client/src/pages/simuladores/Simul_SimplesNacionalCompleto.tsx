@@ -11,7 +11,7 @@ import { useUserCreditBalance } from "@/hooks/useUserCredits";
 
 const FEATURE_CODE = 'simulators.simples_nacional_completo';
 
-export default function SimplesNacionalCompleto() {
+export default function Simul_SimplesNacionalCompleto() {
   const { toast } = useToast();
   const { meses, novoMes, adicionarMes, removerMes, updateNovoMes } = useSimulationData();
   const { mesesCalculados, resumo } = useCalculations(meses);

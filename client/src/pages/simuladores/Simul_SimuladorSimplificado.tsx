@@ -91,7 +91,7 @@ const DEFAULT_SIMULATION: SimulacaoCompleta = {
   produtos: [],
 };
 
-export default function SimuladorSimplificado() {
+export default function Simul_SimuladorSimplificado() {
   const [_, setLocation] = useLocation();
   const [activeSimulation, setActiveSimulation] = useState<SimulacaoCompleta>(DEFAULT_SIMULATION);
 

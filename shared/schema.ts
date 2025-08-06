@@ -860,7 +860,7 @@ export const amazonListingSessions = pgTable("amazon_listing_sessions", {
 }));
 
 // Investment ROI Simulations
-export const investmentSimulations = pgTable("investment_simulations", {
+export const simul_investment_simulations = pgTable("simul_investment_simulations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   name: text("name").notNull().default("Nova Simulação"),
@@ -872,8 +872,8 @@ export const investmentSimulations = pgTable("investment_simulations", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => ({
-  userIdx: index("investment_simulations_user_idx").on(table.userId),
-  createdIdx: index("investment_simulations_created_idx").on(table.createdAt),
+  userIdx: index("simul_investment_simulations_user_idx").on(table.userId),
+  createdIdx: index("simul_investment_simulations_created_idx").on(table.createdAt),
 }));
 
 // Contract schemas
@@ -891,7 +891,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   materials: many(com360_materials),
   news: many(news),
   updates: many(updates),
-  investmentSimulations: many(investmentSimulations),
+  investmentSimulations: many(simul_investment_simulations),
 }));
 
 export const newsRelations = relations(news, ({ one }) => ({
@@ -1173,9 +1173,9 @@ export const amazonListingSessionsRelations = relations(amazonListingSessions, (
   // Future relations if needed
 }));
 
-export const investmentSimulationsRelations = relations(investmentSimulations, ({ one }) => ({
+export const simul_investment_simulations_relations = relations(simul_investment_simulations, ({ one }) => ({
   user: one(users, {
-    fields: [investmentSimulations.userId],
+    fields: [simul_investment_simulations.userId],
     references: [users.id],
   }),
 }));
@@ -2280,13 +2280,13 @@ export type InsertAmazonListingSession = z.infer<typeof insertAmazonListingSessi
 export type AmazonListingSession = typeof amazonListingSessions.$inferSelect;
 
 // Insert schemas for investment simulations
-export const insertInvestmentSimulationSchema = createInsertSchema(investmentSimulations).omit({
+export const insertInvestmentSimulationSchema = createInsertSchema(simul_investment_simulations).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export type InsertInvestmentSimulation = z.infer<typeof insertInvestmentSimulationSchema>;
-export type InvestmentSimulation = typeof investmentSimulations.$inferSelect;
+export type SimulInvestmentSimulation = typeof simul_investment_simulations.$inferSelect;
 
 // Agent with prompts type
 export type AgentWithPrompts = Agent & {
@@ -3001,7 +3001,7 @@ export const userPermissionGroups = pgTable("user_permission_groups", {
 }));
 
 // Import Cost Simulations
-export const importSimulations = pgTable("import_simulations", {
+export const simul_import_simulations = pgTable("simul_import_simulations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   nomeSimulacao: text("nome_simulacao").notNull(),
@@ -3013,12 +3013,12 @@ export const importSimulations = pgTable("import_simulations", {
   configuracoesGerais: jsonb("configuracoes_gerais").notNull(), // JSON with all general settings
   produtos: jsonb("produtos").notNull(), // JSON array with all products
 }, (table) => ({
-  userIdx: index("import_simulations_user_idx").on(table.userId),
-  codigoIdx: index("import_simulations_codigo_idx").on(table.codigoSimulacao),
+  userIdx: index("simul_import_simulations_user_idx").on(table.userId),
+  codigoIdx: index("simul_import_simulations_codigo_idx").on(table.codigoSimulacao),
 }));
 
 // Formal Import Simulations (CBM-based cost allocation)
-export const formalImportSimulations = pgTable("formal_import_simulations", {
+export const simul_formal_import_simulations = pgTable("simul_formal_import_simulations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   nome: text("nome").notNull(),
@@ -3051,10 +3051,10 @@ export const formalImportSimulations = pgTable("formal_import_simulations", {
   
   codigoSimulacao: text("codigo_simulacao").notNull().unique(), // Código único de 8 caracteres alfanuméricos
 }, (table) => ({
-  userIdx: index("formal_import_simulations_user_idx").on(table.userId),
-  codigoIdx: index("formal_import_simulations_codigo_idx").on(table.codigoSimulacao),
-  statusIdx: index("formal_import_simulations_status_idx").on(table.status),
-  dataModificacaoIdx: index("formal_import_simulations_data_modificacao_idx").on(table.dataModificacao),
+  userIdx: index("simul_formal_import_simulations_user_idx").on(table.userId),
+  codigoIdx: index("simul_formal_import_simulations_codigo_idx").on(table.codigoSimulacao),
+  statusIdx: index("simul_formal_import_simulations_status_idx").on(table.status),
+  dataModificacaoIdx: index("simul_formal_import_simulations_data_modificacao_idx").on(table.dataModificacao),
 }));
 
 
@@ -3131,37 +3131,37 @@ export const userPermissionGroupsRelations = relations(userPermissionGroups, ({ 
 }));
 
 // Import Simulations Types
-export const insertImportSimulationSchema = createInsertSchema(importSimulations).omit({
+export const insertImportSimulationSchema = createInsertSchema(simul_import_simulations).omit({
   id: true,
   codigoSimulacao: true,
   dataCreated: true,
   dataLastModified: true,
 });
 export type InsertImportSimulation = z.infer<typeof insertImportSimulationSchema>;
-export type ImportSimulation = typeof importSimulations.$inferSelect;
+export type SimulImportSimulation = typeof simul_import_simulations.$inferSelect;
 
 // Import Simulations Relations
-export const importSimulationsRelations = relations(importSimulations, ({ one }) => ({
+export const simul_import_simulations_relations = relations(simul_import_simulations, ({ one }) => ({
   user: one(users, {
-    fields: [importSimulations.userId],
+    fields: [simul_import_simulations.userId],
     references: [users.id],
   }),
 }));
 
 // Formal Import Simulations Types
-export const insertFormalImportSimulationSchema = createInsertSchema(formalImportSimulations).omit({
+export const insertFormalImportSimulationSchema = createInsertSchema(simul_formal_import_simulations).omit({
   id: true,
   codigoSimulacao: true,
   dataCriacao: true,
   dataModificacao: true,
 });
 export type InsertFormalImportSimulation = z.infer<typeof insertFormalImportSimulationSchema>;
-export type FormalImportSimulation = typeof formalImportSimulations.$inferSelect;
+export type SimulFormalImportSimulation = typeof simul_formal_import_simulations.$inferSelect;
 
 // Formal Import Simulations Relations
-export const formalImportSimulationsRelations = relations(formalImportSimulations, ({ one }) => ({
+export const simul_formal_import_simulations_relations = relations(simul_formal_import_simulations, ({ one }) => ({
   user: one(users, {
-    fields: [formalImportSimulations.userId],
+    fields: [simul_formal_import_simulations.userId],
     references: [users.id],
   }),
 }));
@@ -3169,7 +3169,7 @@ export const formalImportSimulationsRelations = relations(formalImportSimulation
 
 
 // Simples Nacional Simulations
-export const simplesNacionalSimulations = pgTable("simples_nacional_simulations", {
+export const simul_simples_nacional_simulations = pgTable("simul_simples_nacional_simulations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   nomeSimulacao: text("nome_simulacao").notNull(),
@@ -3189,18 +3189,18 @@ export const simplesNacionalSimulations = pgTable("simples_nacional_simulations"
   dataCreated: timestamp("data_criacao").notNull().defaultNow(),
   dataLastModified: timestamp("data_ultima_modificacao").notNull().defaultNow(),
 }, (table) => ({
-  userIdx: index("simples_nacional_simulations_user_idx").on(table.userId),
-  codigoIdx: index("simples_nacional_simulations_codigo_idx").on(table.codigoSimulacao),
+  userIdx: index("simul_simples_nacional_simulations_user_idx").on(table.userId),
+  codigoIdx: index("simul_simples_nacional_simulations_codigo_idx").on(table.codigoSimulacao),
 }));
 
-export const insertSimplesNacionalSimulationSchema = createInsertSchema(simplesNacionalSimulations).omit({
+export const insertSimplesNacionalSimulationSchema = createInsertSchema(simul_simples_nacional_simulations).omit({
   id: true,
   codigoSimulacao: true,
   dataCreated: true,
   dataLastModified: true,
 });
 export type InsertSimplesNacionalSimulation = z.infer<typeof insertSimplesNacionalSimulationSchema>;
-export type SimplesNacionalSimulation = typeof simplesNacionalSimulations.$inferSelect;
+export type SimulSimplesNacionalSimulation = typeof simul_simples_nacional_simulations.$inferSelect;
 
 // =============================================================================
 // SUPPLIER CRM SYSTEM - COMPLETE IMPORT MANAGEMENT TABLES
@@ -3488,9 +3488,9 @@ export const supplierPerformance = pgTable("supplier_performance", {
 }));
 
 // Simples Nacional Simulations Relations
-export const simplesNacionalSimulationsRelations = relations(simplesNacionalSimulations, ({ one }) => ({
+export const simul_simples_nacional_simulations_relations = relations(simul_simples_nacional_simulations, ({ one }) => ({
   user: one(users, {
-    fields: [simplesNacionalSimulations.userId],
+    fields: [simul_simples_nacional_simulations.userId],
     references: [users.id],
   }),
 }));

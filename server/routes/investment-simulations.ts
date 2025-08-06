@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { db } from "../db";
-import { investmentSimulations, type InsertInvestmentSimulation } from "@shared/schema";
+import { simul_investment_simulations, type InsertInvestmentSimulation } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../security";
 import { requirePermission } from "../middleware/permissions";
@@ -14,9 +14,9 @@ router.get('/', requireAuth, requirePermission('simulators.investimentos_roi'), 
     
     const simulations = await db
       .select()
-      .from(investmentSimulations)
-      .where(eq(investmentSimulations.userId, userId))
-      .orderBy(desc(investmentSimulations.updatedAt));
+      .from(simul_investment_simulations)
+      .where(eq(simul_investment_simulations.userId, userId))
+      .orderBy(desc(simul_investment_simulations.updatedAt));
     
     res.json(simulations);
   } catch (error) {
@@ -33,8 +33,8 @@ router.get('/:id', requireAuth, requirePermission('simulators.investimentos_roi'
     
     const [simulation] = await db
       .select()
-      .from(investmentSimulations)
-      .where(eq(investmentSimulations.id, simulationId));
+      .from(simul_investment_simulations)
+      .where(eq(simul_investment_simulations.id, simulationId));
     
     if (!simulation || simulation.userId !== userId) {
       return res.status(404).json({ error: 'Simulation not found' });
@@ -58,7 +58,7 @@ router.post('/', requireAuth, requirePermission('simulators.investimentos_roi'),
     };
     
     const [simulation] = await db
-      .insert(investmentSimulations)
+      .insert(simul_investment_simulations)
       .values(simulationData)
       .returning();
     
@@ -78,20 +78,20 @@ router.put('/:id', requireAuth, requirePermission('simulators.investimentos_roi'
     // Verify ownership
     const [existing] = await db
       .select()
-      .from(investmentSimulations)
-      .where(eq(investmentSimulations.id, simulationId));
+      .from(simul_investment_simulations)
+      .where(eq(simul_investment_simulations.id, simulationId));
     
     if (!existing || existing.userId !== userId) {
       return res.status(404).json({ error: 'Simulation not found' });
     }
     
     const [simulation] = await db
-      .update(investmentSimulations)
+      .update(simul_investment_simulations)
       .set({ 
         ...req.body, 
         updatedAt: new Date() 
       })
-      .where(eq(investmentSimulations.id, simulationId))
+      .where(eq(simul_investment_simulations.id, simulationId))
       .returning();
     
     res.json(simulation);
@@ -110,16 +110,16 @@ router.delete('/:id', requireAuth, requirePermission('simulators.investimentos_r
     // Verify ownership
     const [existing] = await db
       .select()
-      .from(investmentSimulations)
-      .where(eq(investmentSimulations.id, simulationId));
+      .from(simul_investment_simulations)
+      .where(eq(simul_investment_simulations.id, simulationId));
     
     if (!existing || existing.userId !== userId) {
       return res.status(404).json({ error: 'Simulation not found' });
     }
     
     await db
-      .delete(investmentSimulations)
-      .where(eq(investmentSimulations.id, simulationId));
+      .delete(simul_investment_simulations)
+      .where(eq(simul_investment_simulations.id, simulationId));
     
     res.status(204).send();
   } catch (error) {

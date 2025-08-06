@@ -124,7 +124,7 @@ const defaultSimulation: SimulacaoCompleta = {
   faturamentoComST: 0
 };
 
-export default function SimplesNacional() {
+export default function Simul_SimplesNacional() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { checkCredits, showInsufficientCreditsToast, logAIGeneration } = useCreditSystem();
