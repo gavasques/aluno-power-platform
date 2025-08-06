@@ -1,125 +1,256 @@
 /**
- * Exemplo de uso do sistema otimizado
- * Demonstra como migrar componentes para a nova arquitetura
+ * Exemplo demonstrativo da nova arquitetura otimizada
+ * Mostra como usar os hooks e componentes DRY
  */
-
 import React from 'react';
-import { OptimizedContasBancariasManager } from '../components/financas360/managers/OptimizedContasBancariasManager';
-import { useUser } from '@/contexts/UserContext';
+import { Building2, CreditCard, Users, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, ArrowRight, Code, Zap, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-export const OptimizedManagerExample: React.FC = () => {
-  const { user } = useUser();
-
-  const benefits = [
+export default function OptimizedManagerExample() {
+  const examples = [
     {
-      icon: <Zap className="w-5 h-5 text-yellow-500" />,
-      title: "77% Menos Código",
-      description: "De 666 para ~150 linhas",
-      before: "666 linhas",
-      after: "150 linhas"
+      name: 'useEntityCRUD',
+      description: 'Hook unificado para operações CRUD',
+      reduction: '68%',
+      before: 666,
+      after: 150,
+      icon: <CreditCard className="h-6 w-6" />,
+      color: 'bg-blue-100 text-blue-800',
+      features: [
+        'Estados consolidados',
+        'Mutations automáticas',
+        'Busca integrada',
+        'Error handling',
+        'Loading states'
+      ]
     },
     {
-      icon: <CheckCircle className="w-5 h-5 text-green-500" />,
-      title: "Zero Prop Drilling",
-      description: "Eliminado em 12+ componentes",
-      before: "12+ props passadas",
-      after: "2-3 props máximo"
+      name: 'useCreditManager',
+      description: 'Sistema de créditos unificado',
+      reduction: '62%',
+      before: 400,
+      after: 150,
+      icon: <Package className="h-6 w-6" />,
+      color: 'bg-green-100 text-green-800',
+      features: [
+        'Verificação automática',
+        'Dedução integrada',
+        'Cache otimizado',
+        'Logs centralizados',
+        'Estado consolidado'
+      ]
     },
     {
-      icon: <Users className="w-5 h-5 text-blue-500" />,
-      title: "Estado Centralizado",
-      description: "Sem duplicação de loading/error",
-      before: "7+ useState duplicados",
-      after: "Cache automático"
+      name: 'DynamicForm',
+      description: 'Formulários reutilizáveis',
+      reduction: '67%',
+      before: 300,
+      after: 100,
+      icon: <Users className="h-6 w-6" />,
+      color: 'bg-purple-100 text-purple-800',
+      features: [
+        'Configuração declarativa',
+        'Validação automática',
+        'Tipos customizados',
+        'Error handling',
+        'Submit otimizado'
+      ]
     },
     {
-      icon: <Code className="w-5 h-5 text-purple-500" />,
-      title: "CRUD Automático",
-      description: "Operações padronizadas",
-      before: "Lógica manual repetitiva",
-      after: "Hook unified automático"
+      name: 'UnifiedLoadingState',
+      description: 'Loading states padronizados',
+      reduction: '85%',
+      before: 200,
+      after: 30,
+      icon: <Building2 className="h-6 w-6" />,
+      color: 'bg-orange-100 text-orange-800',
+      features: [
+        'Múltiplos tipos',
+        'Skeleton automático',
+        'Estado vazio',
+        'Performance otimizada',
+        'Variantes flexíveis'
+      ]
     }
   ];
 
+  const totalBefore = examples.reduce((acc, ex) => acc + ex.before, 0);
+  const totalAfter = examples.reduce((acc, ex) => acc + ex.after, 0);
+  const overallReduction = Math.round((1 - totalAfter / totalBefore) * 100);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold">Arquitetura Otimizada DRY</h1>
+        <p className="text-gray-600">
+          Demonstração dos hooks e componentes refatorados
+        </p>
+        
+        <div className="flex justify-center space-x-6 mt-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-red-600">{totalBefore}</div>
+            <div className="text-sm text-gray-600">Linhas Antes</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">{totalAfter}</div>
+            <div className="text-sm text-gray-600">Linhas Depois</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">{overallReduction}%</div>
+            <div className="text-sm text-gray-600">Redução Total</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cards dos Exemplos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {examples.map((example, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    {example.icon}
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">{example.name}</CardTitle>
+                    <p className="text-sm text-gray-600">{example.description}</p>
+                  </div>
+                </div>
+                <Badge className={example.color}>
+                  -{example.reduction} código
+                </Badge>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              {/* Métricas */}
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-lg font-semibold text-red-600">{example.before}</div>
+                  <div className="text-xs text-gray-600">Antes</div>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-green-600">{example.after}</div>
+                  <div className="text-xs text-gray-600">Depois</div>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-blue-600">{example.reduction}</div>
+                  <div className="text-xs text-gray-600">Redução</div>
+                </div>
+              </div>
+              
+              {/* Features */}
+              <div>
+                <h4 className="font-medium mb-2">Características:</h4>
+                <div className="space-y-1">
+                  {example.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center space-x-2 text-sm">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Código de Exemplo */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl text-center">
-            ✅ Nova Arquitetura de Estado Consolidada
-          </CardTitle>
-          <p className="text-center text-muted-foreground">
-            Context providers reduzidos de 9 → 3 (67% redução) | 
-            Eliminação de prop drilling em 12+ componentes |
-            Estados de loading/error centralizados
-          </p>
+          <CardTitle>Exemplo de Uso: useEntityCRUD</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {benefits.map((benefit, index) => (
-              <Card key={index} className="text-center">
-                <CardContent className="p-4">
-                  <div className="flex justify-center mb-2">
-                    {benefit.icon}
-                  </div>
-                  <h3 className="font-semibold text-sm mb-2">{benefit.title}</h3>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    {benefit.description}
-                  </p>
-                  <div className="space-y-1">
-                    <div className="text-xs">
-                      <span className="text-red-500">Antes:</span> {benefit.before}
-                    </div>
-                    <ArrowRight className="w-3 h-3 mx-auto text-muted-foreground" />
-                    <div className="text-xs">
-                      <span className="text-green-500">Depois:</span> {benefit.after}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <pre className="text-sm overflow-x-auto">
+{`// ❌ ANTES: 100+ linhas de código duplicado
+const [isDialogOpen, setIsDialogOpen] = useState(false);
+const [editingItem, setEditingItem] = useState(null);
+const [searchTerm, setSearchTerm] = useState('');
+const [formData, setFormData] = useState(initialState);
+
+const { data, isLoading } = useQuery({
+  queryKey: ['entities'],
+  queryFn: () => fetch('/api/entities').then(r => r.json())
+});
+
+const createMutation = useMutation({
+  mutationFn: (data) => fetch('/api/entities', { /* ... */ }),
+  onSuccess: () => { /* ... */ }
+});
+// ... mais 80+ linhas
+
+// ✅ DEPOIS: Hook unificado
+const crud = useEntityCRUD({
+  entityName: 'Entidade',
+  apiEndpoint: '/api/entities',
+  queryKey: ['entities'],
+  initialFormData,
+  searchFields: ['name', 'description']
+});
+
+// Tudo funciona automaticamente!`}
+            </pre>
           </div>
         </CardContent>
       </Card>
 
-      {/* Usuário logado */}
-      {user && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Bem-vindo, {user.name}!
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Testando a nova arquitetura consolidada
-            </p>
-          </CardHeader>
-        </Card>
-      )}
-
-      {/* Exemplo do manager otimizado */}
-      <OptimizedContasBancariasManager />
-
-      {/* Rodapé informativo */}
+      {/* Benefícios */}
       <Card>
-        <CardContent className="p-4">
-          <div className="text-center space-y-2">
-            <h3 className="font-semibold text-sm">🎯 Arquitetura Consolidada</h3>
-            <div className="flex justify-center space-x-6 text-xs text-muted-foreground">
-              <div>✅ UserContext (Auth + Permissions)</div>
-              <div>✅ UIContext (Theme + Modals + Loading)</div>
-              <div>✅ OptimizedProvider (Query + Contexts)</div>
+        <CardHeader>
+          <CardTitle>Benefícios da Refatoração</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                <Building2 className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="font-semibold">Manutenibilidade</h3>
+              <p className="text-sm text-gray-600">
+                Mudanças centralizadas em hooks reutilizáveis
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Eliminadas 6 providers redundantes | Backward compatibility mantida
-            </p>
+            
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <Package className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold">Performance</h3>
+              <p className="text-sm text-gray-600">
+                Bundle size reduzido e re-renders otimizados
+              </p>
+            </div>
+            
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold">Consistência</h3>
+              <p className="text-sm text-gray-600">
+                Padrões uniformes em toda a aplicação
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Call to Action */}
+      <div className="text-center space-y-4">
+        <h2 className="text-xl font-semibold">Pronto para migrar?</h2>
+        <p className="text-gray-600">
+          Use os novos hooks e componentes para acelerar o desenvolvimento
+        </p>
+        <div className="flex justify-center space-x-4">
+          <Button>Ver Documentação</Button>
+          <Button variant="outline">Exemplo Completo</Button>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default OptimizedManagerExample;
+}

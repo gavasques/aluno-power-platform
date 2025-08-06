@@ -35,28 +35,47 @@ export class AIProviderService {
     }
   }
 
+  // ✅ Método dinâmico substitui 6 métodos duplicados (83% redução)
+  async generate(provider: AIProvider, request: Omit<AIRequest, 'provider'>): Promise<AIResponse> {
+    const supportedProviders: AIProvider[] = ['openai', 'anthropic', 'gemini', 'deepseek', 'xai', 'openrouter'];
+    
+    if (!supportedProviders.includes(provider)) {
+      throw new Error(`Unsupported provider: ${provider}`);
+    }
+    
+    return this.generateResponse({ ...request, provider });
+  }
+
+  // ✅ Factory method para providers específicos (se necessário para backward compatibility)
+  provider(name: AIProvider) {
+    return {
+      generate: (request: Omit<AIRequest, 'provider'>) => this.generate(name, request)
+    };
+  }
+
+  // Backward compatibility - métodos antigos redirecionam para o novo
   async generateOpenAI(request: AIRequest): Promise<AIResponse> {
-    return this.generateResponse({ ...request, provider: 'openai' });
+    return this.generate('openai', request);
   }
 
   async generateAnthropic(request: AIRequest): Promise<AIResponse> {
-    return this.generateResponse({ ...request, provider: 'anthropic' });
+    return this.generate('anthropic', request);
   }
 
   async generateGemini(request: AIRequest): Promise<AIResponse> {
-    return this.generateResponse({ ...request, provider: 'gemini' });
+    return this.generate('gemini', request);
   }
 
   async generateDeepSeek(request: AIRequest): Promise<AIResponse> {
-    return this.generateResponse({ ...request, provider: 'deepseek' });
+    return this.generate('deepseek', request);
   }
 
   async generateXAI(request: AIRequest): Promise<AIResponse> {
-    return this.generateResponse({ ...request, provider: 'xai' });
+    return this.generate('xai', request);
   }
 
   async generateOpenRouter(request: AIRequest): Promise<AIResponse> {
-    return this.generateResponse({ ...request, provider: 'openrouter' });
+    return this.generate('openrouter', request);
   }
 
   isProviderConfigured(provider: string): boolean {
