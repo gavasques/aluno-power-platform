@@ -206,7 +206,7 @@ export default function LifestyleWithModel() {
       webhookData.append('acao', variables.ACAO || '');
 
       // Send directly to N8N webhook
-      const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/lifestyle-with-model', {
+      const webhookResponse = await fetch('https://webhook.guivasques.app/webhook/lifestyle-with-model', {
         method: 'POST',
         body: webhookData,
         headers: {
