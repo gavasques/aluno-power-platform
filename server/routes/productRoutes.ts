@@ -28,6 +28,32 @@ router.get('/', productController.getAll.bind(productController));
 // GET /api/products/search/:query - Search products
 router.get('/search/:query', productController.search.bind(productController));
 
+// GET /api/products/my-products/search - Search user's own products
+router.get('/my-products/search', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).user!.id;
+    const searchQuery = req.query.q as string;
+    
+    if (!searchQuery || searchQuery.length < 2) {
+      return res.json([]);
+    }
+
+    // Import storage dynamically to avoid circular dependencies
+    const { storage } = await import('../storage');
+    
+    // Buscar produtos do usuário
+    const products = await storage.searchUserProducts(userId, searchQuery);
+    
+    res.json(products);
+  } catch (error) {
+    console.error('Error searching user products:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Erro ao buscar produtos' 
+    });
+  }
+});
+
 // GET /api/products/:id - Get product by ID
 router.get('/:id', productController.getById.bind(productController));
 

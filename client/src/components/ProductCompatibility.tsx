@@ -47,7 +47,16 @@ const ProductCompatibility: React.FC<ProductCompatibilityProps> = ({ boxId, boxC
 
   // Search for products to add - busca apenas produtos do usuário logado
   const { data: searchResults = [], isLoading: isSearching } = useQuery<Product[]>({
-    queryKey: ['/api/products/search', searchTerm],
+    queryKey: ['/api/products/my-products/search', searchTerm],
+    queryFn: async () => {
+      const response = await fetch(`/api/products/my-products/search?q=${encodeURIComponent(searchTerm)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to search products');
+      return response.json();
+    },
     enabled: searchTerm.length > 2,
   });
 

@@ -256,6 +256,7 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
   searchProducts(query: string): Promise<Product[]>;
+  searchUserProducts(userId: number, query: string): Promise<Product[]>;
   getProductCostHistory(productId: number, limit?: number): Promise<ProductCostHistory[]>;
 
   // Categories
@@ -1402,6 +1403,23 @@ export class DatabaseStorage implements IStorage {
           ilike(products.name, `%${query}%`),
           ilike(products.brand, `%${query}%`),
           ilike(products.category, `%${query}%`)
+        )
+      );
+  }
+
+  async searchUserProducts(userId: number, query: string): Promise<Product[]> {
+    return await db
+      .select()
+      .from(products)
+      .where(
+        and(
+          eq(products.userId, userId),
+          or(
+            ilike(products.name, `%${query}%`),
+            ilike(products.sku, `%${query}%`),
+            ilike(products.brand, `%${query}%`),
+            ilike(products.category, `%${query}%`)
+          )
         )
       );
   }

@@ -32,6 +32,7 @@ import userProfileRoutes from "./routes/user/profile";
 import picsartRoutes from "./routes/picsart";
 import { productSupplierRoutes } from "./routes/productSupplierRoutes";
 import supplierProductsRoutes from "./routes/supplierProductsRoutes";
+import productRoutes from "./routes/productRoutes";
 import performanceRoutes from "./routes/performance";
 import internationalContractsRoutes from "./routes/internationalContracts";
 import internationalSupplierBankingRoutes from "./routes/internationalSupplierBanking";
@@ -7719,6 +7720,14 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   app.use('/api/picsart', picsartRoutes);
   console.log('✅ [PICSART] Routes registered successfully');
   
+  // PHASE 3: Product Management Routes
+  try {
+    app.use('/api/products', productRoutes);
+    console.log('✅ [PRODUCTS] Routes registered successfully');
+  } catch (error) {
+    console.error('❌ Error registering product routes:', error);
+  }
+
   // PHASE 3: Product Channels Management - New Parallel System
   try {
     const { productChannelsRouter } = await import('./routes/productChannels');
