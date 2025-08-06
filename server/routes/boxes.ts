@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { storage } from '../storage';
 import { insertBoxSchema } from '@shared/schema';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth } from '../security';
 import ExcelJS from 'exceljs';
 
 const router = Router();
