@@ -8,8 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Search, RefreshCw } from 'lucide-react';
 import { useDeleteConfirmation } from '@/hooks/useFinancas360Api';
-import { LoadingState, ErrorState, EmptyState as UIEmptyState } from '@/components/ui/states';
-import { useModalState, CrudModal } from '@/components/ui/modals';
+import { UnifiedLoadingState } from '@/shared/components/UnifiedLoadingState';
 
 // Interface para props do componente base
 export interface BaseManagerProps<T> {
@@ -126,42 +125,58 @@ export function BaseManager<T extends { id: number }>({
     setState(prev => ({ ...prev, searchTerm: value }));
   };
 
-  // Loading state - usando componente reutilizável
+  // Loading state - usando componente unificado
   if (isLoading) {
-    return <LoadingState message={`Carregando ${entityName.toLowerCase()}...`} />;
+    return <UnifiedLoadingState message={`Carregando ${entityName.toLowerCase()}...`} />;
   }
 
-  // Error state - usando componente reutilizável
+  // Error state - estado de erro simplificado
   if (error) {
     return (
-      <ErrorState 
-        error={`Erro ao carregar ${entityName.toLowerCase()}: ${error.message}`}
-        onRetry={onRefetch}
-      />
+      <div className="text-center py-8">
+        <p className="text-red-600">Erro ao carregar {entityName.toLowerCase()}: {error.message}</p>
+        <Button onClick={onRefetch} variant="outline" className="mt-2">
+          Tentar novamente
+        </Button>
+      </div>
     );
   }
 
   // Empty state - quando não há dados
   if (filteredData.length === 0 && !state.searchTerm) {
     return (
-      <UIEmptyState
-        title={`Nenhum ${entityName.toLowerCase()} encontrado`}
-        description={`Comece criando seu primeiro ${entityName.toLowerCase()}.`}
-        actionLabel={`Criar ${entityName}`}
-        onAction={handleCreate}
-        variant="create"
-      />
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gray-50 rounded-lg">
+        <div className="text-center">
+          {icon}
+          <h3 className="mt-4 text-lg font-medium text-gray-900">
+            Nenhum {entityName.toLowerCase()} encontrado
+          </h3>
+          <p className="mt-2 text-sm text-gray-500">
+            Comece criando seu primeiro {entityName.toLowerCase()}.
+          </p>
+          <Button onClick={handleCreate} className="mt-4">
+            Criar {entityName}
+          </Button>
+        </div>
+      </div>
     );
   }
 
   // No results state - quando há busca mas nenhum resultado
   if (filteredData.length === 0 && state.searchTerm) {
     return (
-      <UIEmptyState
-        title="Nenhum resultado encontrado"
-        description={`Nenhum ${entityName.toLowerCase()} corresponde à busca "${state.searchTerm}".`}
-        variant="search"
-      />
+      <div className="text-center py-8">
+        <p className="text-gray-600">
+          Nenhum {entityName.toLowerCase()} corresponde à busca "{state.searchTerm}".
+        </p>
+        <Button 
+          variant="outline" 
+          onClick={() => setState(prev => ({ ...prev, searchTerm: '' }))}
+          className="mt-2"
+        >
+          Limpar busca
+        </Button>
+      </div>
     );
   }
 
