@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, LogOut, Home, Shield } from "lucide-react";
+import { User, LogOut, Home, Shield, CreditCard, FileSpreadsheet } from "lucide-react";
 import { useAuth } from "@/contexts/UserContext";
 import { logger } from "@/utils/logger";
 
@@ -47,6 +47,20 @@ export function UserNav() {
             <Link to="/minha-area/perfil" className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-100 rounded transition">
               <User className="h-5 w-5 text-neutral-500" />
               <span>Meu Perfil</span>
+            </Link>
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem asChild>
+            <Link to="/minha-area/assinatura" className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-100 rounded transition">
+              <CreditCard className="h-5 w-5 text-neutral-500" />
+              <span>Minhas Assinaturas</span>
+            </Link>
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem asChild>
+            <Link to="/minha-area/produtos/import-export" className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-100 rounded transition">
+              <FileSpreadsheet className="h-5 w-5 text-neutral-500" />
+              <span>Importação & Exportação</span>
             </Link>
           </DropdownMenuItem>
 

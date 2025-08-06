@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, X, Folder, Package, Building, Star, ArrowRight, User, FileSpreadsheet, Zap, Ship, Calculator, Box } from "lucide-react";
+import { Search, X, Folder, Package, Building, ArrowRight, Zap, Ship, Calculator, Box } from "lucide-react";
 
 interface MinhaAreaItem {
   id: string;
@@ -52,31 +52,6 @@ const minhaAreaItems: MinhaAreaItem[] = [
     category: "Branding",
   },
   {
-    id: "assinaturas",
-    title: "Minhas Assinaturas",
-    description: "Gerencie suas assinaturas, planos e histórico de pagamentos",
-    href: "/minha-area/assinaturas", 
-    icon: Star,
-    category: "Billing",
-  },
-  {
-    id: "perfil",
-    title: "Meu Perfil",
-    description: "Gerencie suas informações pessoais e altere sua senha",
-    href: "/minha-area/perfil",
-    icon: User,
-    category: "Gestão",
-  },
-  {
-    id: "importacao-exportacao",
-    title: "Importação & Exportação",
-    description: "Importe e exporte produtos e configurações via Excel (XLSX)",
-    href: "/minha-area/importacao-exportacao",
-    icon: FileSpreadsheet,
-    category: "Produtos",
-    isNew: true,
-  },
-  {
     id: "importacoes",
     title: "Importações",
     description: "Ferramentas completas para gestão de importações, PO, documentos e compliance",
@@ -101,7 +76,6 @@ const categories = [
   { name: "Gestão", count: minhaAreaItems.filter(item => item.category === "Gestão").length },
   { name: "Produtos", count: minhaAreaItems.filter(item => item.category === "Produtos").length },
   { name: "Branding", count: minhaAreaItems.filter(item => item.category === "Branding").length },
-  { name: "Billing", count: minhaAreaItems.filter(item => item.category === "Billing").length },
 ];
 
 export default function MinhaAreaIndex() {
