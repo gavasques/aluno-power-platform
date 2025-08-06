@@ -34,35 +34,14 @@ const Suppliers = () => {
     queryKey: ['/api/departments'],
   }) as { data: any[] };
 
-  // Buscar fornecedores com paginação
+  // Buscar fornecedores - simplificado para funcionar
   const { data: suppliersResponse, isLoading } = useQuery({
-    queryKey: ['/api/suppliers', { 
-      page: currentPage, 
-      limit: ITEMS_PER_PAGE, 
-      search: searchTerm, 
-      category: categoryFilter,
-      department: departmentFilter,
-      sortBy 
-    }],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
-        sortBy,
-      });
-      
-      if (searchTerm) params.append('search', searchTerm);
-      if (categoryFilter !== 'all') params.append('categoryId', categoryFilter);
-      if (departmentFilter !== 'all') params.append('departmentId', departmentFilter);
-      
-      const response = await fetch(`/api/suppliers/paginated?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch suppliers');
-      return response.json();
-    },
+    queryKey: ['/api/suppliers'],
+    queryFn: () => apiRequest('/api/suppliers'),
   });
 
-  const suppliers = suppliersResponse?.suppliers || [];
-  const totalPages = Math.ceil((suppliersResponse?.total || 0) / ITEMS_PER_PAGE);
+  const suppliers = suppliersResponse?.data || [];
+  const totalPages = Math.ceil((suppliers.length || 0) / ITEMS_PER_PAGE);
 
   // Reset para primeira página quando filtros mudam
   useEffect(() => {

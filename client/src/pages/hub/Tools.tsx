@@ -7,13 +7,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Star, Search, CheckCircle, Wrench, Globe, ArrowRight, Filter, Grid2X2, List, ChevronRight, TrendingUp, Package } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useTools } from "@/contexts/ToolsContext";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 const Tools = () => {
-  const { tools, toolTypes } = useTools();
+  // Fetch tools directly using TanStack Query
+  const { data: tools = [] } = useQuery({
+    queryKey: ['/api/tools'],
+    queryFn: () => apiRequest('/api/tools'),
+  });
+
+  // Fetch tool types
+  const { data: toolTypes = [] } = useQuery({
+    queryKey: ['/api/tool-types'],
+    queryFn: () => apiRequest('/api/tool-types'),
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");

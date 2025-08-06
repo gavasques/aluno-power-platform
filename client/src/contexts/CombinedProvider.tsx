@@ -12,7 +12,6 @@ import { YoutubeProvider } from "./YoutubeContext";
 import { AgentsProvider } from "./AgentsContext";
 import { PermissionProvider } from "./PermissionContext";
 import { useBackgroundSync } from "@/lib/queryOptimizations";
-import { useAuth } from "./AuthContext";
 
 interface CombinedProviderProps {
   children: ReactNode;
@@ -54,10 +53,9 @@ export function CombinedProvider({ children }: CombinedProviderProps) {
 
 // Wrapper component to initialize background sync after QueryClient is available
 function BackgroundSyncWrapper({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  
   // Re-enable background sync now that QueryClient is available
-  // Only pass true for isAuthenticated if user is actually logged in
-  useBackgroundSync(!!user);
+  // Check for auth token in localStorage as fallback
+  const authToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+  useBackgroundSync(!!authToken);
   return <>{children}</>;
 }
