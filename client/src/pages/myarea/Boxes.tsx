@@ -335,9 +335,10 @@ const Boxes = () => {
               {editingBox ? 'Editar Caixa' : 'Nova Caixa'}
             </DialogTitle>
           </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="px-6 pb-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border rounded-lg p-4 bg-gray-50/50 dark:bg-gray-800/50">
                 <FormField
                   control={form.control}
                   name="code"
@@ -642,46 +643,49 @@ const Boxes = () => {
                 />
               </div>
 
-              {/* Text Areas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="idealFor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ideal para</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Ex: Produtos eletrônicos pequenos, cosméticos..."
-                          className="min-h-[80px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Text Areas */}
+                <div className="col-span-full">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-4 bg-gray-50/50 dark:bg-gray-800/50">
+                    <FormField
+                      control={form.control}
+                      name="idealFor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ideal para</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Ex: Produtos eletrônicos pequenos, cosméticos..."
+                              className="min-h-[80px]"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Observações</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Observações adicionais sobre a caixa..."
-                          className="min-h-[80px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Observações</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Observações adicionais sobre a caixa..."
+                              className="min-h-[80px]"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -695,6 +699,7 @@ const Boxes = () => {
               </div>
             </form>
           </Form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
