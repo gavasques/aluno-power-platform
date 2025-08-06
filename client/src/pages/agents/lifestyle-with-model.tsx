@@ -178,6 +178,9 @@ export default function LifestyleWithModel() {
 
       const response = await apiRequest('/api/agents/lifestyle-with-model/process', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           image: base64,
           variables
