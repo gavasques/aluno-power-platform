@@ -28,10 +28,14 @@ export default function LifestyleWithModel() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<{
+    success: boolean;
     originalImage: string;
     processedImage: string;
     processingTime: number;
     cost: number;
+    credits?: number;
+    webhookSent?: boolean;
+    webhookResponse?: any;
   } | null>(null);
   const [processingTime, setProcessingTime] = useState(0);
   
@@ -170,7 +174,16 @@ export default function LifestyleWithModel() {
           image: base64,
           variables
         }),
-      });
+      }) as {
+        success: boolean;
+        originalImage: string;
+        processedImage: string;
+        processingTime: number;
+        cost: number;
+        credits?: number;
+        webhookSent?: boolean;
+        webhookResponse?: any;
+      };
 
       clearInterval(timer);
       setResult(response);
@@ -181,7 +194,7 @@ export default function LifestyleWithModel() {
         provider: 'lifestyle-with-model',
         model: 'lifestyle-ai-generator',
         prompt: `Produto: ${formData.produtoNome}, Ambiente: ${formData.ambiente}`,
-        response: 'Imagem lifestyle gerada com sucesso',
+        response: 'Imagem lifestyle gerada com sucesso via N8N webhook',
         inputTokens: 0,
         outputTokens: 0,
         totalTokens: 0,

@@ -3455,7 +3455,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
   
   // Lifestyle with Model - specific route 
   app.post('/api/agents/lifestyle-with-model/process', requireAuth, async (req: any, res: any) => {
-    console.log('🎨 [LIFESTYLE_MODEL] Starting image processing...');
+    console.log('🎨 [LIFESTYLE_MODEL] Starting image processing via N8N webhook...');
     const startTime = Date.now();
     
     try {
@@ -3472,154 +3472,170 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         AMBIENTE: variables.AMBIENTE,
         SEXO: variables.SEXO,
         FAIXA_ETARIA: variables.FAIXA_ETARIA,
-        ACAO: variables.ACAO?.substring(0, 50) + '...'
+        ACAO: variables.ACAO?.substring(0, 50) + '...',
+        userId: user.id
       });
 
-      // Get agent prompts from database
-      const systemPrompt = await storage.getAgentPrompt('agent-lifestyle-with-model', 'system');
-      const userPromptTemplate = await storage.getAgentPrompt('agent-lifestyle-with-model', 'user');
-
-      if (!systemPrompt || !userPromptTemplate) {
-        console.log('❌ [LIFESTYLE_MODEL] Agent prompts not found');
-        return res.status(500).json({ error: 'Configuração do agente não encontrada' });
-      }
-
-      // Replace variables in the user prompt
-      let userPrompt = userPromptTemplate.content;
-      Object.entries(variables).forEach(([key, value]) => {
-        const placeholder = `{{${key}}}`;
-        userPrompt = userPrompt.replace(new RegExp(placeholder, 'g'), value as string);
-      });
-
-      console.log('🎨 [LIFESTYLE_MODEL] Processed prompt length:', userPrompt.length);
-
-      // Call OpenAI API with image editing
-      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      
-      // Convert base64 to proper format for OpenAI
+      // Convert base64 image to buffer for FormData
       const imageBuffer = Buffer.from(image, 'base64');
       
-      // Call OpenAI GPT-Image-1 API for image editing using the same method as amazon-product-photography
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      // Prepare FormData for N8N webhook
+      const formData = new FormData();
       
+      // Add the image file as blob
+      const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
+      formData.append('image', blob, 'lifestyle-image.jpg');
+      
+      // Add user data
+      formData.append('userId', user.id.toString());
+      formData.append('userName', user.name || '');
+      formData.append('userEmail', user.email || '');
+      formData.append('agentType', 'lifestyle-with-model');
+      formData.append('timestamp', new Date().toISOString());
+      
+      // Add all variables as separate form fields
+      formData.append('produtoNome', variables.PRODUTO_NOME || '');
+      formData.append('ambiente', variables.AMBIENTE || '');
+      formData.append('sexo', variables.SEXO || '');
+      formData.append('faixaEtaria', variables.FAIXA_ETARIA || '');
+      formData.append('acao', variables.ACAO || '');
+
+      console.log('🚀 [LIFESTYLE_MODEL] Sending to N8N webhook...');
+
+      // Send to N8N webhook with 10-minute timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutes
+
+      const webhookResponse = await fetch('https://n8n.guivasques.app/webhook-test/lifestyle-with-model', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'AI-Platform-Webhook/1.0'
+        }
+      });
+
+      clearTimeout(timeoutId);
+
+      console.log('📥 [LIFESTYLE_MODEL] N8N webhook response status:', webhookResponse.status);
+
+      if (!webhookResponse.ok) {
+        throw new Error(`N8N webhook error: ${webhookResponse.status} ${webhookResponse.statusText}`);
+      }
+
+      // Handle webhook response - prioritize binary image response
+      const contentType = webhookResponse.headers.get('content-type');
+      let responseData: any;
+      let processedImageUrl: string | null = null;
+
+      if (contentType?.includes('image/')) {
+        // Handle binary image response (primary expected response)
+        const imageArrayBuffer = await webhookResponse.arrayBuffer();
+        const imageBase64 = Buffer.from(imageArrayBuffer).toString('base64');
+        processedImageUrl = `data:${contentType};base64,${imageBase64}`;
+        responseData = { 
+          processedImage: processedImageUrl,
+          contentType: contentType,
+          size: imageArrayBuffer.byteLength
+        };
+        console.log(`🖼️ [LIFESTYLE_MODEL] Binary image response received from webhook - Size: ${Math.round(imageArrayBuffer.byteLength / 1024)}KB`);
+      } else if (contentType?.includes('application/json')) {
+        responseData = await webhookResponse.json();
+        processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+        console.log('📋 [LIFESTYLE_MODEL] JSON response received from webhook');
+      } else {
+        // Handle text response as fallback
+        const textResponse = await webhookResponse.text();
+        console.log('📝 [LIFESTYLE_MODEL] Text response received from webhook:', textResponse.substring(0, 100));
+        
+        // Try to parse as JSON
+        try {
+          responseData = JSON.parse(textResponse);
+          processedImageUrl = responseData?.processedImage || responseData?.imageUrl || responseData?.url || null;
+        } catch {
+          responseData = { message: textResponse };
+        }
+      }
+
+      const processingTime = Math.round((Date.now() - startTime) / 1000);
+      console.log('✅ [LIFESTYLE_MODEL] N8N processing completed in', processingTime, 's');
+
+      // Save AI log with automatic credit deduction (12 credits for lifestyle-with-model)
       try {
-        // Import toFile from OpenAI library
-        const { toFile } = await import('openai');
-        
-        // Create file object using OpenAI's toFile utility
-        const imageFile = await toFile(imageBuffer, 'lifestyle-image.jpg', { type: 'image/jpeg' });
-        
-        const response = await openai.images.edit({
-          model: 'gpt-image-1',
-          image: imageFile,
-          prompt: userPrompt,
-          n: 1,
-          size: '1024x1024',
-          quality: 'high'
-        });
-
-        const endTime = Date.now();
-        const processingTime = Math.round((endTime - startTime) / 1000);
-        
-        // Get real cost from OpenAI response usage (gpt-image-1 pricing)
-        // Text input: $5.00/1M, Image input: $10.00/1M, Image output: $40.00/1M
-        let realCost = 0.167; // Default fallback
-        
-        if (response.usage) {
-          const textInputTokens = response.usage.input_tokens_details?.text_tokens || 0;
-          const imageInputTokens = response.usage.input_tokens_details?.image_tokens || 0;
-          const imageOutputTokens = response.usage.output_tokens || 0;
-          
-          realCost = (textInputTokens * 0.000005) + (imageInputTokens * 0.00001) + (imageOutputTokens * 0.00004);
-        }
-
-        console.log('💰 [LIFESTYLE_MODEL] Cost calculation details:', {
-          textTokens: response.usage?.input_tokens_details?.text_tokens || 0,
-          imageTokens: response.usage?.input_tokens_details?.image_tokens || 0,
-          outputTokens: response.usage?.output_tokens || 0,
-          textCost: ((response.usage?.input_tokens_details?.text_tokens || 0) * 0.000005).toFixed(6),
-          imageCost: ((response.usage?.input_tokens_details?.image_tokens || 0) * 0.00001).toFixed(6),
-          outputCost: ((response.usage?.output_tokens || 0) * 0.00004).toFixed(6),
-          totalCost: realCost.toFixed(6)
-        });
-
-        console.log('✅ [LIFESTYLE_MODEL] Processing completed:', {
-          processingTime: `${processingTime}s`,
-          cost: `$${realCost.toFixed(6)}`,
-          usage: response.usage
-        });
-
-        // Extract generated image from response - images.edit can return base64 or URL
-        const imageBase64 = response.data?.[0]?.b64_json;
-        const imageUrl = response.data?.[0]?.url;
-        
-        if (!imageBase64 && !imageUrl) {
-          throw new Error('No image data received from OpenAI');
-        }
-        
-        // Convert to data URL if we got base64, otherwise use URL directly
-        const generatedImageUrl = imageBase64 
-          ? (imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`)
-          : imageUrl;
-        
-        // Save to ai_generation_logs with AUTOMATIC CREDIT DEDUCTION
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.lifestyle_model', // Feature code para dedução de créditos
-          userPrompt,
-          'Imagem lifestyle gerada com sucesso via GPT-Image-1',
-          'openai',
-          'gpt-image-1',
-          response.usage?.input_tokens || 0,
-          response.usage?.output_tokens || 0,
-          response.usage?.total_tokens || 0,
-          realCost,
-          0, // creditsUsed = 0 para dedução automática
+          'agents.lifestyle_model', // Feature code for credit deduction
+          `Produto: ${variables.PRODUTO_NOME}, Ambiente: ${variables.AMBIENTE}, Sexo: ${variables.SEXO}, Faixa Etária: ${variables.FAIXA_ETARIA}, Ação: ${variables.ACAO}`,
+          'Imagem lifestyle processada com sucesso via N8N',
+          'lifestyle-with-model',
+          'lifestyle-ai-generator',
+          0, // No tokens for webhook
+          0,
+          0,
+          0.167, // Fixed cost estimation
+          0, // creditsUsed = 0 for automatic deduction
           processingTime * 1000
         );
-
-        // Return result
-        return res.json({
-          originalImage: `data:image/jpeg;base64,${image}`,
-          processedImage: generatedImageUrl,
-          processingTime,
-          cost: realCost
-        });
-        
-      } catch (gptImageError: any) {
-        console.error('❌ [LIFESTYLE_MODEL] GPT-Image-1 error:', gptImageError);
-        throw gptImageError; // Re-throw to be handled by main catch block
+      } catch (logError: any) {
+        console.error('❌ [LIFESTYLE_MODEL] Error saving AI log:', logError);
       }
 
+      // Return the original image as base64 and processed result from webhook
+      res.json({
+        success: true,
+        originalImage: `data:image/jpeg;base64,${image}`,
+        processedImage: processedImageUrl,
+        processingTime,
+        cost: 0.167,
+        credits: 12, // Credits deducted for this operation
+        webhookSent: true,
+        webhookResponse: {
+          contentType: contentType,
+          hasProcessedImage: !!processedImageUrl,
+          responseType: contentType?.includes('image/') ? 'binary_image' : 'json',
+          ...responseData
+        }
+      });
     } catch (error: any) {
       console.error('❌ [LIFESTYLE_MODEL] Error:', error);
       
+      const processingTime = Math.round((Date.now() - startTime) / 1000);
+      
       // Save error log to ai_generation_logs
       try {
-        const errorDuration = Date.now() - startTime;
-        await db.insert(aiGenerationLogs).values({
-          userId: user.id,
-          provider: 'openai',
-          model: 'gpt-image-1',
-          prompt: 'Erro no processamento da imagem lifestyle',
-          response: `Erro: ${error.message}`,
-          promptCharacters: 0,
-          responseCharacters: error.message?.length || 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          totalTokens: 0,
-          cost: '0.00',
-          duration: errorDuration,
-          feature: 'lifestyle-with-model',
-          createdAt: new Date()
-        });
-      } catch (logError) {
+        const { LoggingService } = await import('./services/loggingService');
+        await LoggingService.saveAiLog(
+          user.id,
+          'agents.lifestyle_model',
+          'Erro no processamento da imagem lifestyle via N8N webhook',
+          `Erro: ${error.message}`,
+          'lifestyle-with-model',
+          'lifestyle-ai-generator',
+          0, // No tokens for webhook
+          0,
+          0,
+          0,
+          0, // creditsUsed = 0 for automatic deduction
+          processingTime * 1000
+        );
+      } catch (logError: any) {
         console.error('❌ [LIFESTYLE_MODEL] Error saving error log:', logError);
       }
       
-      res.status(500).json({ 
-        error: 'Erro no processamento da imagem lifestyle',
+      // Handle specific errors
+      let errorMessage = 'Erro no processamento de imagens lifestyle';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Timeout: Processamento demorou mais que 10 minutos';
+      } else if (error.message?.includes('Webhook error')) {
+        errorMessage = 'Erro no serviço de processamento de imagens';
+      } else if (error.message?.includes('files are allowed')) {
+        errorMessage = 'Tipo de arquivo não suportado. Use JPG, PNG ou WEBP';
+      }
+
+      return res.status(500).json({ 
+        error: errorMessage,
         details: error.message
       });
     }
