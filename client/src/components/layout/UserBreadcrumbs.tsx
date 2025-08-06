@@ -23,6 +23,7 @@ const breadcrumbMap: Record<string, string> = {
   "/hub/descricao-html": "Descrição em HTML",
   "/minha-area": "Minha Área",
   "/minha-area/fornecedores": "Meus Fornecedores",
+  "/minha-area/marcas": "Minhas Marcas",
   "/minha-area/produtos": "Meus Produtos",
   "/minha-area/materiais": "Meus Materiais",
   "/simuladores": "Simuladores",
