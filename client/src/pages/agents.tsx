@@ -187,7 +187,42 @@ function AgentCard({ agent, isFavorited, onToggleFavorite }: AgentCardProps) {
           featureName={AGENT_FEATURE_MAP[agent.id] || `agents.${agent.id}`}
           userBalance={userBalance}
           onProcess={() => {
-            const href = agent.id === 'agent-amazon-listings' ? '/agents/amazon-listings-optimizer' : `/agentes/${agent.id}`;
+            let href = `/agentes/${agent.id}`;
+            
+            // Mapeamento específico para URLs corretas dos agentes
+            switch(agent.id) {
+              case 'agent-amazon-listings':
+                href = '/agentes/otimizador-listings';
+                break;
+              case 'html-description-generator':
+                href = '/agentes/html-descriptions-generator';
+                break;
+              case 'bullet-points-generator':
+                href = '/agentes/bullet-points-generator';
+                break;
+              case 'agent-amazon-product-photography':
+                href = '/agentes/editor-imagem-principal';
+                break;
+              case 'agent-lifestyle-with-model':
+                href = '/agentes/lifestyle-com-modelo';
+                break;
+              case 'agent-infographic-generator':
+                href = '/agentes/editor-infograficos';
+                break;
+              case 'advanced-infographic-generator':
+                href = '/agentes/editor-infograficos-avancado';
+                break;
+              case 'amazon-image-processing':
+                href = '/agentes/copiador-imagens';
+                break;
+              case 'amazon-customer-service':
+                href = '/agentes/atendimento-cliente';
+                break;
+              case 'amazon-negative-reviews':
+                href = '/agentes/reviews-negativos';
+                break;
+            }
+            
             window.location.href = href;
           }}
           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200"
