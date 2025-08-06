@@ -49,6 +49,8 @@ import {
   supportTicketFiles,
   supportCategories,
   userCompanies,
+  boxes,
+  boxProductCompatibility,
   type User, 
   type InsertUser,
   type Supplier,
@@ -408,6 +410,13 @@ export interface IStorage {
   updateBox(id: number, box: Partial<InsertBox>): Promise<Box>;
   deleteBox(id: number): Promise<void>;
   searchBoxes(userId: number, query: string): Promise<Box[]>;
+  
+  // Box Product Compatibility
+  getBoxProductCompatibility(boxId: number): Promise<any[]>;
+  addBoxProductCompatibility(boxId: number, productId: number, userId: number): Promise<void>;
+  removeBoxProductCompatibility(boxId: number, productId: number): Promise<void>;
+  getBoxesForProduct(productId: number, userId: number): Promise<Box[]>;
+  getProductsForBox(boxId: number): Promise<any[]>;
 
   // User Companies
   getUserCompanies(userId: number): Promise<UserCompany[]>;
@@ -2873,6 +2882,99 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(boxes.createdAt))
       .limit(20);
+  }
+
+  // Box Product Compatibility Methods
+  async getBoxProductCompatibility(boxId: number): Promise<any[]> {
+    return await db
+      .select({
+        id: boxProductCompatibility.id,
+        boxId: boxProductCompatibility.boxId,
+        productId: boxProductCompatibility.productId,
+        productName: products.name,
+        productBrand: products.brand,
+        productSku: products.sku,
+        createdAt: boxProductCompatibility.createdAt,
+      })
+      .from(boxProductCompatibility)
+      .leftJoin(products, eq(boxProductCompatibility.productId, products.id))
+      .where(eq(boxProductCompatibility.boxId, boxId))
+      .orderBy(desc(boxProductCompatibility.createdAt));
+  }
+
+  async addBoxProductCompatibility(boxId: number, productId: number, userId: number): Promise<void> {
+    await db
+      .insert(boxProductCompatibility)
+      .values({
+        boxId,
+        productId,
+        userId,
+        createdAt: new Date(),
+      })
+      .onConflictDoNothing();
+  }
+
+  async removeBoxProductCompatibility(boxId: number, productId: number): Promise<void> {
+    await db
+      .delete(boxProductCompatibility)
+      .where(
+        and(
+          eq(boxProductCompatibility.boxId, boxId),
+          eq(boxProductCompatibility.productId, productId)
+        )
+      );
+  }
+
+  async getBoxesForProduct(productId: number, userId: number): Promise<Box[]> {
+    return await db
+      .select({
+        id: boxes.id,
+        userId: boxes.userId,
+        code: boxes.code,
+        status: boxes.status,
+        type: boxes.type,
+        length: boxes.length,
+        width: boxes.width,
+        height: boxes.height,
+        weight: boxes.weight,
+        waveType: boxes.waveType,
+        paper: boxes.paper,
+        hasLogo: boxes.hasLogo,
+        isColored: boxes.isColored,
+        isFullColor: boxes.isFullColor,
+        isPremiumPrint: boxes.isPremiumPrint,
+        unitCost: boxes.unitCost,
+        moq: boxes.moq,
+        idealFor: boxes.idealFor,
+        notes: boxes.notes,
+        createdAt: boxes.createdAt,
+        updatedAt: boxes.updatedAt,
+      })
+      .from(boxes)
+      .innerJoin(boxProductCompatibility, eq(boxes.id, boxProductCompatibility.boxId))
+      .where(
+        and(
+          eq(boxProductCompatibility.productId, productId),
+          eq(boxes.userId, userId)
+        )
+      )
+      .orderBy(desc(boxes.createdAt));
+  }
+
+  async getProductsForBox(boxId: number): Promise<any[]> {
+    return await db
+      .select({
+        id: products.id,
+        name: products.name,
+        brand: products.brand,
+        sku: products.sku,
+        description: products.description,
+        compatibilityId: boxProductCompatibility.id,
+      })
+      .from(products)
+      .innerJoin(boxProductCompatibility, eq(products.id, boxProductCompatibility.productId))
+      .where(eq(boxProductCompatibility.boxId, boxId))
+      .orderBy(asc(products.name));
   }
 
   // User Companies - Minhas Empresas

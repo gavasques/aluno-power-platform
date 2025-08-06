@@ -11,13 +11,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { SearchIcon, Package, Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import { SearchIcon, Package, Plus, Edit2, Trash2, Eye, Download, FileSpreadsheet, FileText, Link } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { Box } from '@shared/schema';
+import ProductCompatibility from '@/components/ProductCompatibility';
 
 // Validation schema for box form
 const boxFormSchema = z.object({
@@ -46,6 +47,8 @@ const Boxes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingBox, setEditingBox] = useState<Box | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [compatibilityBox, setCompatibilityBox] = useState<Box | null>(null);
+  const [isCompatibilityDialogOpen, setIsCompatibilityDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -184,6 +187,48 @@ const Boxes = () => {
     saveMutation.mutate(data);
   };
 
+  // Export functionality
+  const handleExport = async (format: 'excel' | 'txt') => {
+    try {
+      const response = await fetch(`/api/boxes/export/${format}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao exportar');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `caixas.${format === 'excel' ? 'xlsx' : 'txt'}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Sucesso',
+        description: `Arquivo ${format.toUpperCase()} exportado com sucesso!`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível exportar o arquivo',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleViewCompatibility = (box: Box) => {
+    setCompatibilityBox(box);
+    setIsCompatibilityDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -192,10 +237,33 @@ const Boxes = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Caixas</h1>
           <p className="text-gray-600 dark:text-gray-400">Gerencie suas embalagens e caixas</p>
         </div>
-        <Button onClick={handleNew} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Nova Caixa
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Export buttons */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExport('excel')}
+              className="flex items-center gap-2"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExport('txt')}
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              TXT
+            </Button>
+          </div>
+          <Button onClick={handleNew} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Nova Caixa
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -285,8 +353,18 @@ const Boxes = () => {
                             size="sm"
                             onClick={() => handleEdit(box)}
                             className="h-8 w-8 p-0"
+                            title="Editar caixa"
                           >
                             <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewCompatibility(box)}
+                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
+                            title="Ver produtos compatíveis"
+                          >
+                            <Link className="h-4 w-4" />
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -294,6 +372,7 @@ const Boxes = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                title="Excluir caixa"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -698,6 +777,24 @@ const Boxes = () => {
               </div>
             </form>
           </Form>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Product Compatibility Dialog */}
+      <Dialog open={isCompatibilityDialogOpen} onOpenChange={setIsCompatibilityDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link className="h-5 w-5" />
+              Produtos Compatíveis - {compatibilityBox?.code}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-6 pb-6">
+            <ProductCompatibility 
+              boxId={compatibilityBox?.id} 
+              boxCode={compatibilityBox?.code}
+            />
           </div>
         </DialogContent>
       </Dialog>

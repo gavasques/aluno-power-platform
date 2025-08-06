@@ -3930,6 +3930,45 @@ export const boxesRelations = relations(boxes, ({ one }) => ({
   }),
 }));
 
+// Box Product Compatibility table
+export const boxProductCompatibility = pgTable("box_product_compatibility", {
+  id: serial("id").primaryKey(),
+  boxId: integer("box_id").references(() => boxes.id, { onDelete: "cascade" }).notNull(),
+  productId: integer("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  boxProductIdx: index("box_product_compatibility_box_product_idx").on(table.boxId, table.productId),
+  userIdx: index("box_product_compatibility_user_idx").on(table.userId),
+  productIdx: index("box_product_compatibility_product_idx").on(table.productId),
+  uniqueBoxProduct: unique().on(table.boxId, table.productId), // Evita duplicatas
+}));
+
+// Box Product Compatibility Relations
+export const boxProductCompatibilityRelations = relations(boxProductCompatibility, ({ one }) => ({
+  box: one(boxes, {
+    fields: [boxProductCompatibility.boxId],
+    references: [boxes.id],
+  }),
+  product: one(products, {
+    fields: [boxProductCompatibility.productId],
+    references: [products.id],
+  }),
+  user: one(users, {
+    fields: [boxProductCompatibility.userId],
+    references: [users.id],
+  }),
+}));
+
+// Enhanced Boxes Relations with compatibility
+export const boxesRelationsEnhanced = relations(boxes, ({ one, many }) => ({
+  user: one(users, {
+    fields: [boxes.userId],
+    references: [users.id],
+  }),
+  compatibleProducts: many(boxProductCompatibility),
+}));
+
 // Insert Schemas for Boxes
 export const insertBoxSchema = createInsertSchema(boxes).omit({
   id: true,
@@ -3938,3 +3977,11 @@ export const insertBoxSchema = createInsertSchema(boxes).omit({
 });
 export type InsertBox = z.infer<typeof insertBoxSchema>;
 export type Box = typeof boxes.$inferSelect;
+
+// Insert Schemas for Box Product Compatibility
+export const insertBoxProductCompatibilitySchema = createInsertSchema(boxProductCompatibility).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertBoxProductCompatibility = z.infer<typeof insertBoxProductCompatibilitySchema>;
+export type BoxProductCompatibility = typeof boxProductCompatibility.$inferSelect;
