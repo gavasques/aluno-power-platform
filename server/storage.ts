@@ -705,19 +705,19 @@ export class DatabaseStorage implements IStorage {
 
   // Partners
   async getPartners(): Promise<Partner[]> {
-    return await db.select().from(partners);
+    return await db.select().from(hub_partners);
   }
 
   async getPartnersWithReviewStats(): Promise<Partner[]> {
     try {
-      const allPartners = await db.select().from(partners);
+      const allPartners = await db.select().from(hub_partners);
       
       const partnersWithStats = await Promise.all(
         allPartners.map(async (partner) => {
           const reviews = await db
             .select()
             .from(partnerReviews)
-            .where(and(eq(partnerReviews.partnerId, partner.id), eq(partnerReviews.isApproved, true)));
+            .where(and(eq(hub_partner_reviews.partnerId, partner.id), eq(hub_partner_reviews.isApproved, true)));
           
           const totalReviews = reviews.length;
           let averageRating = '0';
@@ -743,19 +743,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPartner(id: number): Promise<Partner | undefined> {
-    const [partner] = await db.select().from(partners).where(eq(partners.id, id));
+    const [partner] = await db.select().from(hub_partners).where(eq(hub_partners.id, id));
     return partner || undefined;
   }
 
   async getPartnerWithReviewStats(id: number): Promise<Partner | undefined> {
     try {
-      const [partner] = await db.select().from(partners).where(eq(partners.id, id));
+      const [partner] = await db.select().from(hub_partners).where(eq(hub_partners.id, id));
       if (!partner) return undefined;
       
       const reviews = await db
-        .select({ rating: partnerReviews.rating })
+        .select({ rating: hub_partner_reviews.rating })
         .from(partnerReviews)
-        .where(and(eq(partnerReviews.partnerId, id), eq(partnerReviews.isApproved, true)));
+        .where(and(eq(hub_partner_reviews.partnerId, id), eq(hub_partner_reviews.isApproved, true)));
       
       const totalReviews = reviews.length;
       let averageRating = '0.0';
@@ -795,24 +795,24 @@ export class DatabaseStorage implements IStorage {
         ...partner,
         updatedAt: new Date(),
       })
-      .where(eq(partners.id, id))
+      .where(eq(hub_partners.id, id))
       .returning();
     return updated;
   }
 
   async deletePartner(id: number): Promise<void> {
-    await db.delete(partners).where(eq(partners.id, id));
+    await db.delete(partners).where(eq(hub_partners.id, id));
   }
 
   async searchPartners(query: string): Promise<Partner[]> {
     return await db
       .select()
-      .from(partners)
+      .from(hub_partners)
       .where(
         or(
-          ilike(partners.name, `%${query}%`),
-          ilike(partners.specialties, `%${query}%`),
-          ilike(partners.description, `%${query}%`)
+          ilike(hub_partners.name, `%${query}%`),
+          ilike(hub_partners.specialties, `%${query}%`),
+          ilike(hub_partners.description, `%${query}%`)
         )
       );
   }
@@ -1626,11 +1626,11 @@ export class DatabaseStorage implements IStorage {
 
   // Partner Types
   async getPartnerTypes(): Promise<PartnerType[]> {
-    return await db.select().from(partnerTypes).orderBy(desc(partnerTypes.createdAt));
+    return await db.select().from(partnerTypes).orderBy(desc(hub_partner_types.createdAt));
   }
 
   async getPartnerType(id: number): Promise<PartnerType | undefined> {
-    const [partnerType] = await db.select().from(partnerTypes).where(eq(partnerTypes.id, id));
+    const [partnerType] = await db.select().from(partnerTypes).where(eq(hub_partner_types.id, id));
     return partnerType || undefined;
   }
 
@@ -1646,22 +1646,22 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(partnerTypes)
       .set(partnerType)
-      .where(eq(partnerTypes.id, id))
+      .where(eq(hub_partner_types.id, id))
       .returning();
     return updated;
   }
 
   async deletePartnerType(id: number): Promise<void> {
-    await db.delete(partnerTypes).where(eq(partnerTypes.id, id));
+    await db.delete(partnerTypes).where(eq(hub_partner_types.id, id));
   }
 
   // Partner Contacts
   async getPartnerContacts(partnerId: number): Promise<PartnerContact[]> {
-    return await db.select().from(partnerContacts).where(eq(partnerContacts.partnerId, partnerId));
+    return await db.select().from(partnerContacts).where(eq(hub_partner_contacts.partnerId, partnerId));
   }
 
   async getPartnerContact(id: number): Promise<PartnerContact | undefined> {
-    const [contact] = await db.select().from(partnerContacts).where(eq(partnerContacts.id, id));
+    const [contact] = await db.select().from(partnerContacts).where(eq(hub_partner_contacts.id, id));
     return contact || undefined;
   }
 
@@ -1677,13 +1677,13 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(partnerContacts)
       .set(contact)
-      .where(eq(partnerContacts.id, id))
+      .where(eq(hub_partner_contacts.id, id))
       .returning();
     return updated;
   }
 
   async deletePartnerContact(id: number): Promise<void> {
-    await db.delete(partnerContacts).where(eq(partnerContacts.id, id));
+    await db.delete(partnerContacts).where(eq(hub_partner_contacts.id, id));
   }
 
   // Partner Files
@@ -1727,9 +1727,9 @@ export class DatabaseStorage implements IStorage {
           user: users
         })
         .from(partnerReviews)
-        .leftJoin(users, eq(partnerReviews.userId, users.id))
-        .where(and(eq(partnerReviews.partnerId, partnerId), eq(partnerReviews.isApproved, true)))
-        .orderBy(desc(partnerReviews.createdAt));
+        .leftJoin(users, eq(hub_partner_reviews.userId, users.id))
+        .where(and(eq(hub_partner_reviews.partnerId, partnerId), eq(hub_partner_reviews.isApproved, true)))
+        .orderBy(desc(hub_partner_reviews.createdAt));
 
       if (reviews.length === 0) {
         return [];
@@ -1803,13 +1803,13 @@ export class DatabaseStorage implements IStorage {
         ...review,
         updatedAt: new Date(),
       })
-      .where(eq(partnerReviews.id, id))
+      .where(eq(hub_partner_reviews.id, id))
       .returning();
     return updated;
   }
 
   async deletePartnerReview(id: number): Promise<void> {
-    await db.delete(partnerReviews).where(eq(partnerReviews.id, id));
+    await db.delete(partnerReviews).where(eq(hub_partner_reviews.id, id));
   }
 
   // Partner Review Replies
@@ -2146,11 +2146,11 @@ export class DatabaseStorage implements IStorage {
 
   // Agents
   async getAgents(): Promise<Agent[]> {
-    return await db.select().from(agents).where(eq(agents.isActive, true));
+    return await db.select().from(agent_agents).where(eq(agent_agents.isActive, true));
   }
 
   async getAgent(id: string): Promise<Agent | undefined> {
-    const [agent] = await db.select().from(agents).where(eq(agents.id, id));
+    const [agent] = await db.select().from(agent_agents).where(eq(agent_agents.id, id));
     return agent || undefined;
   }
 
@@ -2181,13 +2181,13 @@ export class DatabaseStorage implements IStorage {
         ...agent,
         updatedAt: new Date(),
       })
-      .where(eq(agents.id, id))
+      .where(eq(agent_agents.id, id))
       .returning();
     return updated;
   }
 
   async deleteAgent(id: string): Promise<void> {
-    await db.delete(agents).where(eq(agents.id, id));
+    await db.delete(agents).where(eq(agent_agents.id, id));
   }
 
   // Agent Prompts
@@ -2715,7 +2715,7 @@ export class DatabaseStorage implements IStorage {
 
   // Agent Management
   async getAgentById(agentId: string) {
-    const [agent] = await db.select().from(agents).where(eq(agents.id, agentId)).limit(1);
+    const [agent] = await db.select().from(agent_agents).where(eq(agent_agents.id, agentId)).limit(1);
     return agent || null;
   }
 

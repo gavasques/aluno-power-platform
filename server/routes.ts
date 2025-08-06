@@ -125,7 +125,7 @@ import { amazonListingService as amazonService } from "./services/amazonListingS
 import { requireAuth, requireRole } from "./security";
 import { db } from './db';
 import { eq, desc, like, and, isNull, isNotNull, or, not, sql, asc, count, sum, avg, gte, lte } from 'drizzle-orm';
-import { com360_materials, partners, tool_tools, tool_types, com360_suppliers, news, updates, agent_agents, agent_prompts, agent_usage, agent_generations, users, com360_products, com360_brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, tool_usage_logs, insertToolUsageLogSchema, aiImgGenerationLogs, categories, agentProcessingSessions } from '@shared/schema';
+import { com360_materials, hub_partners, tool_tools, tool_types, com360_suppliers, news, updates, agent_agents, agent_prompts, agent_usage, agent_generations, users, com360_products, com360_brands, generatedImages, departments, amazonListingSessions, insertAmazonListingSessionSchema, InsertAmazonListingSession, userGroups, userGroupMembers, tool_usage_logs, insertToolUsageLogSchema, aiImgGenerationLogs, categories, agentProcessingSessions } from '@shared/schema';
 
 // PHASE 2: SOLID/DRY/KISS Modular Architecture Integration
 import { registerModularRoutes } from './routes/index';
@@ -1558,8 +1558,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Partner Types routes
   app.get('/api/partner-types', async (req, res) => {
     try {
-      const partnerTypes = await storage.getPartnerTypes();
-      res.json(partnerTypes);
+      const hub_partner_types = await storage.getPartnerTypes();
+      res.json(hub_partner_types);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch partner types' });
     }
@@ -2241,7 +2241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.customer_service', // Feature code para dedução de créditos
+          'agent_agents.customer_service', // Feature code para dedução de créditos
           inputData,
           responseText,
           'webhook',
@@ -2530,7 +2530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .where(eq(users.id, user.id));
 
-        console.log('✅ [CREDIT] Successfully deducted 4 credits for agents.negative_reviews - User:', user.id);
+        console.log('✅ [CREDIT] Successfully deducted 4 credits for agent_agents.negative_reviews - User:', user.id);
 
         // Create usage record first
         const usageId = `usage-${sessionId}`;
@@ -2548,7 +2548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // TODO: Fix agent_generations table schema compatibility later
         console.log('⚠️ [GENERATION_LOG] Skipping agent_generations insert due to schema mismatch - will fix later');
 
-        console.log('💾 [AI_LOG] Saved generation log - User:', user.id, 'Feature: agents.negative_reviews, Model: amazon-negative-reviews, Credits:', creditsCost);
+        console.log('💾 [AI_LOG] Saved generation log - User:', user.id, 'Feature: agent_agents.negative_reviews, Model: amazon-negative-reviews, Credits:', creditsCost);
         console.log('🎉 [NEGATIVE_REVIEWS] Processamento síncrono concluído com sucesso:', sessionId);
 
         // Return the complete result immediately
@@ -3399,7 +3399,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.amazon_image_processing', // Feature code for 15 credits deduction
+          'agent_agents.amazon_image_processing', // Feature code for 15 credits deduction
           `Amazon Image Processing: ${targetImages.length} target images, ${baseImages.length} base images`,
           'Processamento de imagens Amazon realizado com sucesso via webhook',
           'webhook',
@@ -3412,7 +3412,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
           processingTime
         );
 
-        console.log('✅ [CREDIT] Successfully deducted 15 credits for agents.amazon_image_processing - User:', user.id);
+        console.log('✅ [CREDIT] Successfully deducted 15 credits for agent_agents.amazon_image_processing - User:', user.id);
       } catch (logError) {
         console.error('❌ [IMAGE_PROCESSING] Error saving AI log and deducting credits:', logError);
         // Continue processing but log the error
@@ -3572,7 +3572,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.lifestyle_model', // Feature code for credit deduction
+          'agent_agents.lifestyle_model', // Feature code for credit deduction
           `Produto: ${variables.PRODUTO_NOME}, Ambiente: ${variables.AMBIENTE}, Sexo: ${variables.SEXO}, Faixa Etária: ${variables.FAIXA_ETARIA}, Ação: ${variables.ACAO}`,
           'Imagem lifestyle processada com sucesso via N8N',
           'lifestyle-with-model',
@@ -3614,7 +3614,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.lifestyle_model',
+          'agent_agents.lifestyle_model',
           'Erro no processamento da imagem lifestyle via N8N webhook',
           `Erro: ${error.message}`,
           'lifestyle-with-model',
@@ -3745,7 +3745,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.main_image_editor', // Feature code for 8 credits deduction
+          'agent_agents.main_image_editor', // Feature code for 8 credits deduction
           'Processamento de imagem para fotografia profissional de produto Amazon',
           'Imagem processada com sucesso',
           'amazon-product-photography',
@@ -3789,7 +3789,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
         const { LoggingService } = await import('./services/loggingService');
         await LoggingService.saveAiLog(
           user.id,
-          'agents.main_image_editor',
+          'agent_agents.main_image_editor',
           'Erro no processamento da imagem via N8N webhook',
           `Erro: ${error.message}`,
           'amazon-product-photography',
@@ -3854,7 +3854,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       }
 
       // Verificar créditos antes de processar
-      const FEATURE_CODE = 'agents.amazon_listing';
+      const FEATURE_CODE = 'agent_agents.amazon_listing';
       try {
         const creditsUsed = await CreditService.deductCredits(user.id, FEATURE_CODE);
         console.log(`💳 [CREDITS] Deducted ${creditsUsed} credits for user ${user.id}`);
@@ -7233,7 +7233,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { LoggingService } = await import('./services/loggingService');
       await LoggingService.saveAiLog(
         user.id,
-        'agents.infographic_editor', // Feature code para dedução de créditos
+        'agent_agents.infographic_editor', // Feature code para dedução de créditos
         systemPrompt,
         responseText,
         'anthropic',
@@ -7462,7 +7462,7 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const { LoggingService } = await import('./services/loggingService');
       await LoggingService.saveAiLog(
         user.id,
-        'agents.advanced_infographic', // Feature code para dedução de créditos
+        'agent_agents.advanced_infographic', // Feature code para dedução de créditos
         userPrompt,
         `${images.length} infográficos gerados com sucesso via GPT-Image-1`,
         'openai',
