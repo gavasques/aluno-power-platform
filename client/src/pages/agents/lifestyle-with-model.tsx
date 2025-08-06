@@ -171,6 +171,11 @@ export default function LifestyleWithModel() {
         ACAO: formData.acao
       };
 
+      console.log('🔍 [FRONTEND] Sending data to backend:', {
+        imageLength: base64.length,
+        variables
+      });
+
       const response = await apiRequest('/api/agents/lifestyle-with-model/process', {
         method: 'POST',
         body: JSON.stringify({

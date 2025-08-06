@@ -3462,8 +3462,13 @@ Crie uma descrição que transforme visitantes em compradores apaixonados pelo p
       const user = req.user;
       const { image, variables } = req.body;
 
+      console.log('🔍 [LIFESTYLE_MODEL] Request body keys:', Object.keys(req.body));
+      console.log('🔍 [LIFESTYLE_MODEL] Image exists:', !!image);
+      console.log('🔍 [LIFESTYLE_MODEL] Variables exists:', !!variables);
+      console.log('🔍 [LIFESTYLE_MODEL] Variables content:', variables);
+
       if (!image || !variables) {
-        console.log('❌ [LIFESTYLE_MODEL] Missing required fields');
+        console.log('❌ [LIFESTYLE_MODEL] Missing required fields - image:', !!image, 'variables:', !!variables);
         return res.status(400).json({ error: 'Imagem e variáveis são obrigatórias' });
       }
 
